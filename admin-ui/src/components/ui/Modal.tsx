@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   subtitle?: string;
-  variant: 'right-slide' | 'center';
+  variant?: 'right-slide' | 'center';
   children: ReactNode;
   footer?: ReactNode;
   size?: 'sm' | 'md' | 'lg';
@@ -17,7 +17,7 @@ export const Modal = ({
   onClose,
   title,
   subtitle,
-  variant,
+  variant = 'center',
   children,
   footer,
   size = 'md',

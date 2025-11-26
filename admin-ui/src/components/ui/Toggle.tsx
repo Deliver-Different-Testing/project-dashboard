@@ -4,9 +4,12 @@ interface ToggleProps {
   size?: 'sm' | 'md';
   disabled?: boolean;
   className?: string;
+  label?: string;
 }
 
-export function Toggle({ checked, onChange, size = 'md', disabled = false, className = '' }: ToggleProps) {
+export type { ToggleProps };
+
+export function Toggle({ checked, onChange, size = 'md', disabled = false, className = '', label }: ToggleProps) {
   const sizeStyles = {
     sm: {
       track: 'w-10 h-5',
@@ -22,7 +25,7 @@ export function Toggle({ checked, onChange, size = 'md', disabled = false, class
 
   const styles = sizeStyles[size];
 
-  return (
+  const toggle = (
     <button
       type="button"
       role="switch"
@@ -50,4 +53,15 @@ export function Toggle({ checked, onChange, size = 'md', disabled = false, class
       />
     </button>
   );
+
+  if (label) {
+    return (
+      <label className="flex items-center gap-2 cursor-pointer">
+        {toggle}
+        <span className="text-sm text-text-secondary">{label}</span>
+      </label>
+    );
+  }
+
+  return toggle;
 }

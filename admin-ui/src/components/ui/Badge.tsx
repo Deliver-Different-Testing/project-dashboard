@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 
-type BadgeVariant = 'default' | 'blue' | 'purple' | 'green' | 'cyan' | 'system' | 'customized' | 'orange' | 'yellow';
+export type BadgeVariant = 'default' | 'blue' | 'purple' | 'green' | 'cyan' | 'system' | 'customized' | 'orange' | 'yellow' | 'red';
 
-interface BadgeProps {
+export interface BadgeProps {
   variant?: BadgeVariant;
   children: ReactNode;
   className?: string;
+  size?: 'sm' | 'md';
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
@@ -18,12 +19,18 @@ const variantStyles: Record<BadgeVariant, string> = {
   customized: 'bg-badge-purple-bg text-badge-purple-text',
   orange: 'bg-badge-orange-bg text-warning',
   yellow: 'bg-badge-yellow-bg text-warning',
+  red: 'bg-error/10 text-error',
 };
 
-export function Badge({ variant = 'default', children, className = '' }: BadgeProps) {
+const sizeStyles = {
+  sm: 'px-1.5 py-0.5 text-[10px]',
+  md: 'px-2 py-0.5 text-xs',
+};
+
+export function Badge({ variant = 'default', children, className = '', size = 'md' }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${variantStyles[variant]} ${className}`}
+      className={`inline-flex items-center font-medium rounded-full ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
     >
       {children}
     </span>

@@ -17,7 +17,7 @@ interface ConnectionBadgeProps {
   /** Show warning indicator if some expected connections are missing */
   hasIssues?: boolean;
   /** Opens the TagSidebar when clicked */
-  onClick: () => void;
+  onClick: (e?: React.MouseEvent) => void;
   /** Optional size variant */
   size?: 'sm' | 'md';
 }
