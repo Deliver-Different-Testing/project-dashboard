@@ -37,7 +37,7 @@ export function ExpandableRow({
 }: ExpandableRowProps) {
   return (
     <div
-      className={`border-l-4 transition-colors duration-normal ${
+      className={`border-l-4 transition-colors duration-expand ${
         isExpanded ? 'border-brand-cyan' : 'border-transparent'
       }`}
     >

@@ -106,7 +106,7 @@ export function TagSidebar({
                       key={tag}
                       onClick={() => handleTagClick(category, tag)}
                       disabled={mode === 'view'}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-all ${
                         selected
                           ? 'bg-brand-cyan text-brand-dark'
                           : 'bg-surface-light text-text-secondary'

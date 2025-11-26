@@ -65,10 +65,13 @@ export default {
         '2xl': '48px',
       },
       borderRadius: {
+        'none': '0',
         'sm': '4px',
+        'DEFAULT': '8px',
         'md': '8px',
         'lg': '12px',
         'xl': '16px',
+        'full': '9999px',
       },
       boxShadow: {
         'sm': '0 1px 2px rgba(0, 14, 37, 0.05)',
