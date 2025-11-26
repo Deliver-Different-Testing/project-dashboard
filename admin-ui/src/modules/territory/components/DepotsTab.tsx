@@ -1,18 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { ExpandableRow } from '../../../components/data/ExpandableRow';
 import { DataTable } from '../../../components/data/DataTable';
 import { FilterBar } from '../../../components/filters/FilterBar';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Toggle } from '../../../components/ui/Toggle';
-import { depotsData, zoneGroupsData, depotZoneGroupFilters, zoneGroupColumns } from '../data/sampleData';
-import type { Depot, ZoneGroup } from '../types';
+import { depotsData, zoneGroupsData, depotZoneGroupFilters, zoneGroupColumns, sampleDepotConnections } from '../data/sampleData';
+import type { Depot, ZoneGroup, SourceItem, EntityConnections } from '../types';
 
 interface DepotsTabProps {
-  onTagsClick: () => void;
+  onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
 }
 
-export function DepotsTab({ onTagsClick }: DepotsTabProps) {
+export function DepotsTab({ onConnectionsClick }: DepotsTabProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>('d1');
 
   // State for depot zone group filters (per depot)
@@ -88,11 +88,14 @@ export function DepotsTab({ onTagsClick }: DepotsTabProps) {
               { label: 'City', value: depot.city },
               { label: 'State', value: depot.state },
             ]}
-            tagCount={depot.zoneGroups.length}
-            preview={`${depot.dropOffLocations.length} drop-offs`}
+            connectionCount={sampleDepotConnections[depot.id]?.connectedCount ?? 0}
+            hasConnectionIssues={sampleDepotConnections[depot.id]?.hasIssues ?? false}
             isExpanded={expandedItem === depot.id}
             onToggle={() => setExpandedItem(expandedItem === depot.id ? null : depot.id)}
-            onTagsClick={onTagsClick}
+            onConnectionsClick={() => onConnectionsClick(
+              { type: 'depot', id: depot.id, name: depot.name },
+              sampleDepotConnections[depot.id]?.connections ?? {} as EntityConnections
+            )}
           >
             <div className="p-6 bg-surface-cream space-y-4">
               {/* Depot Details Form */}

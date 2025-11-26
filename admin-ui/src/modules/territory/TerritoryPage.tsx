@@ -3,16 +3,16 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 import { FilterBar } from '../../components/filters/FilterBar';
 import { FilterChips } from '../../components/filters/FilterChips';
 import { SearchInput } from '../../components/filters/SearchInput';
-import { TagSidebar } from '../../components/tags/TagSidebar';
+import { TagSidebar, TagSearchInput } from '../../components/tags';
 import { ZipZonesTab } from './components/ZipZonesTab';
 import { ZoneGroupsTab } from './components/ZoneGroupsTab';
 import { DepotsTab } from './components/DepotsTab';
 import { zipZoneFilters } from './data/sampleData';
-import { TERRITORY_TAGS } from './types';
+import type { SourceItem, EntityConnections } from './types';
+import { createEmptyConnections } from './types';
 
 export function TerritoryPage() {
   const [activeTab, setActiveTab] = useState('zip-zones');
@@ -20,6 +20,35 @@ export function TerritoryPage() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [tagSearch, setTagSearch] = useState('');
+
+  // State for the connection sidebar
+  const [sidebarSourceItem, setSidebarSourceItem] = useState<SourceItem>({
+    type: 'zipZone',
+    id: '',
+    name: '',
+  });
+  const [sidebarConnections, setSidebarConnections] = useState<EntityConnections>(createEmptyConnections());
+
+  // Handle opening the sidebar for a specific item
+  const handleConnectionsClick = (sourceItem: SourceItem, connections: EntityConnections) => {
+    setSidebarSourceItem(sourceItem);
+    setSidebarConnections(connections);
+    setTagSidebarOpen(true);
+  };
+
+  // Handle navigation from the sidebar
+  const handleNavigate = (targetRoute: string, searchQuery: string) => {
+    // In a real app, this would use a router
+    // For now, just log and update tag search
+    console.log(`Navigate to ${targetRoute}?tagSearch=${searchQuery}`);
+    setTagSearch(searchQuery);
+    // Could also switch tabs based on route
+    if (targetRoute.includes('tab=groups')) {
+      setActiveTab('zone-groups');
+    } else if (targetRoute.includes('tab=depots')) {
+      setActiveTab('depots');
+    }
+  };
 
   const tabs = [
     { id: 'zip-zones', label: 'All Zip Zones' },
@@ -83,10 +112,11 @@ export function TerritoryPage() {
             onChange={setSearchQuery}
             placeholder="Search zones, groups, or depots..."
           />
-          <Input
-            placeholder="Wildcard tag search (e.g., *express*, high-vol*)"
+          <TagSearchInput
             value={tagSearch}
-            onChange={(e) => setTagSearch(e.target.value)}
+            onChange={setTagSearch}
+            placeholder="Filter by connected entity..."
+            entityType={activeTab === 'zip-zones' ? 'zip zone' : activeTab === 'zone-groups' ? 'zone group' : 'depot'}
           />
         </div>
       </div>
@@ -118,25 +148,24 @@ export function TerritoryPage() {
 
             {/* Tab 2: Zone Groups */}
             {activeTab === 'zone-groups' && (
-              <ZoneGroupsTab onTagsClick={() => setTagSidebarOpen(true)} />
+              <ZoneGroupsTab onConnectionsClick={handleConnectionsClick} />
             )}
 
             {/* Tab 3: Depots */}
             {activeTab === 'depots' && (
-              <DepotsTab onTagsClick={() => setTagSidebarOpen(true)} />
+              <DepotsTab onConnectionsClick={handleConnectionsClick} />
             )}
           </div>
         </Card>
       </div>
 
-      {/* Tag Sidebar */}
+      {/* Tag Sidebar - Connection Navigator */}
       <TagSidebar
         isOpen={tagSidebarOpen}
         onClose={() => setTagSidebarOpen(false)}
-        title="Zone Tags"
-        subtitle="Manage tag connections"
-        tags={TERRITORY_TAGS}
-        mode="edit"
+        sourceItem={sidebarSourceItem}
+        connections={sidebarConnections}
+        onNavigate={handleNavigate}
       />
     </div>
   );

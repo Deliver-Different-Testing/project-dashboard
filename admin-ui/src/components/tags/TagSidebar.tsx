@@ -1,47 +1,101 @@
 import type { ReactNode } from 'react';
+import { ArrowRight, X } from 'lucide-react';
+import type { EntityConnections, SourceItem } from '../../modules/territory/types';
+import { TAG_CATEGORIES } from '../../modules/territory/types';
+
+/**
+ * TagSidebar - Connection Navigator
+ *
+ * Shows which OTHER parts of the system relate to the current item.
+ * Displays connection status (✓/✗) per category with navigation.
+ *
+ * See TAG-SYSTEM-SPEC.md for full documentation.
+ */
 
 interface TagSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  subtitle: string;
-  tags: Record<string, string[]>;
-  selectedTags?: Record<string, string[]>;
-  onTagSelect?: (category: string, tag: string) => void;
-  mode?: 'view' | 'edit';
+  sourceItem: SourceItem;
+  connections: EntityConnections;
+  onNavigate: (targetRoute: string, searchQuery: string) => void;
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'Region': '🌎',
-  'Depot': '🏢',
-  'Country': '🌍',
-  'Customer': '👤',
-  'Service': '⚡',
-  'Vehicle': '🚚',
-  'Notification': '🔔',
-  'Rate Card': '💰',
-  'Airport': '✈️',
-  'Linehaul': '🚛',
-};
+interface ConnectionRowProps {
+  icon: string;
+  label: string;
+  connection: {
+    hasConnections: boolean;
+    count: number;
+    connectionPath?: string;
+  };
+  onClick: () => void;
+}
+
+function ConnectionRow({ icon, label, connection, onClick }: ConnectionRowProps): ReactNode {
+  const { hasConnections, count, connectionPath } = connection;
+
+  return (
+    <div
+      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+        hasConnections
+          ? 'bg-brand-cyan/10 hover:bg-brand-cyan/20 cursor-pointer'
+          : 'bg-gray-50'
+      }`}
+      onClick={hasConnections ? onClick : undefined}
+      role={hasConnections ? 'button' : undefined}
+      tabIndex={hasConnections ? 0 : undefined}
+      onKeyDown={hasConnections ? (e) => e.key === 'Enter' && onClick() : undefined}
+    >
+      <div className="flex items-center gap-3">
+        {/* Status indicator */}
+        <span className={`text-lg ${hasConnections ? 'text-brand-cyan' : 'text-gray-400'}`}>
+          {hasConnections ? '✓' : '✗'}
+        </span>
+
+        {/* Category info */}
+        <div>
+          <div className="flex items-center gap-2">
+            <span>{icon}</span>
+            <span className={`font-medium ${hasConnections ? 'text-text-primary' : 'text-gray-400'}`}>
+              {label}
+            </span>
+            {hasConnections && count > 0 && (
+              <span className="text-sm text-brand-cyan">({count})</span>
+            )}
+          </div>
+          {connectionPath && (
+            <p className="text-xs text-text-secondary mt-0.5">{connectionPath}</p>
+          )}
+          {!hasConnections && (
+            <p className="text-xs text-gray-400 mt-0.5">Not connected</p>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation arrow */}
+      {hasConnections && (
+        <ArrowRight className="w-4 h-4 text-brand-cyan" />
+      )}
+    </div>
+  );
+}
 
 export function TagSidebar({
   isOpen,
   onClose,
-  title,
-  subtitle,
-  tags,
-  selectedTags = {},
-  onTagSelect,
-  mode = 'view',
+  sourceItem,
+  connections,
+  onNavigate,
 }: TagSidebarProps): ReactNode {
-  const isTagSelected = (category: string, tag: string): boolean => {
-    return selectedTags[category]?.includes(tag) ?? false;
-  };
+  // Count connected and disconnected categories
+  const connectedCount = Object.values(connections).filter(c => c.hasConnections).length;
+  const totalCount = Object.keys(connections).length;
 
-  const handleTagClick = (category: string, tag: string): void => {
-    if (mode === 'edit' && onTagSelect) {
-      onTagSelect(category, tag);
-    }
+  const handleCategoryClick = (category: typeof TAG_CATEGORIES[0]) => {
+    // Navigate to target page with search pre-filled
+    const searchQuery = sourceItem.name;
+    onNavigate(category.route, searchQuery);
+    onClose();
   };
 
   return (
@@ -49,80 +103,82 @@ export function TagSidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 duration-slow transition-opacity"
+          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-sidebar z-50 transition-transform duration-slow ${
+        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-sidebar z-50 transition-transform duration-500 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
         <div className="border-b border-gray-200 p-6">
           <div className="flex items-start justify-between mb-2">
-            <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-text-primary">
+                Connections for:
+              </h2>
+              <p className="text-xl font-bold text-brand-dark mt-1">
+                {sourceItem.name}
+              </p>
+            </div>
             <button
               onClick={onClose}
-              className="text-text-secondary hover:text-text-primary transition-colors"
+              className="p-1 text-text-secondary hover:text-text-primary hover:bg-gray-100 rounded transition-colors"
               aria-label="Close"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-sm text-text-secondary">{subtitle}</p>
+          <p className="text-sm text-text-secondary">
+            See which parts of the system this {sourceItem.type.replace(/([A-Z])/g, ' $1').toLowerCase().trim()} relates to
+          </p>
+          <div className="mt-3 text-sm">
+            <span className="text-brand-cyan font-medium">{connectedCount}</span>
+            <span className="text-text-secondary"> of {totalCount} categories connected</span>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto h-[calc(100%-120px)] p-6">
-          {Object.entries(tags).map(([category, categoryTags]) => (
-            <div key={category} className="mb-6">
-              {/* Category Header */}
-              <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wide mb-3 flex items-center gap-2">
-                <span>{CATEGORY_ICONS[category] || '🏷️'}</span>
-                <span>{category}</span>
-              </h3>
+        {/* Connection List */}
+        <div className="overflow-y-auto h-[calc(100%-180px)] p-4">
+          <div className="space-y-2">
+            {TAG_CATEGORIES.map((category) => {
+              const connection = connections[category.id];
+              // Skip the category that matches the source item type
+              // (e.g., don't show "Zone Groups" when viewing a zone group)
+              const sourceTypeMap: Record<string, string> = {
+                zipZone: 'zoneGroups', // Zip zones are part of zone groups
+                zoneGroup: 'zoneGroups',
+                depot: 'depots',
+                customer: 'customers',
+                rateCard: 'rateCards',
+                service: 'services',
+              };
+              if (sourceTypeMap[sourceItem.type] === category.id) {
+                return null;
+              }
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2">
-                {categoryTags.map((tag) => {
-                  const selected = isTagSelected(category, tag);
-                  return (
-                    <button
-                      key={tag}
-                      onClick={() => handleTagClick(category, tag)}
-                      disabled={mode === 'view'}
-                      className={`px-3 py-1.5 rounded-[8px] text-sm font-medium transition-all ${
-                        selected
-                          ? 'bg-brand-cyan text-brand-dark'
-                          : 'bg-surface-light text-text-secondary'
-                      } ${
-                        mode === 'edit'
-                          ? 'hover:ring-2 hover:ring-brand-cyan/50 cursor-pointer'
-                          : 'cursor-default'
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+              return (
+                <ConnectionRow
+                  key={category.id}
+                  icon={category.icon}
+                  label={category.label}
+                  connection={connection}
+                  onClick={() => handleCategoryClick(category)}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
+          <p className="text-xs text-text-secondary text-center">
+            Click a connected category to navigate there with this item pre-searched
+          </p>
         </div>
       </div>
     </>

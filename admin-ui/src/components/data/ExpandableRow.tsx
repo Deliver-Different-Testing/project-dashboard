@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Toggle } from '../ui/Toggle';
+import { ConnectionBadge } from '../tags/ConnectionBadge';
 
 interface ExpandableRowProps {
   id: string;
@@ -16,10 +16,13 @@ interface ExpandableRowProps {
     label: string;
     value: string | number;
   }[];
-  tagCount: number;
+  /** Number of connected categories (0-10) - replaces old tagCount */
+  connectionCount: number;
+  /** Show warning indicator if connections have issues */
+  hasConnectionIssues?: boolean;
   isExpanded: boolean;
   onToggle: () => void;
-  onTagsClick: () => void;
+  onConnectionsClick: () => void;
   children: ReactNode;
 }
 
@@ -27,12 +30,13 @@ export function ExpandableRow({
   id: _id,
   name,
   badge,
-  preview,
+  preview: _preview,
   stats,
-  tagCount,
+  connectionCount,
+  hasConnectionIssues = false,
   isExpanded,
   onToggle,
-  onTagsClick,
+  onConnectionsClick,
   children,
 }: ExpandableRowProps) {
   return (
@@ -62,22 +66,13 @@ export function ExpandableRow({
           ))}
         </div>
 
-        {/* Tags Button */}
-        <Button
-          variant="secondary"
+        {/* Connections Badge */}
+        <ConnectionBadge
+          connectionCount={connectionCount}
+          hasIssues={hasConnectionIssues}
+          onClick={onConnectionsClick}
           size="sm"
-          onClick={onTagsClick}
-          className="min-w-fit"
-        >
-          <span className="text-text-primary">
-            {tagCount} {tagCount === 1 ? 'Tag' : 'Tags'}
-          </span>
-          {preview && (
-            <span className="text-text-muted ml-2 truncate max-w-[200px]">
-              {preview}
-            </span>
-          )}
-        </Button>
+        />
 
         {/* Chevron */}
         <button

@@ -1,4 +1,5 @@
-import type { ZipZone, ZoneGroup, Depot, FilterDefinition } from '../types';
+import type { ZipZone, ZoneGroup, Depot, FilterDefinition, EntityConnections } from '../types';
+import { createEmptyConnections, countConnectedCategories } from '../types';
 
 // 50+ Zip Zones covering all filter combinations
 export const zipZonesData: ZipZone[] = [
@@ -363,3 +364,331 @@ export const zoneGroupColumns = [
   { key: 'zipCount', label: 'Zip Count' },
   { key: 'status', label: 'Status' },
 ];
+
+// ============================================
+// SAMPLE CONNECTION DATA
+// See TAG-SYSTEM-SPEC.md for documentation
+// ============================================
+
+interface SampleConnectionData {
+  connections: EntityConnections;
+  connectedCount: number;
+  hasIssues: boolean;
+}
+
+/**
+ * Sample connection data for zone groups.
+ * In production, this would be computed from actual relationships.
+ */
+export const sampleZoneGroupConnections: Record<string, SampleConnectionData> = {
+  g1: {
+    connections: {
+      customers: { hasConnections: true, count: 847, connectionPath: 'via rate cards and service areas' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'NYC Central' },
+      rateCards: { hasConnections: true, count: 4, connectionPath: 'Standard, Premium, Corporate, Volume' },
+      services: { hasConnections: true, count: 3, connectionPath: 'Express, Same Day, Standard' },
+      vehicles: { hasConnections: true, count: 3, connectionPath: 'Van, Cargo Bike, Motorcycle' },
+      notifications: { hasConnections: true, count: 2, connectionPath: 'Email, SMS' },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1, connectionPath: 'North America' },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  g2: {
+    connections: {
+      customers: { hasConnections: true, count: 234, connectionPath: 'via Brooklyn Hub' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'Brooklyn Hub' },
+      rateCards: { hasConnections: true, count: 3, connectionPath: 'Standard, Corporate, Premium' },
+      services: { hasConnections: true, count: 2, connectionPath: 'Standard, Overnight' },
+      vehicles: { hasConnections: true, count: 2, connectionPath: 'Truck, Van' },
+      notifications: { hasConnections: true, count: 1, connectionPath: 'Email only' },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1, connectionPath: 'North America' },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  g3: {
+    connections: {
+      customers: { hasConnections: true, count: 156, connectionPath: 'via Queens Hub' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'Queens Hub' },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 4, connectionPath: 'All services' },
+      vehicles: { hasConnections: true, count: 2, connectionPath: 'Van, Truck' },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  g4: {
+    connections: {
+      customers: { hasConnections: true, count: 89, connectionPath: 'via JFK Facility' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'JFK Facility' },
+      rateCards: { hasConnections: true, count: 2, connectionPath: 'Premium, Corporate' },
+      services: { hasConnections: true, count: 2, connectionPath: 'Express, Same Day' },
+      vehicles: { hasConnections: true, count: 2, connectionPath: 'Van, Truck' },
+      notifications: { hasConnections: true, count: 3 },
+      airports: { hasConnections: true, count: 1, connectionPath: 'JFK' },
+      linehauls: { hasConnections: true, count: 2, connectionPath: 'NYC-BOS, NYC-DC' },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 9,
+    hasIssues: false,
+  },
+  g5: {
+    connections: {
+      customers: { hasConnections: true, count: 178, connectionPath: 'via Newark Gateway' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'Newark Gateway' },
+      rateCards: { hasConnections: true, count: 3 },
+      services: { hasConnections: true, count: 4, connectionPath: 'All services' },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: false, count: 0 },
+      airports: { hasConnections: true, count: 1, connectionPath: 'Newark' },
+      linehauls: { hasConnections: true, count: 3 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 8,
+    hasIssues: true, // No notifications configured - potential issue
+  },
+  g6: {
+    connections: {
+      customers: { hasConnections: true, count: 123 },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'Hoboken Depot' },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 4 },
+      vehicles: { hasConnections: true, count: 3 },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  g7: {
+    connections: {
+      customers: { hasConnections: true, count: 1, connectionPath: '1976 Limited' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 4, connectionPath: 'Multiple depots' },
+      rateCards: { hasConnections: true, count: 3 },
+      services: { hasConnections: true, count: 3 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: true, count: 3 },
+      airports: { hasConnections: true, count: 1, connectionPath: 'JFK' },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 8,
+    hasIssues: false,
+  },
+  g8: {
+    connections: {
+      customers: { hasConnections: true, count: 412, connectionPath: 'via Same Day service' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 5, connectionPath: 'Multiple depots' },
+      rateCards: { hasConnections: true, count: 1, connectionPath: 'Premium Rates only' },
+      services: { hasConnections: true, count: 1, connectionPath: 'Same Day' },
+      vehicles: { hasConnections: true, count: 3, connectionPath: 'Van, Cargo Bike, Motorcycle' },
+      notifications: { hasConnections: true, count: 4, connectionPath: 'All channels' },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  g9: {
+    connections: {
+      customers: { hasConnections: true, count: 289 },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 6 },
+      rateCards: { hasConnections: true, count: 2 },
+      services: { hasConnections: true, count: 1, connectionPath: 'Overnight' },
+      vehicles: { hasConnections: true, count: 2, connectionPath: 'Truck, Van' },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: true, count: 2, connectionPath: 'JFK, Newark' },
+      linehauls: { hasConnections: true, count: 5, connectionPath: 'All routes' },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 9,
+    hasIssues: false,
+  },
+  g10: {
+    connections: {
+      customers: { hasConnections: true, count: 567 },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 6 },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 3 },
+      vehicles: { hasConnections: true, count: 2, connectionPath: 'Truck, Semi' },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: true, count: 2 },
+      linehauls: { hasConnections: true, count: 4 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 9,
+    hasIssues: false,
+  },
+  g11: {
+    connections: {
+      customers: { hasConnections: false, count: 0 },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 1, connectionPath: 'NYC Central' },
+      rateCards: { hasConnections: false, count: 0 },
+      services: { hasConnections: true, count: 3 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: false, count: 0 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 4,
+    hasIssues: true, // No customers, no rate cards - definitely has issues
+  },
+  g12: {
+    connections: {
+      customers: { hasConnections: true, count: 1, connectionPath: 'Global Logistics' },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: true, count: 5 },
+      rateCards: { hasConnections: true, count: 2 },
+      services: { hasConnections: true, count: 2 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: true, count: 3 },
+      airports: { hasConnections: true, count: 2 },
+      linehauls: { hasConnections: true, count: 3 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 9,
+    hasIssues: false,
+  },
+};
+
+/**
+ * Sample connection data for depots.
+ */
+export const sampleDepotConnections: Record<string, SampleConnectionData> = {
+  d1: {
+    connections: {
+      customers: { hasConnections: true, count: 1243 },
+      zoneGroups: { hasConnections: true, count: 4 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 4 },
+      vehicles: { hasConnections: true, count: 4 },
+      notifications: { hasConnections: true, count: 3 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: true, count: 3 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 8,
+    hasIssues: false,
+  },
+  d2: {
+    connections: {
+      customers: { hasConnections: true, count: 567 },
+      zoneGroups: { hasConnections: true, count: 1 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 3 },
+      services: { hasConnections: true, count: 3 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  d3: {
+    connections: {
+      customers: { hasConnections: true, count: 345 },
+      zoneGroups: { hasConnections: true, count: 1 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 4 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  d4: {
+    connections: {
+      customers: { hasConnections: true, count: 234 },
+      zoneGroups: { hasConnections: true, count: 1 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 2 },
+      services: { hasConnections: true, count: 2 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: true, count: 4 },
+      airports: { hasConnections: true, count: 1 },
+      linehauls: { hasConnections: true, count: 4 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 9,
+    hasIssues: false,
+  },
+  d5: {
+    connections: {
+      customers: { hasConnections: true, count: 456 },
+      zoneGroups: { hasConnections: true, count: 1 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 3 },
+      services: { hasConnections: true, count: 4 },
+      vehicles: { hasConnections: true, count: 2 },
+      notifications: { hasConnections: false, count: 0 },
+      airports: { hasConnections: true, count: 1 },
+      linehauls: { hasConnections: true, count: 3 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 8,
+    hasIssues: true, // No notifications
+  },
+  d6: {
+    connections: {
+      customers: { hasConnections: true, count: 289 },
+      zoneGroups: { hasConnections: true, count: 1 },
+      depots: { hasConnections: false, count: 0 },
+      rateCards: { hasConnections: true, count: 4 },
+      services: { hasConnections: true, count: 4 },
+      vehicles: { hasConnections: true, count: 3 },
+      notifications: { hasConnections: true, count: 2 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: false, count: 0 },
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 7,
+    hasIssues: false,
+  },
+  d7: {
+    connections: {
+      ...createEmptyConnections(),
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 1,
+    hasIssues: true, // Inactive depot - minimal connections
+  },
+  d8: {
+    connections: {
+      ...createEmptyConnections(),
+      regions: { hasConnections: true, count: 1 },
+    },
+    connectedCount: 1,
+    hasIssues: true, // Inactive depot - minimal connections
+  },
+};

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { ExpandableRow } from '../../../components/data/ExpandableRow';
 import { DataTable } from '../../../components/data/DataTable';
 import { FilterBar } from '../../../components/filters/FilterBar';
@@ -6,14 +6,14 @@ import { SearchInput } from '../../../components/filters/SearchInput';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Toggle } from '../../../components/ui/Toggle';
-import { zoneGroupsData, zipZonesData, zipZoneFilters, zipSelectionColumns } from '../data/sampleData';
-import type { ZoneGroup, ZipZone } from '../types';
+import { zoneGroupsData, zipZonesData, zipZoneFilters, zipSelectionColumns, sampleZoneGroupConnections } from '../data/sampleData';
+import type { ZoneGroup, ZipZone, SourceItem, EntityConnections } from '../types';
 
 interface ZoneGroupsTabProps {
-  onTagsClick: () => void;
+  onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
 }
 
-export function ZoneGroupsTab({ onTagsClick }: ZoneGroupsTabProps) {
+export function ZoneGroupsTab({ onConnectionsClick }: ZoneGroupsTabProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>('g1');
 
   // State for zone group filters (per group)
@@ -104,10 +104,14 @@ export function ZoneGroupsTab({ onTagsClick }: ZoneGroupsTabProps) {
               { label: 'Zones', value: group.zipCount },
               { label: 'Region', value: group.region },
             ]}
-            tagCount={3}
+            connectionCount={sampleZoneGroupConnections[group.id]?.connectedCount ?? 0}
+            hasConnectionIssues={sampleZoneGroupConnections[group.id]?.hasIssues ?? false}
             isExpanded={expandedItem === group.id}
             onToggle={() => setExpandedItem(expandedItem === group.id ? null : group.id)}
-            onTagsClick={onTagsClick}
+            onConnectionsClick={() => onConnectionsClick(
+              { type: 'zoneGroup', id: group.id, name: group.name },
+              sampleZoneGroupConnections[group.id]?.connections ?? {} as EntityConnections
+            )}
           >
             <div className="p-6 bg-surface-cream space-y-4">
               {/* Group Name Input */}
