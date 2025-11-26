@@ -3,109 +3,267 @@ import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 
-type Module = 'territory' | 'clients' | 'notifications';
+type ModuleId = 'clients' | 'agents' | 'drivers' | 'holidays' | 'rates' |
+  'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
+  'staff-users' | 'client-users' |
+  'notifications' | 'territory' | 'dashboards' | 'site-settings';
 
-const MODULES: { id: Module; label: string; icon: ReactNode }[] = [
+interface MenuItem {
+  id: ModuleId;
+  label: string;
+  icon?: ReactNode;
+  children?: MenuItem[];
+}
+
+interface MenuSection {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  items: MenuItem[];
+}
+
+const MENU_SECTIONS: MenuSection[] = [
   {
-    id: 'territory',
-    label: 'Territory & Locations',
+    id: 'general',
+    label: 'General',
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-        <circle cx="12" cy="10" r="3" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </svg>
     ),
+    items: [
+      { id: 'clients', label: 'Clients & Customers' },
+      { id: 'agents', label: 'Agents' },
+      { id: 'drivers', label: 'Drivers' },
+      { id: 'holidays', label: 'Holidays / Afterhours' },
+      { id: 'rates', label: 'Rates & Accessorials' },
+    ],
   },
   {
-    id: 'clients',
-    label: 'Clients & Customers',
+    id: 'services',
+    label: 'Services',
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
       </svg>
     ),
+    items: [
+      { id: 'customer-contacts', label: 'Customer Contacts' },
+      { id: 'billing-types', label: 'Billing Types' },
+      { id: 'job-settings', label: 'Job Settings' },
+      { id: 'sources', label: 'Sources' },
+      { id: 'airports', label: 'Airports & Airfreight' },
+    ],
   },
   {
-    id: 'notifications',
-    label: 'Notification Center',
+    id: 'users',
+    label: 'Users & Permissions',
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     ),
+    items: [
+      { id: 'staff-users', label: 'Staff & Admin Users' },
+      { id: 'client-users', label: 'Customer/Client Users' },
+    ],
+  },
+  {
+    id: 'advanced',
+    label: 'Advanced',
+    icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </svg>
+    ),
+    items: [
+      { id: 'notifications', label: 'Tasks & Notifications' },
+      { id: 'territory', label: 'Territory & Locations' },
+      { id: 'dashboards', label: 'Dashboards' },
+      { id: 'site-settings', label: 'Site Level Settings' },
+    ],
   },
 ];
 
+// Modules that are implemented
+const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications'];
+
 function App() {
-  const [activeModule, setActiveModule] = useState<Module>('territory');
+  const [activeModule, setActiveModule] = useState<ModuleId>('territory');
+  const [expandedSections, setExpandedSections] = useState<string[]>(['general', 'advanced']);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSections(prev =>
+      prev.includes(sectionId)
+        ? prev.filter(id => id !== sectionId)
+        : [...prev, sectionId]
+    );
+  };
+
+  const isImplemented = (moduleId: ModuleId) => IMPLEMENTED_MODULES.includes(moduleId);
+
+  const renderModule = () => {
+    switch (activeModule) {
+      case 'territory':
+        return <TerritoryPage />;
+      case 'clients':
+        return <ClientsPage />;
+      case 'notifications':
+        return <NotificationsPage />;
+      default:
+        return (
+          <div className="min-h-screen bg-surface-light flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-border flex items-center justify-center">
+                <svg className="w-8 h-8 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-text-primary mb-2">
+                {MENU_SECTIONS.flatMap(s => s.items).find(i => i.id === activeModule)?.label}
+              </h2>
+              <p className="text-text-secondary">This module is ready for development</p>
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-brand-dark">
-      {/* Top Navigation Bar */}
-      <nav className="bg-brand-dark border-b border-white/10 px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
+    <div className="min-h-screen bg-surface-light flex">
+      {/* Sidebar */}
+      <aside
+        className={`bg-brand-dark flex flex-col transition-all duration-300 ${
+          sidebarCollapsed ? 'w-16' : 'w-64'
+        }`}
+      >
+        {/* Logo */}
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-brand-cyan flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-brand-cyan flex items-center justify-center flex-shrink-0">
               <svg className="w-6 h-6 text-brand-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2" />
                 <circle cx="6.5" cy="16.5" r="2.5" />
                 <circle cx="16.5" cy="16.5" r="2.5" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">Deliver Different</h1>
-              <p className="text-xs text-white/50">Admin Settings</p>
-            </div>
-          </div>
-
-          {/* Module Navigation */}
-          <div className="flex items-center gap-2">
-            {MODULES.map((module) => (
-              <button
-                key={module.id}
-                onClick={() => setActiveModule(module.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  activeModule === module.id
-                    ? 'bg-brand-cyan text-brand-dark'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {module.icon}
-                <span className="text-sm font-medium">{module.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* User Menu */}
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-white/70 hover:text-white transition-colors">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
-            <button className="p-2 text-white/70 hover:text-white transition-colors relative">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="absolute top-1 right-1 w-2 h-2 bg-brand-cyan rounded-full" />
-            </button>
-            <div className="w-8 h-8 rounded-full bg-secondary-purple flex items-center justify-center text-white text-sm font-medium">
-              AD
-            </div>
+            {!sidebarCollapsed && (
+              <div className="overflow-hidden">
+                <h1 className="text-base font-bold text-white whitespace-nowrap">Deliver Different</h1>
+                <p className="text-xs text-white/50 whitespace-nowrap">Admin Settings</p>
+              </div>
+            )}
           </div>
         </div>
-      </nav>
 
-      {/* Page Content */}
-      <main>
-        {activeModule === 'territory' && <TerritoryPage />}
-        {activeModule === 'clients' && <ClientsPage />}
-        {activeModule === 'notifications' && <NotificationsPage />}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {MENU_SECTIONS.map((section) => (
+            <div key={section.id} className="mb-2">
+              {/* Section Header */}
+              <button
+                onClick={() => toggleSection(section.id)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/5 ${
+                  sidebarCollapsed ? 'justify-center' : ''
+                }`}
+              >
+                <span className="text-white/70">{section.icon}</span>
+                {!sidebarCollapsed && (
+                  <>
+                    <span className="flex-1 text-sm font-medium text-white/90">{section.label}</span>
+                    <svg
+                      className={`w-4 h-4 text-white/50 transition-transform ${
+                        expandedSections.includes(section.id) ? 'rotate-180' : ''
+                      }`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </>
+                )}
+              </button>
+
+              {/* Section Items */}
+              {!sidebarCollapsed && expandedSections.includes(section.id) && (
+                <div className="mt-1 space-y-0.5">
+                  {section.items.map((item) => {
+                    const implemented = isImplemented(item.id);
+                    const isActive = activeModule === item.id;
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveModule(item.id)}
+                        className={`w-full flex items-center gap-3 pl-12 pr-4 py-2 text-left transition-colors ${
+                          isActive
+                            ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
+                            : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                        }`}
+                      >
+                        <span className="text-sm">{item.label}</span>
+                        {implemented && (
+                          <span className="ml-auto w-2 h-2 rounded-full bg-brand-cyan" title="Implemented" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+
+        {/* Collapse Toggle */}
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white/50 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
+          >
+            <svg
+              className={`w-5 h-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            {!sidebarCollapsed && <span className="text-sm">Collapse</span>}
+          </button>
+        </div>
+
+        {/* User */}
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-secondary-purple flex items-center justify-center text-white text-sm font-medium">
+                AD
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">Admin User</p>
+                <p className="text-xs text-white/50 truncate">admin@deliverdifferent.com</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        {renderModule()}
       </main>
     </div>
   );
