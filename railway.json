@@ -6,7 +6,7 @@
       "providers": ["node"],
       "phases": {
         "setup": {
-          "nixPkgs": ["nodejs_20", "npm"]
+          "nixPkgs": ["nodejs_20"]
         },
         "install": {
           "cmds": ["cd admin-ui && npm install"]
