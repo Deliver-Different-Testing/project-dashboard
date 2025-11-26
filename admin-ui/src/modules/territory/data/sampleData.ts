@@ -1,5 +1,5 @@
 import type { ZipZone, ZoneGroup, Depot, FilterDefinition, EntityConnections } from '../types';
-import { createEmptyConnections, countConnectedCategories } from '../types';
+import { createEmptyConnections } from '../types';
 
 // 50+ Zip Zones covering all filter combinations
 export const zipZonesData: ZipZone[] = [
