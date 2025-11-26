@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Button, Badge, Toggle, Input, Select } from './components/ui';
 import { Tabs, PageHeader, Card } from './components/layout';
+import { ExpandableRow } from './components/data';
+import { FilterBar, FilterChips } from './components/filters';
+import { TagSidebar } from './components/tags';
 
-// Icons (inline SVGs for now)
+// Icons
 const TagIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z" />
@@ -21,6 +24,9 @@ function App() {
   const [toggle2, setToggle2] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [selectValue, setSelectValue] = useState('all');
+  const [expandedRow, setExpandedRow] = useState<string | null>('zone-1');
+  const [tagSidebarOpen, setTagSidebarOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
 
   const tabs = [
     { id: 'zones', label: 'All Zip Zones' },
@@ -35,16 +41,48 @@ function App() {
     { value: 'asia', label: 'Asia Pacific' },
   ];
 
+  const filters = [
+    { id: 'region', label: 'Region', options: ['North America', 'Europe', 'Asia Pacific', 'Australia'] },
+    { id: 'depot', label: 'Depot', options: ['NYC Central', 'LA Hub', 'London', 'Sydney'] },
+    { id: 'service', label: 'Service', options: ['Standard', 'Express', 'Same Day', 'Next Day'] },
+  ];
+
+  const sampleTags = {
+    Region: ['North America', 'Europe', 'Asia Pacific'],
+    Depot: ['NYC Central', 'LA Hub', 'London HQ'],
+    Service: ['Express', 'Standard'],
+    Customer: ['1976 Limited', 'Acme Corp'],
+  };
+
+  const handleFilterChange = (filterId: string, values: string[]) => {
+    setActiveFilters({ ...activeFilters, [filterId]: values });
+  };
+
+  const getFilterChips = () => {
+    const chips: { category: string; value: string }[] = [];
+    Object.entries(activeFilters).forEach(([category, values]) => {
+      values.forEach((value) => {
+        chips.push({ category, value });
+      });
+    });
+    return chips;
+  };
+
+  const handleRemoveChip = (category: string, value: string) => {
+    const newValues = activeFilters[category]?.filter((v) => v !== value) || [];
+    setActiveFilters({ ...activeFilters, [category]: newValues });
+  };
+
   return (
-    <div className="min-h-screen bg-surface-light p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Page Header */}
+    <div className="min-h-screen bg-surface-light">
+      {/* Page Header */}
+      <div className="p-8 pb-0">
         <PageHeader
           title="Territory & Locations"
           subtitle="Manage zip zones, zone groups, and depot locations"
           actions={
             <>
-              <Button variant="secondary">
+              <Button variant="secondary" onClick={() => setTagSidebarOpen(true)}>
                 <TagIcon />
                 Tags
               </Button>
@@ -52,12 +90,75 @@ function App() {
             </>
           }
         />
+      </div>
 
+      {/* Filter Bar */}
+      <FilterBar
+        filters={filters}
+        activeFilters={activeFilters}
+        onFilterChange={handleFilterChange}
+        onClear={() => setActiveFilters({})}
+      />
+
+      {/* Filter Chips */}
+      {getFilterChips().length > 0 && (
+        <div className="px-8 py-3 border-b border-border bg-white">
+          <FilterChips
+            chips={getFilterChips()}
+            onRemove={handleRemoveChip}
+            onClearAll={() => setActiveFilters({})}
+          />
+        </div>
+      )}
+
+      <div className="p-8 space-y-8">
         {/* Tabs Demo */}
         <Card padding="none">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
           <div className="p-6">
-            <p className="text-text-secondary">Active tab: <strong>{activeTab}</strong></p>
+            {/* Expandable Rows */}
+            <div className="space-y-2">
+              <ExpandableRow
+                id="zone-1"
+                name="Manhattan Central"
+                badge={{ text: 'Customized', variant: 'customized' }}
+                stats={[
+                  { label: 'Zips', value: 156 },
+                  { label: 'Active', value: '98%' },
+                ]}
+                tagCount={5}
+                preview="Region, Depot, Service"
+                isExpanded={expandedRow === 'zone-1'}
+                onToggle={() => setExpandedRow(expandedRow === 'zone-1' ? null : 'zone-1')}
+                onTagsClick={() => setTagSidebarOpen(true)}
+              >
+                <div className="p-6 bg-surface-cream">
+                  <p className="text-text-secondary">Expanded content for Manhattan Central zone group...</p>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <Input label="Zone Name" placeholder="Manhattan Central" />
+                    <Select label="Status" options={[{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }]} />
+                  </div>
+                </div>
+              </ExpandableRow>
+
+              <ExpandableRow
+                id="zone-2"
+                name="Brooklyn Hub"
+                badge={{ text: 'System', variant: 'system' }}
+                stats={[
+                  { label: 'Zips', value: 89 },
+                  { label: 'Active', value: '100%' },
+                ]}
+                tagCount={3}
+                isExpanded={expandedRow === 'zone-2'}
+                onToggle={() => setExpandedRow(expandedRow === 'zone-2' ? null : 'zone-2')}
+                onTagsClick={() => setTagSidebarOpen(true)}
+              >
+                <div className="p-6 bg-surface-cream">
+                  <p className="text-text-secondary">Expanded content for Brooklyn Hub zone group...</p>
+                </div>
+              </ExpandableRow>
+            </div>
           </div>
         </Card>
 
@@ -75,16 +176,6 @@ function App() {
               <Button variant="danger">Delete</Button>
               <Button variant="ghost">Ghost</Button>
               <Button variant="primary" disabled>Disabled</Button>
-            </div>
-          </div>
-
-          {/* Button Sizes */}
-          <div className="mb-8">
-            <h3 className="text-sm font-medium text-text-muted uppercase tracking-wide mb-4">Button Sizes</h3>
-            <div className="flex items-center gap-3">
-              <Button variant="primary" size="sm">Small</Button>
-              <Button variant="primary" size="md">Medium</Button>
-              <Button variant="primary" size="lg">Large</Button>
             </div>
           </div>
 
@@ -170,6 +261,16 @@ function App() {
           </div>
         </Card>
       </div>
+
+      {/* Tag Sidebar */}
+      <TagSidebar
+        isOpen={tagSidebarOpen}
+        onClose={() => setTagSidebarOpen(false)}
+        title="Zone Tags"
+        subtitle="Manhattan Central"
+        tags={sampleTags}
+        mode="view"
+      />
     </div>
   );
 }
