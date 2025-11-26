@@ -274,43 +274,49 @@ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 ---
 
-### 5.7 Tag Sidebar
+### 5.7 Tag Sidebar (Connection Navigator)
+
+> **IMPORTANT:** See `TAG-SYSTEM-SPEC.md` for complete specification.
+> Tags are a **navigation system**, not a labeling system.
 
 ```
-┌──────────────────────────┐
-│ Title           [Close]  │
-│ Subtitle                 │
-├──────────────────────────┤
-│ 🌎 REGION                │
-│   [Tag 1] [Tag 2]        │
-│                          │
-│ 🏢 DEPOT                 │
-│   [Tag 1] [Tag 2]        │
-│                          │
-│ ... (10 categories)      │
-└──────────────────────────┘
+┌──────────────────────────────────────┐
+│ Connections for: Zip Code 10001      │
+│ "Related areas of the system"        │
+├──────────────────────────────────────┤
+│                                      │
+│ ✓ CUSTOMERS          [→ View]        │  ← Click to navigate
+│   Connected via 3 zone groups        │
+│                                      │
+│ ✓ ZONE GROUPS        [→ View]        │
+│   Member of 3 groups                 │
+│                                      │
+│ ✗ RATE CARDS                         │  ← No connection (debug hint)
+│   Not connected                      │
+│                                      │
+└──────────────────────────────────────┘
 ```
+
+**Purpose:**
+- Show which OTHER settings pages relate to the current item
+- Enable cross-navigation with pre-filled search
+- Reveal missing connections for debugging
 
 **10 Tag Categories:**
-1. Region
-2. Depot
-3. Country
-4. Customer
-5. Service
-6. Vehicle
-7. Notification
-8. Rate Card
-9. Airport
-10. Linehaul
+1. Region, 2. Depot, 3. Country, 4. Customer, 5. Service
+6. Vehicle, 7. Notification, 8. Rate Card, 9. Airport, 10. Linehaul
+
+**Connection States:**
+- ✓ Connected (cyan) - Relationships exist, clickable
+- ✗ Not Connected (gray) - No relationships, might be a problem
+- ⚠ Partial (orange) - Some expected connections missing
 
 **Props:**
 - `isOpen`: boolean
 - `onClose`: () => void
-- `title`: string
-- `subtitle`: string
-- `tags`: Record<string, string[]> (category -> tag names)
-- `selectedTags?`: Record<string, string[]>
-- `onTagSelect?`: (category: string, tag: string) => void
+- `sourceItem`: { type: string, id: string, name: string }
+- `connections`: EntityConnections (computed relationship summary)
+- `onNavigate`: (targetModule: string, searchQuery: string) => void
 
 ---
 
