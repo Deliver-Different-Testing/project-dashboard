@@ -1,14 +1,43 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
 import { TagSidebar } from '../../components/tags';
+import { SearchInput } from '../../components/filters/SearchInput';
+import { FilterDropdown } from '../../components/filters/FilterDropdown';
+import { FilterChips } from '../../components/filters/FilterChips';
 import { NotificationGroupsTab } from './components/NotificationGroupsTab';
 import { AttachmentBuilderTab } from './components/AttachmentBuilderTab';
+import { SettingsTab } from './components/SettingsTab';
+// Notifications Page with filter bar, search, and settings tab
 import { sampleNotificationGroups, sampleAttachmentTemplates } from './data/sampleData';
 import type { SourceItem, EntityConnections } from './types';
-import { createEmptyConnections } from './types';
+import { createEmptyConnections, TRIGGER_EVENT_LABELS } from './types';
+
+// Define filter options
+const notificationFilters = [
+  {
+    id: 'status',
+    label: 'Status',
+    options: ['All Statuses', 'Active', 'Inactive'],
+  },
+  {
+    id: 'triggerEvent',
+    label: 'Trigger Event',
+    options: ['All Events', ...Object.values(TRIGGER_EVENT_LABELS)],
+  },
+  {
+    id: 'channel',
+    label: 'Channel',
+    options: ['All Channels', 'Email', 'SMS', 'Push', 'Webhook'],
+  },
+  {
+    id: 'tag',
+    label: 'Tag',
+    options: ['All Tags', 'Customer', 'Driver', 'Billing', 'Automated', 'Alert', 'POD'],
+  },
+];
 
 export function NotificationsPage() {
   const [activeTab, setActiveTab] = useState('groups');
@@ -20,10 +49,91 @@ export function NotificationsPage() {
   });
   const [sidebarConnections, setSidebarConnections] = useState<EntityConnections>(createEmptyConnections());
 
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+
   const tabs = [
     { id: 'groups', label: 'Notification Groups' },
     { id: 'attachments', label: 'Attachment Builder' },
+    { id: 'settings', label: 'Settings' },
   ];
+
+  // Filter groups based on search and filters
+  const filteredGroups = useMemo(() => {
+    let filtered = [...sampleNotificationGroups];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(g =>
+        g.name.toLowerCase().includes(query) ||
+        g.description.toLowerCase().includes(query) ||
+        g.templates.some(t =>
+          t.body.toLowerCase().includes(query) ||
+          t.subject?.toLowerCase().includes(query) ||
+          t.mergeFields.some(f => f.toLowerCase().includes(query))
+        )
+      );
+    }
+
+    // Status filter
+    if (activeFilters.status?.length && !activeFilters.status.includes('All Statuses')) {
+      filtered = filtered.filter(g =>
+        activeFilters.status.includes(g.isActive ? 'Active' : 'Inactive')
+      );
+    }
+
+    // Trigger event filter
+    if (activeFilters.triggerEvent?.length && !activeFilters.triggerEvent.some(v => v.startsWith('All '))) {
+      filtered = filtered.filter(g =>
+        activeFilters.triggerEvent.includes(TRIGGER_EVENT_LABELS[g.triggerEvent])
+      );
+    }
+
+    // Channel filter
+    if (activeFilters.channel?.length && !activeFilters.channel.includes('All Channels')) {
+      filtered = filtered.filter(g => {
+        const channelMap: Record<string, keyof typeof g.channels> = {
+          'Email': 'email',
+          'SMS': 'sms',
+          'Push': 'push',
+          'Webhook': 'webhook'
+        };
+        return activeFilters.channel.some(ch => g.channels[channelMap[ch]]);
+      });
+    }
+
+    // Tag filter
+    if (activeFilters.tag?.length && !activeFilters.tag.includes('All Tags')) {
+      filtered = filtered.filter(g =>
+        g.tags?.some(t => activeFilters.tag.includes(t))
+      );
+    }
+
+    return filtered;
+  }, [searchQuery, activeFilters]);
+
+  const handleFilterChange = (filterId: string, values: string[]) => {
+    setActiveFilters({ ...activeFilters, [filterId]: values });
+  };
+
+  const getFilterChips = () => {
+    const chips: { category: string; value: string }[] = [];
+    Object.entries(activeFilters).forEach(([category, values]) => {
+      values.forEach((value) => {
+        if (!value.startsWith('All ')) {
+          chips.push({ category, value });
+        }
+      });
+    });
+    return chips;
+  };
+
+  const handleRemoveChip = (category: string, value: string) => {
+    const newValues = activeFilters[category]?.filter((v) => v !== value) || [];
+    setActiveFilters({ ...activeFilters, [category]: newValues });
+  };
 
   const handleConnectionsClick = (sourceItem: SourceItem, connections: EntityConnections) => {
     setSidebarSourceItem(sourceItem);
@@ -127,15 +237,63 @@ export function NotificationsPage() {
         <Card padding="none">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
+          {/* Search + Filters Section (only show for groups tab) */}
+          {activeTab === 'groups' && (
+            <div className="px-4 py-3 border-b border-border bg-white space-y-3">
+              {/* Search Row - Full Width */}
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search groups, templates, or merge fields..."
+              />
+
+              {/* Filter Dropdowns Row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {notificationFilters.map((filter) => (
+                  <FilterDropdown
+                    key={filter.id}
+                    id={filter.id}
+                    label={filter.label}
+                    options={filter.options}
+                    selectedValues={activeFilters[filter.id] || []}
+                    onChange={(values) => handleFilterChange(filter.id, values)}
+                    multiSelect
+                  />
+                ))}
+
+                {Object.values(activeFilters).some(v => v.length > 0) && (
+                  <button
+                    onClick={() => setActiveFilters({})}
+                    className="text-sm text-text-muted hover:text-brand-cyan ml-2 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              {/* Active Filter Chips */}
+              {getFilterChips().length > 0 && (
+                <FilterChips
+                  chips={getFilterChips()}
+                  onRemove={handleRemoveChip}
+                  onClearAll={() => setActiveFilters({})}
+                />
+              )}
+            </div>
+          )}
+
           <div className="p-6">
             {activeTab === 'groups' && (
               <NotificationGroupsTab
-                groups={sampleNotificationGroups}
+                groups={filteredGroups}
                 onConnectionsClick={handleConnectionsClick}
               />
             )}
             {activeTab === 'attachments' && (
               <AttachmentBuilderTab templates={sampleAttachmentTemplates} />
+            )}
+            {activeTab === 'settings' && (
+              <SettingsTab />
             )}
           </div>
         </Card>

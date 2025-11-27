@@ -3,7 +3,8 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Toggle } from '../../../components/ui/Toggle';
 import { ConnectionBadge } from '../../../components/tags/ConnectionBadge';
-import type { NotificationGroup, EntityConnections, SourceItem } from '../types';
+import { TemplateEditor } from './TemplateEditor';
+import type { NotificationGroup, NotificationTemplate, EntityConnections, SourceItem } from '../types';
 import { TRIGGER_EVENT_LABELS, createEmptyConnections } from '../types';
 import { sampleNotificationConnections } from '../data/sampleData';
 
@@ -19,6 +20,7 @@ function countConnectedCategories(connections: EntityConnections): number {
 export function NotificationGroupsTab({ groups, onConnectionsClick }: NotificationGroupsTabProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [localGroups, setLocalGroups] = useState(groups);
+  const [editingTemplate, setEditingTemplate] = useState<{groupId: string; template: NotificationTemplate} | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -43,6 +45,29 @@ export function NotificationGroupsTab({ groups, onConnectionsClick }: Notificati
       id: group.id,
       name: group.name,
     }, connections);
+  };
+
+  const handleEditTemplate = (groupId: string, template: NotificationTemplate) => {
+    setEditingTemplate({ groupId, template });
+  };
+
+  const handleSaveTemplate = (updatedTemplate: NotificationTemplate) => {
+    setLocalGroups(localGroups.map(g => {
+      if (g.id === editingTemplate?.groupId) {
+        return {
+          ...g,
+          templates: g.templates.map(t =>
+            t.id === updatedTemplate.id ? updatedTemplate : t
+          )
+        };
+      }
+      return g;
+    }));
+    setEditingTemplate(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTemplate(null);
   };
 
   return (
@@ -220,43 +245,67 @@ export function NotificationGroupsTab({ groups, onConnectionsClick }: Notificati
 
                     {/* Templates Preview */}
                     <div className="space-y-4 col-span-2">
-                      <h4 className="text-sm font-medium text-text-secondary">Templates</h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium text-text-secondary">Templates</h4>
+                        <span className="text-xs text-text-muted">Click a template to edit</span>
+                      </div>
                       <div className="space-y-3">
-                        {group.templates.map((template) => (
-                          <div
-                            key={template.id}
-                            className="bg-white border border-border rounded-lg p-4"
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <Badge variant={template.channel === 'email' ? 'blue' : template.channel === 'sms' ? 'green' : 'purple'}>
-                                {template.channel.toUpperCase()}
-                              </Badge>
-                              <Toggle
-                                checked={template.isActive}
-                                onChange={() => {}}
-                                label={template.isActive ? 'Active' : 'Inactive'}
+                        {group.templates.map((template) => {
+                          const isEditing = editingTemplate?.template.id === template.id;
+
+                          if (isEditing) {
+                            return (
+                              <TemplateEditor
+                                key={template.id}
+                                template={editingTemplate.template}
+                                onSave={handleSaveTemplate}
+                                onCancel={handleCancelEdit}
                               />
-                            </div>
-                            {template.subject && (
-                              <div className="text-sm font-medium text-text-primary mb-1">
-                                Subject: {template.subject}
+                            );
+                          }
+
+                          return (
+                            <div
+                              key={template.id}
+                              onClick={() => handleEditTemplate(group.id, template)}
+                              className="bg-white border border-border rounded-lg p-4 cursor-pointer hover:border-brand-cyan hover:shadow-sm transition-all group"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={template.channel === 'email' ? 'blue' : template.channel === 'sms' ? 'green' : 'purple'}>
+                                    {template.channel.toUpperCase()}
+                                  </Badge>
+                                  <span className="text-xs text-text-muted opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Click to edit
+                                  </span>
+                                </div>
+                                <Toggle
+                                  checked={template.isActive}
+                                  onChange={() => {}}
+                                  label={template.isActive ? 'Active' : 'Inactive'}
+                                />
                               </div>
-                            )}
-                            <div className="text-sm text-text-secondary whitespace-pre-wrap line-clamp-3">
-                              {template.body}
+                              {template.subject && (
+                                <div className="text-sm font-medium text-text-primary mb-1">
+                                  Subject: {template.subject}
+                                </div>
+                              )}
+                              <div className="text-sm text-text-secondary whitespace-pre-wrap line-clamp-3">
+                                {template.body}
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {template.mergeFields.map((field) => (
+                                  <span
+                                    key={field}
+                                    className="text-xs px-2 py-0.5 bg-brand-cyan/10 text-brand-cyan rounded"
+                                  >
+                                    {field}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {template.mergeFields.map((field) => (
-                                <span
-                                  key={field}
-                                  className="text-xs px-2 py-0.5 bg-brand-cyan/10 text-brand-cyan rounded"
-                                >
-                                  {field}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -281,7 +330,17 @@ export function NotificationGroupsTab({ groups, onConnectionsClick }: Notificati
                       label={group.isActive ? 'Notification Active' : 'Notification Inactive'}
                     />
                     <div className="flex gap-3">
-                      <Button variant="secondary" size="sm">Edit Templates</Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          if (group.templates.length > 0 && !editingTemplate) {
+                            handleEditTemplate(group.id, group.templates[0]);
+                          }
+                        }}
+                      >
+                        {editingTemplate?.groupId === group.id ? 'Editing...' : 'Edit Templates'}
+                      </Button>
                       <Button variant="secondary" size="sm">Test Send</Button>
                       <Button variant="primary" size="sm">Save Changes</Button>
                     </div>
