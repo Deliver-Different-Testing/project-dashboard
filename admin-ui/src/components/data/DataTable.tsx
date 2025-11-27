@@ -160,7 +160,7 @@ export const DataTable = ({
           <thead className="bg-surface-light">
             <tr>
               {selectable && (
-                <th className="w-12 px-6 py-3 text-left">
+                <th className="w-10 px-3 py-2.5 text-left">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -177,14 +177,14 @@ export const DataTable = ({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider"
+                  className="px-3 py-2.5 text-left text-xs font-medium text-text-muted uppercase tracking-wider whitespace-nowrap"
                   style={column.width ? { width: column.width } : undefined}
                 >
                   {column.label}
                 </th>
               ))}
               {actions && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
                   Actions
                 </th>
               )}
@@ -204,7 +204,7 @@ export const DataTable = ({
                   onClick={() => onRowClick?.(row)}
                 >
                   {selectable && (
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -214,12 +214,12 @@ export const DataTable = ({
                     </td>
                   )}
                   {columns.map((column) => (
-                    <td key={column.key} className="px-6 py-4 text-sm text-text-primary">
+                    <td key={column.key} className="px-3 py-2.5 text-sm text-text-primary whitespace-nowrap">
                       {row[column.key]}
                     </td>
                   ))}
                   {actions && (
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                       {actions(row)}
                     </td>
                   )}

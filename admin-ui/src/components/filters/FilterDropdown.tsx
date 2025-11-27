@@ -86,7 +86,7 @@ export function FilterDropdown({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+          flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm transition-all duration-200
           border
           ${hasActiveFilters
             ? 'bg-brand-cyan/10 text-brand-cyan border-brand-cyan hover:bg-brand-cyan/20'
@@ -94,14 +94,14 @@ export function FilterDropdown({
           }
         `}
       >
-        <IconComponent className={`w-4 h-4 ${hasActiveFilters ? 'text-brand-cyan' : 'text-text-muted'}`} />
-        <span className="max-w-[120px] truncate">{getDisplayText()}</span>
+        <IconComponent className={`w-3.5 h-3.5 ${hasActiveFilters ? 'text-brand-cyan' : 'text-text-muted'}`} />
+        <span className="max-w-[100px] truncate">{getDisplayText()}</span>
         {activeCount > 1 && (
-          <span className="bg-brand-cyan text-white rounded-full px-1.5 py-0.5 text-xs min-w-[20px] text-center">
+          <span className="bg-brand-cyan text-white rounded-full px-1.5 text-xs min-w-[18px] text-center">
             {activeCount}
           </span>
         )}
-        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${hasActiveFilters ? 'text-brand-cyan' : 'text-text-muted'}`} />
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${hasActiveFilters ? 'text-brand-cyan' : 'text-text-muted'}`} />
       </button>
 
       {/* Dropdown Menu */}

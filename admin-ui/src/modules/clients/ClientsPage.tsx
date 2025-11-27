@@ -131,10 +131,10 @@ export function ClientsPage() {
             options={clientOptions}
             value={selectedOption}
             onChange={handleClientSelect}
-            placeholder="Search and select a customer..."
-            searchPlaceholder="Type to search customers..."
+            placeholder="Search customers..."
             emptyMessage="No customers found"
             maxResults={15}
+            searchBarMode
           />
         </div>
       </div>

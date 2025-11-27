@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button';
 import { FilterChips } from '../../components/filters/FilterChips';
 import { FilterDropdown } from '../../components/filters/FilterDropdown';
 import { SearchInput } from '../../components/filters/SearchInput';
-import { TagSidebar, TagSearchInput } from '../../components/tags';
+import { TagSidebar } from '../../components/tags';
 import { ZipZonesTab } from './components/ZipZonesTab';
 import { ZoneGroupsTab } from './components/ZoneGroupsTab';
 import { DepotsTab } from './components/DepotsTab';
@@ -81,7 +81,7 @@ export function TerritoryPage() {
   return (
     <div className="min-h-screen bg-surface-light">
       {/* Header */}
-      <div className="px-8 pt-8 pb-4">
+      <div className="px-6 pt-6 pb-3">
         <PageHeader
           title="Territory & Locations"
           subtitle="Manage zip zones, zone groups, and depot locations"
@@ -92,29 +92,21 @@ export function TerritoryPage() {
       </div>
 
       {/* Main Content Card */}
-      <div className="px-8 pb-8">
+      <div className="px-6 pb-6">
         <Card padding="none">
           {/* Sub-tabs at top of card */}
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
           {/* Search + Filters Section */}
-          <div className="p-4 border-b border-border bg-white">
-            {/* Search Row */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search zones, groups, or depots..."
-              />
-              <TagSearchInput
-                value={tagSearch}
-                onChange={setTagSearch}
-                placeholder="Filter by connected entity..."
-                entityType={activeTab === 'zip-zones' ? 'zip zone' : activeTab === 'zone-groups' ? 'zone group' : 'depot'}
-              />
-            </div>
+          <div className="px-4 py-3 border-b border-border bg-white space-y-3">
+            {/* Search Row - Full Width */}
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search zones, groups, or depots..."
+            />
 
-            {/* Filter Dropdowns */}
+            {/* Filter Dropdowns Row */}
             {activeTab === 'zip-zones' && (
               <div className="flex items-center gap-2 flex-wrap">
                 {zipZoneFilters.map((filter) => (
@@ -129,12 +121,30 @@ export function TerritoryPage() {
                   />
                 ))}
 
-                {Object.values(activeFilters).some(v => v.length > 0) && (
+                {/* Tag/Connection Filter - integrated into filter row */}
+                <div className="flex items-center gap-1 px-3 py-1.5 border border-border rounded-md bg-white hover:border-gray-300 transition-colors">
+                  <svg className="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    placeholder="Connected entity..."
+                    className="w-32 text-sm bg-transparent border-none outline-none placeholder:text-text-muted"
+                  />
+                </div>
+
+                {(Object.values(activeFilters).some(v => v.length > 0) || tagSearch) && (
                   <button
-                    onClick={() => setActiveFilters({})}
+                    onClick={() => {
+                      setActiveFilters({});
+                      setTagSearch('');
+                    }}
                     className="text-sm text-text-muted hover:text-brand-cyan ml-2 transition-colors"
                   >
-                    Clear all filters
+                    Clear all
                   </button>
                 )}
               </div>
@@ -142,18 +152,16 @@ export function TerritoryPage() {
 
             {/* Active Filter Chips */}
             {getFilterChips().length > 0 && (
-              <div className="mt-3">
-                <FilterChips
-                  chips={getFilterChips()}
-                  onRemove={handleRemoveChip}
-                  onClearAll={() => setActiveFilters({})}
-                />
-              </div>
+              <FilterChips
+                chips={getFilterChips()}
+                onRemove={handleRemoveChip}
+                onClearAll={() => setActiveFilters({})}
+              />
             )}
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-4">
             {activeTab === 'zip-zones' && (
               <ZipZonesTab
                 activeFilters={activeFilters}
