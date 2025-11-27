@@ -86,12 +86,7 @@ export function TerritoryPage() {
           title="Territory & Locations"
           subtitle="Manage zip zones, zone groups, and depot locations"
           actions={
-            <>
-              <Button variant="secondary" onClick={() => setTagSidebarOpen(true)}>
-                Tags
-              </Button>
-              <Button variant="primary">Add New</Button>
-            </>
+            <Button variant="primary">Add New</Button>
           }
         />
       </div>

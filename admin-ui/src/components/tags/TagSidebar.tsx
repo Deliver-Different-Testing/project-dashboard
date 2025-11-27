@@ -1,7 +1,35 @@
 import type { ReactNode } from 'react';
-import { ArrowRight, X } from 'lucide-react';
+import {
+  ArrowRight,
+  X,
+  Check,
+  Users,
+  MapPin,
+  Building2,
+  DollarSign,
+  Zap,
+  Truck,
+  Bell,
+  Plane,
+  Route,
+  Globe
+} from 'lucide-react';
 import type { EntityConnections, SourceItem } from '../../modules/territory/types';
 import { TAG_CATEGORIES } from '../../modules/territory/types';
+
+// Map icon names to Lucide components
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Users,
+  MapPin,
+  Building2,
+  DollarSign,
+  Zap,
+  Truck,
+  Bell,
+  Plane,
+  Route,
+  Globe,
+};
 
 /**
  * TagSidebar - Connection Navigator
@@ -33,13 +61,14 @@ interface ConnectionRowProps {
 
 function ConnectionRow({ icon, label, connection, onClick }: ConnectionRowProps): ReactNode {
   const { hasConnections, count, connectionPath } = connection;
+  const IconComponent = iconMap[icon];
 
   return (
     <div
-      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+      className={`flex items-center justify-between p-4 rounded-lg transition-all duration-200 ${
         hasConnections
-          ? 'bg-brand-cyan/10 hover:bg-brand-cyan/20 cursor-pointer'
-          : 'bg-gray-50'
+          ? 'bg-brand-cyan/10 hover:bg-brand-cyan/20 cursor-pointer hover:shadow-sm'
+          : 'bg-gray-50/50 opacity-60'
       }`}
       onClick={hasConnections ? onClick : undefined}
       role={hasConnections ? 'button' : undefined}
@@ -47,20 +76,23 @@ function ConnectionRow({ icon, label, connection, onClick }: ConnectionRowProps)
       onKeyDown={hasConnections ? (e) => e.key === 'Enter' && onClick() : undefined}
     >
       <div className="flex items-center gap-3">
-        {/* Status indicator */}
-        <span className={`text-lg ${hasConnections ? 'text-brand-cyan' : 'text-gray-400'}`}>
-          {hasConnections ? '✓' : '✗'}
-        </span>
+        {/* Category icon */}
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+          hasConnections ? 'bg-brand-cyan/20' : 'bg-gray-200'
+        }`}>
+          {IconComponent && (
+            <IconComponent className={`w-5 h-5 ${hasConnections ? 'text-brand-cyan' : 'text-gray-400'}`} />
+          )}
+        </div>
 
         {/* Category info */}
         <div>
           <div className="flex items-center gap-2">
-            <span>{icon}</span>
             <span className={`font-medium ${hasConnections ? 'text-text-primary' : 'text-gray-400'}`}>
               {label}
             </span>
             {hasConnections && count > 0 && (
-              <span className="text-sm text-brand-cyan">({count})</span>
+              <span className="text-sm font-medium text-brand-cyan">({count})</span>
             )}
           </div>
           {connectionPath && (
@@ -72,10 +104,17 @@ function ConnectionRow({ icon, label, connection, onClick }: ConnectionRowProps)
         </div>
       </div>
 
-      {/* Navigation arrow */}
-      {hasConnections && (
-        <ArrowRight className="w-4 h-4 text-brand-cyan" />
-      )}
+      {/* Status indicator + Navigation arrow */}
+      <div className="flex items-center gap-2">
+        {hasConnections ? (
+          <>
+            <Check className="w-4 h-4 text-success" />
+            <ArrowRight className="w-4 h-4 text-brand-cyan" />
+          </>
+        ) : (
+          <X className="w-4 h-4 text-gray-300" />
+        )}
+      </div>
     </div>
   );
 }

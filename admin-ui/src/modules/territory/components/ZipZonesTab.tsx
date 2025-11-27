@@ -9,8 +9,11 @@ interface ZipZonesTabProps {
   searchQuery: string;
 }
 
+const PAGE_SIZE = 15;
+
 export function ZipZonesTab({ activeFilters, searchQuery }: ZipZonesTabProps) {
   const [selectedZones, setSelectedZones] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter zip zones based on active filters and search query
   const filteredZones = useMemo(() => {
@@ -44,14 +47,30 @@ export function ZipZonesTab({ activeFilters, searchQuery }: ZipZonesTabProps) {
     });
   }, [activeFilters, searchQuery]);
 
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [activeFilters, searchQuery]);
+
+  // Paginate the data
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredZones.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredZones, currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <DataTable
       columns={zipZoneColumns}
-      data={filteredZones}
+      data={paginatedData}
       selectable
       selectedIds={selectedZones}
       onSelectionChange={setSelectedZones}
-      pagination={{ page: 1, pageSize: 20, total: filteredZones.length }}
+      pagination={{ page: currentPage, pageSize: PAGE_SIZE, total: filteredZones.length }}
+      onPageChange={handlePageChange}
       actions={() => (
         <div className="flex gap-2">
           <Button variant="ghost" size="sm">Edit</Button>

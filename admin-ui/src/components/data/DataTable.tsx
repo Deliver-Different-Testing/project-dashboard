@@ -196,8 +196,10 @@ export const DataTable = ({
               return (
                 <tr
                   key={row.id}
-                  className={`border-b border-border hover:bg-surface-cream cursor-pointer ${
-                    isSelected ? 'bg-brand-cyan/5' : ''
+                  className={`border-b border-border transition-colors duration-150 cursor-pointer ${
+                    isSelected
+                      ? 'bg-brand-cyan/10 hover:bg-brand-cyan/15'
+                      : 'hover:bg-surface-light'
                   }`}
                   onClick={() => onRowClick?.(row)}
                 >

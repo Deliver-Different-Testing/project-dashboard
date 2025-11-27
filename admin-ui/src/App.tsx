@@ -173,7 +173,7 @@ function App() {
               {/* Section Header */}
               <button
                 onClick={() => toggleSection(section.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/5 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-white/5 ${
                   sidebarCollapsed ? 'justify-center' : ''
                 }`}
               >
@@ -198,7 +198,7 @@ function App() {
 
               {/* Section Items */}
               {!sidebarCollapsed && expandedSections.includes(section.id) && (
-                <div className="mt-1 space-y-0.5">
+                <div className="mt-1 space-y-1">
                   {section.items.map((item) => {
                     const implemented = isImplemented(item.id);
                     const isActive = activeModule === item.id;
@@ -207,7 +207,7 @@ function App() {
                       <button
                         key={item.id}
                         onClick={() => setActiveModule(item.id)}
-                        className={`w-full flex items-center gap-3 pl-12 pr-4 py-2 text-left transition-colors ${
+                        className={`w-full flex items-center gap-3 pl-12 pr-4 py-2.5 text-left transition-all duration-150 ${
                           isActive
                             ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
                             : 'text-white/60 hover:bg-white/5 hover:text-white/80'

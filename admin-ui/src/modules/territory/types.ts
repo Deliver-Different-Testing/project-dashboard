@@ -108,18 +108,19 @@ export interface TagCategory {
 
 /**
  * All 10 tag categories with their display info and routes.
+ * Using Lucide icon names for consistent styling.
  */
 export const TAG_CATEGORIES: TagCategory[] = [
-  { id: 'customers', label: 'Customers', icon: '👤', route: '/settings/customers' },
-  { id: 'zoneGroups', label: 'Zone Groups', icon: '📍', route: '/settings/territory?tab=groups' },
-  { id: 'depots', label: 'Depots', icon: '🏢', route: '/settings/territory?tab=depots' },
-  { id: 'rateCards', label: 'Rate Cards', icon: '💰', route: '/settings/rate-cards' },
-  { id: 'services', label: 'Services', icon: '⚡', route: '/settings/services' },
-  { id: 'vehicles', label: 'Vehicles', icon: '🚚', route: '/settings/vehicles' },
-  { id: 'notifications', label: 'Notifications', icon: '🔔', route: '/settings/notifications' },
-  { id: 'airports', label: 'Airports', icon: '✈️', route: '/settings/airports' },
-  { id: 'linehauls', label: 'Linehauls', icon: '🚛', route: '/settings/linehauls' },
-  { id: 'regions', label: 'Regions', icon: '🌎', route: '/settings/regions' },
+  { id: 'customers', label: 'Customers', icon: 'Users', route: '/settings/customers' },
+  { id: 'zoneGroups', label: 'Zone Groups', icon: 'MapPin', route: '/settings/territory?tab=groups' },
+  { id: 'depots', label: 'Depots', icon: 'Building2', route: '/settings/territory?tab=depots' },
+  { id: 'rateCards', label: 'Rate Cards', icon: 'DollarSign', route: '/settings/rate-cards' },
+  { id: 'services', label: 'Services', icon: 'Zap', route: '/settings/services' },
+  { id: 'vehicles', label: 'Vehicles', icon: 'Truck', route: '/settings/vehicles' },
+  { id: 'notifications', label: 'Notifications', icon: 'Bell', route: '/settings/notifications' },
+  { id: 'airports', label: 'Airports', icon: 'Plane', route: '/settings/airports' },
+  { id: 'linehauls', label: 'Linehauls', icon: 'Route', route: '/settings/linehauls' },
+  { id: 'regions', label: 'Regions', icon: 'Globe', route: '/settings/regions' },
 ];
 
 /**
