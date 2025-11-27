@@ -98,17 +98,42 @@ const MENU_SECTIONS: MenuSection[] = [
 // Modules that are implemented
 const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications'];
 
+// Helper to find which section contains a module
+const findSectionForModule = (moduleId: ModuleId): string | null => {
+  for (const section of MENU_SECTIONS) {
+    for (const item of section.items) {
+      if (item.id === moduleId) return section.id;
+      if (item.children?.some(child => child.id === moduleId)) return section.id;
+    }
+  }
+  return null;
+};
+
 function App() {
   const [activeModule, setActiveModule] = useState<ModuleId>('territory');
-  const [expandedSections, setExpandedSections] = useState<string[]>(['general', 'advanced']);
+  // Start with only the active module's section expanded
+  const [expandedSections, setExpandedSections] = useState<string[]>(() => {
+    const section = findSectionForModule('territory');
+    return section ? [section] : [];
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  // Toggle section - pure toggle behavior for section headers
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev =>
       prev.includes(sectionId)
         ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
+        : [sectionId] // Accordion: only one section open at a time
     );
+  };
+
+  // Select module and auto-expand its section (collapse others)
+  const selectModule = (moduleId: ModuleId) => {
+    setActiveModule(moduleId);
+    const sectionId = findSectionForModule(moduleId);
+    if (sectionId) {
+      setExpandedSections([sectionId]); // Only this section expanded
+    }
   };
 
   const isImplemented = (moduleId: ModuleId) => IMPLEMENTED_MODULES.includes(moduleId);
@@ -200,7 +225,7 @@ function App() {
 
               {/* Section Items */}
               {!sidebarCollapsed && expandedSections.includes(section.id) && (
-                <div className="mt-1 space-y-1">
+                <div className="mt-1 space-y-1 menu-section-items">
                   {section.items.map((item) => {
                     const implemented = isImplemented(item.id);
                     const isActive = activeModule === item.id;
@@ -210,7 +235,7 @@ function App() {
                     return (
                       <div key={item.id}>
                         <button
-                          onClick={() => setActiveModule(item.id)}
+                          onClick={() => selectModule(item.id)}
                           className={`w-full flex items-center gap-3 pl-12 pr-4 py-2.5 text-left transition-all duration-150 ${
                             isActive || childActive
                               ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
@@ -229,7 +254,7 @@ function App() {
                           return (
                             <button
                               key={child.id}
-                              onClick={() => setActiveModule(child.id)}
+                              onClick={() => selectModule(child.id)}
                               className={`w-full flex items-center gap-3 pl-16 pr-4 py-2 text-left transition-all duration-150 ${
                                 childIsActive
                                   ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
