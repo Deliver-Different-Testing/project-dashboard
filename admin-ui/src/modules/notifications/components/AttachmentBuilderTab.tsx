@@ -44,11 +44,6 @@ const FIELD_LIBRARY = {
   ],
 };
 
-interface CanvasField extends AttachmentField {
-  isDragging?: boolean;
-  isResizing?: boolean;
-}
-
 export function AttachmentBuilderTab({ templates, onSave }: AttachmentBuilderTabProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<AttachmentTemplate | null>(templates[0] || null);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
