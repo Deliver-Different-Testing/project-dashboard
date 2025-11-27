@@ -4,7 +4,6 @@ import { DataTable } from '../../../components/data/DataTable';
 import { FilterBar } from '../../../components/filters/FilterBar';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
-import { Toggle } from '../../../components/ui/Toggle';
 import { depotsData, zoneGroupsData, depotZoneGroupFilters, zoneGroupColumns, sampleDepotConnections } from '../data/sampleData';
 import type { Depot, ZoneGroup, SourceItem, EntityConnections } from '../types';
 
@@ -175,11 +174,19 @@ export function DepotsTab({ onConnectionsClick }: DepotsTabProps) {
                 </div>
               </div>
 
-              {/* Status Toggle & Save/Cancel */}
+              {/* Status Badge & Save/Cancel */}
               <div className="flex items-center justify-between border-t border-border pt-4">
                 <div className="flex items-center gap-2">
-                  <Toggle checked={depot.status === 'active'} onChange={() => {}} />
-                  <span className="text-text-secondary">Active</span>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                    depot.status === 'active'
+                      ? 'bg-success/10 text-success'
+                      : 'bg-text-muted/10 text-text-muted'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      depot.status === 'active' ? 'bg-success' : 'bg-text-muted'
+                    }`} />
+                    {depot.status === 'active' ? 'Active' : 'Inactive'}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="save" size="sm">Save Changes</Button>
