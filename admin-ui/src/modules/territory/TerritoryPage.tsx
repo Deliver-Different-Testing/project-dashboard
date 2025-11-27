@@ -4,6 +4,7 @@ import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
 import { FilterChips } from '../../components/filters/FilterChips';
+import { FilterDropdown } from '../../components/filters/FilterDropdown';
 import { SearchInput } from '../../components/filters/SearchInput';
 import { TagSidebar, TagSearchInput } from '../../components/tags';
 import { ZipZonesTab } from './components/ZipZonesTab';
@@ -113,50 +114,27 @@ export function TerritoryPage() {
               />
             </div>
 
-            {/* Inline Filters */}
+            {/* Filter Dropdowns */}
             {activeTab === 'zip-zones' && (
               <div className="flex items-center gap-2 flex-wrap">
-                {zipZoneFilters.map((filter) => {
-                  const activeCount = activeFilters[filter.id]?.length || 0;
-                  const filterIsActive = activeCount > 0;
-
-                  return (
-                    <div key={filter.id} className="relative group">
-                      <button
-                        onClick={() => {
-                          // Simple toggle - cycle through first few options
-                          const currentValues = activeFilters[filter.id] || [];
-                          if (currentValues.length === 0) {
-                            handleFilterChange(filter.id, [filter.options[1] || filter.options[0]]);
-                          } else {
-                            handleFilterChange(filter.id, []);
-                          }
-                        }}
-                        className={`
-                          flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors
-                          ${filterIsActive
-                            ? 'bg-brand-cyan text-white'
-                            : 'bg-gray-100 text-text-secondary hover:bg-gray-200'
-                          }
-                        `}
-                      >
-                        {filter.label}
-                        {activeCount > 0 && (
-                          <span className="bg-white/20 rounded-full px-1.5 text-[10px]">
-                            {activeCount}
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
+                {zipZoneFilters.map((filter) => (
+                  <FilterDropdown
+                    key={filter.id}
+                    id={filter.id}
+                    label={filter.label}
+                    options={filter.options}
+                    selectedValues={activeFilters[filter.id] || []}
+                    onChange={(values) => handleFilterChange(filter.id, values)}
+                    multiSelect
+                  />
+                ))}
 
                 {Object.values(activeFilters).some(v => v.length > 0) && (
                   <button
                     onClick={() => setActiveFilters({})}
-                    className="text-xs text-text-muted hover:text-brand-cyan ml-2"
+                    className="text-sm text-text-muted hover:text-brand-cyan ml-2 transition-colors"
                   >
-                    Clear all
+                    Clear all filters
                   </button>
                 )}
               </div>

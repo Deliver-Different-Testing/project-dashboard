@@ -3,7 +3,7 @@ import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 
-type ModuleId = 'clients' | 'agents' | 'drivers' | 'holidays' | 'rates' |
+type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
   'staff-users' | 'client-users' |
   'notifications' | 'territory' | 'dashboards' | 'site-settings';
@@ -35,7 +35,9 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { id: 'clients', label: 'Clients & Customers' },
       { id: 'agents', label: 'Agents' },
-      { id: 'drivers', label: 'Drivers' },
+      { id: 'drivers', label: 'Drivers', children: [
+        { id: 'vehicle-management', label: 'Vehicle Management' },
+      ] },
       { id: 'holidays', label: 'Holidays / Afterhours' },
       { id: 'rates', label: 'Rates & Accessorials' },
     ],
@@ -88,7 +90,7 @@ const MENU_SECTIONS: MenuSection[] = [
       { id: 'notifications', label: 'Tasks & Notifications' },
       { id: 'territory', label: 'Territory & Locations' },
       { id: 'dashboards', label: 'Dashboards' },
-      { id: 'site-settings', label: 'Site Level Settings' },
+      { id: 'site-settings', label: 'Site Settings & Integrations' },
     ],
   },
 ];
@@ -202,22 +204,46 @@ function App() {
                   {section.items.map((item) => {
                     const implemented = isImplemented(item.id);
                     const isActive = activeModule === item.id;
+                    const hasChildren = item.children && item.children.length > 0;
+                    const childActive = hasChildren && item.children?.some(child => activeModule === child.id);
 
                     return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveModule(item.id)}
-                        className={`w-full flex items-center gap-3 pl-12 pr-4 py-2.5 text-left transition-all duration-150 ${
-                          isActive
-                            ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
-                            : 'text-white/60 hover:bg-white/5 hover:text-white/80'
-                        }`}
-                      >
-                        <span className="text-sm">{item.label}</span>
-                        {implemented && (
-                          <span className="ml-auto w-2 h-2 rounded-full bg-brand-cyan" title="Implemented" />
-                        )}
-                      </button>
+                      <div key={item.id}>
+                        <button
+                          onClick={() => setActiveModule(item.id)}
+                          className={`w-full flex items-center gap-3 pl-12 pr-4 py-2.5 text-left transition-all duration-150 ${
+                            isActive || childActive
+                              ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
+                              : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                          }`}
+                        >
+                          <span className="text-sm">{item.label}</span>
+                          {implemented && (
+                            <span className="ml-auto w-2 h-2 rounded-full bg-brand-cyan" title="Implemented" />
+                          )}
+                        </button>
+                        {/* Nested children */}
+                        {hasChildren && item.children?.map((child) => {
+                          const childImplemented = isImplemented(child.id);
+                          const childIsActive = activeModule === child.id;
+                          return (
+                            <button
+                              key={child.id}
+                              onClick={() => setActiveModule(child.id)}
+                              className={`w-full flex items-center gap-3 pl-16 pr-4 py-2 text-left transition-all duration-150 ${
+                                childIsActive
+                                  ? 'bg-brand-cyan/20 text-brand-cyan border-r-2 border-brand-cyan'
+                                  : 'text-white/50 hover:bg-white/5 hover:text-white/70'
+                              }`}
+                            >
+                              <span className="text-xs">• {child.label}</span>
+                              {childImplemented && (
+                                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-cyan" title="Implemented" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     );
                   })}
                 </div>
