@@ -1,5 +1,22 @@
-# Session Summary - Nov 25-26, 2024
+# Session Summary - Nov 25-27, 2024
 ## Deliver Different Admin Settings Menu
+
+---
+
+## 🚨 MANDATORY: Start With Workflow Orchestrator
+
+**EVERY SESSION MUST BEGIN WITH:**
+```
+Invoke the workflow-orchestrator agent to begin this session.
+```
+
+This will:
+1. Run doc-reader to recover context
+2. Start dev server if not running
+3. Run browser-inspector to verify UI state
+4. Report ready state
+
+**NEVER call MCP tools (chrome-devtools, playwright) directly. ALWAYS use agents.**
 
 ---
 
@@ -7,21 +24,23 @@
 
 ### Before You Do Anything:
 
-1. **READ THESE FILES FIRST** (in order):
+1. **Use workflow-orchestrator** (see above)
+
+2. **READ THESE FILES FIRST** (in order):
    ```
    TAG-SYSTEM-SPEC.md     ← CRITICAL: Tags are NAVIGATION, not labels
    DESIGN-SYSTEM.md       ← UI patterns, colors, spacing
    .claude/CLAUDE.md      ← Quick reference guide
    ```
 
-2. **Start the dev server**:
+3. **Start the dev server**:
    ```bash
    cd "C:\Users\dane\Documents\Mytests\Nov 25 - Admin manager menu\admin-ui"
    npm run dev
    ```
    Opens at http://localhost:5173
 
-3. **Understand the tag system** before making any changes:
+4. **Understand the tag system** before making any changes:
    - Tags show **which OTHER settings pages relate to current item**
    - Show ✓/✗ for connection existence, NOT lists of items
    - Click navigates to target page with pre-filled search
@@ -70,19 +89,30 @@ Per TAG-SYSTEM-SPEC.md:
 - Cross-page navigation works (click category → navigate + search)
 - Sample connection data for all zone groups and depots
 
-### ✅ Custom Agent Definitions
-```
-.claude/agents/
-├── browser-inspector.md  ← Chrome DevTools (use for UI testing)
-├── codebase-explorer.md  ← Fast file/code search
-├── doc-reader.md         ← Recover specs after compaction
-├── code-reviewer.md      ← Verify implementation vs specs
-└── test-runner.md        ← Run npm build/lint/test
-```
+### ✅ Agent Workflow System (COMPLETE - Nov 27, 2024)
 
-**Note:** Custom agents may not be recognized by Task tool. Use built-in agents:
-- `subagent_type: "Explore"` for codebase search
-- `subagent_type: "general-purpose"` for complex tasks
+**13 agents defined in `.claude/agents/`:**
+
+| # | Agent | Purpose | Auto-Run | Blocks Commit |
+|---|-------|---------|----------|---------------|
+| 1 | workflow-orchestrator | Master coordinator | Session start | - |
+| 2 | doc-reader | Recover context | Session start | No |
+| 3 | browser-inspector | UI screenshots | File save | Yes (errors) |
+| 4 | code-reviewer | Spec compliance | Pre-commit | Yes |
+| 5 | plan-validator | Check plan vs specs | On request | No |
+| 6 | build-watcher | Build/lint errors | File save | Yes |
+| 7 | tag-compliance-checker | Tag system rules | Component edit | Yes |
+| 8 | visual-regression-tester | Screenshot diff | Pre-commit | Yes |
+| 9 | integration-tester | Click flows | Pre-commit | Yes |
+| 10 | smoke-tester | Quick sanity | Pre-commit | Yes |
+| 11 | edge-case-tester | Boundary testing | On request | No |
+| 12 | accessibility-tester | A11y checks | On request | No |
+| 13 | debug-helper | Troubleshooting | On error | No |
+
+**Key Rules:**
+- NEVER call MCP tools directly - use agents
+- All blocking agents must PASS before commit
+- workflow-orchestrator coordinates everything
 
 ---
 
@@ -211,5 +241,6 @@ Read `TAG-SYSTEM-SPEC.md` - it has everything.
 
 ---
 
-*Last updated: Nov 26, 2024*
+*Last updated: Nov 27, 2024*
 *All tag system components are implemented and working.*
+*Agent workflow system with 13 agents is complete.*
