@@ -3,11 +3,12 @@ import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 import { TasksPage } from './modules/tasks';
+import { AutomationsPage } from './modules/automations';
 
 type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
   'staff-users' | 'client-users' |
-  'tasks' | 'notifications' | 'territory' | 'dashboards' | 'site-settings';
+  'tasks' | 'notifications' | 'automations' | 'territory' | 'dashboards' | 'site-settings';
 
 interface MenuItem {
   id: ModuleId;
@@ -90,6 +91,7 @@ const MENU_SECTIONS: MenuSection[] = [
     items: [
       { id: 'tasks', label: 'Tasks' },
       { id: 'notifications', label: 'Notifications' },
+      { id: 'automations', label: 'Automations' },
       { id: 'territory', label: 'Territory & Locations' },
       { id: 'dashboards', label: 'Dashboards' },
       { id: 'site-settings', label: 'Site Settings & Integrations' },
@@ -98,7 +100,7 @@ const MENU_SECTIONS: MenuSection[] = [
 ];
 
 // Modules that are implemented
-const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks'];
+const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'automations'];
 
 // Helper to find which section contains a module
 const findSectionForModule = (moduleId: ModuleId): string | null => {
@@ -150,6 +152,8 @@ function App() {
         return <NotificationsPage />;
       case 'tasks':
         return <TasksPage />;
+      case 'automations':
+        return <AutomationsPage />;
       default:
         return (
           <div className="min-h-screen bg-surface-light flex items-center justify-center">
