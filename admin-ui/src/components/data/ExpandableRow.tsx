@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Badge } from '../ui/Badge';
-import { Toggle } from '../ui/Toggle';
 import { ConnectionBadge } from '../tags/ConnectionBadge';
 
 interface ExpandableRowProps {
@@ -45,11 +44,11 @@ export function ExpandableRow({
         isExpanded ? 'border-brand-cyan' : 'border-transparent'
       }`}
     >
-      {/* Header Row */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-border">
-        {/* Toggle */}
-        <Toggle checked={isExpanded} onChange={onToggle} />
-
+      {/* Header Row - Entire row is clickable to expand/collapse */}
+      <div
+        onClick={onToggle}
+        className="flex items-center gap-4 px-4 py-3 border-b border-border cursor-pointer hover:bg-surface-cream/50 transition-colors"
+      >
         {/* Name and Badge */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className="text-text-primary font-medium truncate">{name}</span>
@@ -66,26 +65,22 @@ export function ExpandableRow({
           ))}
         </div>
 
-        {/* Connections Badge */}
-        <ConnectionBadge
-          connectionCount={connectionCount}
-          hasIssues={hasConnectionIssues}
-          onClick={onConnectionsClick}
-          size="sm"
-        />
-
-        {/* Chevron */}
-        <button
-          onClick={onToggle}
-          className="p-1 hover:bg-gray-100 rounded transition-colors duration-normal"
-          aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
-        >
-          <ChevronDown
-            className={`w-5 h-5 text-text-secondary transition-transform duration-expand ease-out ${
-              isExpanded ? 'rotate-180' : ''
-            }`}
+        {/* Connections Badge - Stop propagation so it doesn't trigger row expand */}
+        <div onClick={(e) => e.stopPropagation()}>
+          <ConnectionBadge
+            connectionCount={connectionCount}
+            hasIssues={hasConnectionIssues}
+            onClick={onConnectionsClick}
+            size="sm"
           />
-        </button>
+        </div>
+
+        {/* Chevron indicator */}
+        <ChevronDown
+          className={`w-5 h-5 text-text-secondary transition-transform duration-expand ease-out ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+        />
       </div>
 
       {/* Expanded Content */}
