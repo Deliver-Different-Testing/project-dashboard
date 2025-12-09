@@ -82,14 +82,10 @@ export function ColumnMapper({
   };
 
   // Get mapping status for a CSV column
-  const getMappingStatus = (csvColumn: string): 'valid' | 'warning' | 'unmapped' => {
+  const getMappingStatus = (csvColumn: string): 'mapped' | 'skipped' => {
     const schemaKey = mapping[csvColumn];
-    if (!schemaKey) return 'unmapped';
-
-    const schemaCol = schema.columns.find(col => col.key === schemaKey);
-    if (!schemaCol) return 'unmapped';
-
-    return schemaCol.required ? 'valid' : 'warning';
+    if (!schemaKey) return 'skipped';
+    return 'mapped';
   };
 
   // Get status icon
@@ -97,12 +93,10 @@ export function ColumnMapper({
     const status = getMappingStatus(csvColumn);
 
     switch (status) {
-      case 'valid':
+      case 'mapped':
         return <span className="text-success text-lg">✓</span>;
-      case 'warning':
-        return <span className="text-warning text-lg">⚠</span>;
-      case 'unmapped':
-        return <span className="text-error text-lg">✗</span>;
+      case 'skipped':
+        return <span className="text-text-muted text-lg">–</span>;
       default:
         return null;
     }
