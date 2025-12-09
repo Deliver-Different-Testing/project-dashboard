@@ -292,18 +292,17 @@ function App() {
           <button
             onClick={() => setWizardOpen(true)}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200
-              bg-gradient-to-r from-secondary-purple/20 to-secondary-purple/10
-              hover:from-secondary-purple/30 hover:to-secondary-purple/20
-              border border-secondary-purple/30 hover:border-secondary-purple/50
+              bg-brand-cyan/10 hover:bg-brand-cyan/20
+              border border-brand-cyan/30 hover:border-brand-cyan/50
               ${sidebarCollapsed ? 'justify-center' : ''}`}
           >
-            <svg className="w-5 h-5 text-secondary-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-5 h-5 text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             {!sidebarCollapsed && (
-              <span className="text-sm font-medium text-secondary-purple">Import & Export</span>
+              <span className="text-sm font-medium text-brand-cyan">Import & Export</span>
             )}
           </button>
         </div>
