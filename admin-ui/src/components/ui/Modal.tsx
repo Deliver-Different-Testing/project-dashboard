@@ -88,11 +88,11 @@ export const Modal = ({
       <div className={overlayClasses} onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className={`bg-white rounded-lg ${sizeClasses[size]} w-full transition-opacity duration-200 ${
+          className={`bg-white rounded-lg ${sizeClasses[size]} w-full max-h-[90vh] flex flex-col transition-opacity duration-200 ${
             isOpen ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <div className="sticky top-0 border-b p-6 flex justify-between items-start bg-white rounded-t-lg">
+          <div className="sticky top-0 border-b p-6 flex justify-between items-start bg-white rounded-t-lg flex-shrink-0">
             <div>
               <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
               {subtitle && <p className="text-sm text-text-muted mt-1">{subtitle}</p>}
@@ -106,10 +106,10 @@ export const Modal = ({
             </button>
           </div>
 
-          <div className="p-6">{children}</div>
+          <div className="p-6 overflow-y-auto flex-1">{children}</div>
 
           {footer && (
-            <div className="sticky bottom-0 border-t p-4 flex justify-end gap-2 bg-white rounded-b-lg">
+            <div className="sticky bottom-0 border-t p-4 flex justify-end gap-2 bg-white rounded-b-lg flex-shrink-0">
               {footer}
             </div>
           )}
