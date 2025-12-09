@@ -78,6 +78,15 @@ function normalizeValue(value: unknown, options: Required<DiffOptions>): unknown
 }
 
 /**
+ * Check if a value is "empty" (null, undefined, or empty/whitespace string)
+ */
+function isEmpty(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === 'string' && value.trim() === '') return true;
+  return false;
+}
+
+/**
  * Compare two values with type awareness
  * Handles CSV string values being compared against typed data (numbers, booleans, etc.)
  */
@@ -89,11 +98,17 @@ export function compareValues(
 ): { isEqual: boolean; normalizedImported: unknown; normalizedExisting: unknown } {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
-  // Normalize values first
+  // FIRST: Check if both values are "empty" (null, undefined, or empty string)
+  // This is the most common case for missing fields in CSV round-trips
+  if (opts.compareNulls && isEmpty(importedValue) && isEmpty(existingValue)) {
+    return { isEqual: true, normalizedImported: null, normalizedExisting: null };
+  }
+
+  // Normalize values
   const normalizedImported = normalizeValue(importedValue, opts);
   const normalizedExisting = normalizeValue(existingValue, opts);
 
-  // Both null/undefined/empty - equal
+  // Both null after normalization - equal
   if (opts.compareNulls && normalizedImported === null && normalizedExisting === null) {
     return { isEqual: true, normalizedImported, normalizedExisting };
   }
@@ -103,9 +118,11 @@ export function compareValues(
     return { isEqual: false, normalizedImported, normalizedExisting };
   }
 
-  // For string/enum types, do case-insensitive string comparison
+  // For string-like types, do case-insensitive string comparison
   // This handles CSV strings matching typed data regardless of case
-  if (column.type === 'string' || column.type === 'enum' || column.type === 'id') {
+  // Also handles phone, email, and reference types
+  if (column.type === 'string' || column.type === 'enum' || column.type === 'id' ||
+      column.type === 'phone' || column.type === 'email' || column.type === 'reference') {
     const importedStr = String(normalizedImported).toLowerCase().trim();
     const existingStr = String(normalizedExisting).toLowerCase().trim();
     return {
@@ -274,6 +291,7 @@ export function diffRow(
   options?: DiffOptions
 ): DiffResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
+  const debugMode = true; // Enable debug logging
 
   // Check for delete marker first
   if (hasDeleteMarker(importedRow)) {
@@ -300,6 +318,10 @@ export function diffRow(
   const changedFields: string[] = [];
   const unchangedFields: string[] = [];
 
+  if (debugMode) {
+    console.log(`[DiffEngine] Comparing row with ${schema.uniqueKey}:`, importedRow[schema.uniqueKey]);
+  }
+
   for (const column of schema.columns) {
     // Skip locked fields if option enabled
     if (opts.ignoreLocked && column.locked) {
@@ -317,6 +339,16 @@ export function diffRow(
     }
 
     const comparison = compareValues(importedValue, existingValue, column, options);
+
+    if (debugMode && !comparison.isEqual) {
+      console.log(`[DiffEngine] Field '${column.key}' differs:`, {
+        type: column.type,
+        imported: importedValue,
+        existing: existingValue,
+        normalizedImported: comparison.normalizedImported,
+        normalizedExisting: comparison.normalizedExisting,
+      });
+    }
 
     if (comparison.isEqual) {
       unchangedFields.push(column.key);
