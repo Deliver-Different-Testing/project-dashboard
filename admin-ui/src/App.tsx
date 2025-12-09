@@ -1,10 +1,15 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 import { TasksPage } from './modules/tasks';
 import { AutomationsPage } from './modules/automations';
 import { SetupWizard } from './features/setup-wizard';
+
+// Import sample data for import/export functionality
+import { sampleClients } from './modules/clients/data/sampleData';
+import { zipZonesData, zoneGroupsData, depotsData } from './modules/territory/data/sampleData';
+import { sampleNotificationGroups } from './modules/notifications/data/sampleData';
 
 type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
@@ -123,6 +128,16 @@ function App() {
   });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+
+  // Prepare existing data for import/export wizard
+  // Maps schema IDs to their sample data arrays
+  const existingData = useMemo((): Record<string, Record<string, unknown>[]> => ({
+    clients: sampleClients as unknown as Record<string, unknown>[],
+    zipZones: zipZonesData as unknown as Record<string, unknown>[],
+    zoneGroups: zoneGroupsData as unknown as Record<string, unknown>[],
+    depots: depotsData as unknown as Record<string, unknown>[],
+    notificationGroups: sampleNotificationGroups as unknown as Record<string, unknown>[],
+  }), []);
 
   // Toggle section - pure toggle behavior for section headers
   const toggleSection = (sectionId: string) => {
@@ -351,6 +366,7 @@ function App() {
       <SetupWizard
         isOpen={wizardOpen}
         onClose={() => setWizardOpen(false)}
+        existingData={existingData}
         onComplete={() => {
           // Optionally refresh data or show toast
           console.log('Setup wizard completed');
