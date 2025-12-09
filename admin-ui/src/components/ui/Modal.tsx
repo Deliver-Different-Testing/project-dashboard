@@ -36,12 +36,22 @@ export const Modal = ({
 
   const overlayClasses = 'fixed inset-0 bg-black/30 z-50';
 
+  // Right-slide widths - responsive
+  const slideWidthClasses = {
+    sm: 'w-full sm:w-[400px]',
+    md: 'w-full sm:w-[480px]',
+    lg: 'w-full sm:w-[600px] lg:w-[700px]',
+    xl: 'w-full sm:w-[700px] lg:w-[800px] xl:w-[900px]',
+    '2xl': 'w-full sm:w-[800px] lg:w-[900px] xl:w-[1000px]',
+    full: 'w-full sm:w-[90vw] lg:w-[75vw] xl:w-[60vw]',
+  };
+
   if (variant === 'right-slide') {
     return (
       <>
         <div className={overlayClasses} onClick={onClose} />
         <div
-          className={`fixed right-0 top-0 h-full w-[480px] bg-white z-50 transform transition-transform duration-300 ${
+          className={`fixed right-0 top-0 h-full ${slideWidthClasses[size]} bg-white z-50 transform transition-transform duration-300 ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

@@ -448,7 +448,7 @@ export function ImportWizardModal({
       onClose={handleClose}
       title={`Import ${schema.label}`}
       variant="right-slide"
-      size="lg"
+      size="xl"
       footer={renderFooter()}
     >
       <StepIndicator currentStep={stepIndex} steps={STEP_LABELS} />
