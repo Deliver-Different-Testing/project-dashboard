@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
@@ -10,6 +10,9 @@ import { SetupWizard } from './features/setup-wizard';
 import { sampleClients } from './modules/clients/data/sampleData';
 import { zipZonesData, zoneGroupsData, depotsData } from './modules/territory/data/sampleData';
 import { sampleNotificationGroups } from './modules/notifications/data/sampleData';
+
+// Import the data service for in-memory persistence
+import { initializeDataStore, getAllData, subscribeToChanges } from './features/import-export/services/importService';
 
 type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
@@ -119,6 +122,18 @@ const findSectionForModule = (moduleId: ModuleId): string | null => {
   return null;
 };
 
+// Initial data for the import service
+const INITIAL_DATA: Record<string, Record<string, unknown>[]> = {
+  clients: sampleClients as unknown as Record<string, unknown>[],
+  zipZones: zipZonesData as unknown as Record<string, unknown>[],
+  zoneGroups: zoneGroupsData as unknown as Record<string, unknown>[],
+  depots: depotsData as unknown as Record<string, unknown>[],
+  notificationGroups: sampleNotificationGroups as unknown as Record<string, unknown>[],
+};
+
+// Initialize the data store once at module load
+initializeDataStore(INITIAL_DATA);
+
 function App() {
   const [activeModule, setActiveModule] = useState<ModuleId>('territory');
   // Start with only the active module's section expanded
@@ -129,15 +144,25 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  // Prepare existing data for import/export wizard
-  // Maps schema IDs to their sample data arrays
-  const existingData = useMemo((): Record<string, Record<string, unknown>[]> => ({
-    clients: sampleClients as unknown as Record<string, unknown>[],
-    zipZones: zipZonesData as unknown as Record<string, unknown>[],
-    zoneGroups: zoneGroupsData as unknown as Record<string, unknown>[],
-    depots: depotsData as unknown as Record<string, unknown>[],
-    notificationGroups: sampleNotificationGroups as unknown as Record<string, unknown>[],
-  }), []);
+  // Reactive data state - updates when imports complete
+  const [existingData, setExistingData] = useState<Record<string, Record<string, unknown>[]>>(getAllData);
+
+  // Subscribe to data changes from the import service
+  useEffect(() => {
+    const unsubscribe = subscribeToChanges((schemaId, data) => {
+      setExistingData(prev => ({
+        ...prev,
+        [schemaId]: data,
+      }));
+    });
+    return unsubscribe;
+  }, []);
+
+  // Force refresh data when wizard opens (in case of external changes)
+  const handleWizardOpen = useCallback(() => {
+    setExistingData(getAllData());
+    setWizardOpen(true);
+  }, []);
 
   // Toggle section - pure toggle behavior for section headers
   const toggleSection = (sectionId: string) => {
@@ -305,7 +330,7 @@ function App() {
         {/* Import & Export - Meta Feature */}
         <div className="px-3 py-2 border-t border-white/10 flex-shrink-0">
           <button
-            onClick={() => setWizardOpen(true)}
+            onClick={handleWizardOpen}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200
               bg-brand-cyan/10 hover:bg-brand-cyan/20
               border border-brand-cyan/30 hover:border-brand-cyan/50

@@ -8,6 +8,7 @@ import { ImportConfirmationTabs } from './ImportConfirmationTabs';
 import { parseCSV } from '../engine/CSVParser';
 import { validateAll } from '../engine/ValidationEngine';
 import { diffAll } from '../engine/DiffEngine';
+import { processImport } from '../services/importService';
 import type { ImportSchema } from '../types/schema.types';
 import type { ImportStep, ParsedRow, ImportSummary } from '../types/import.types';
 import type { ValidationResult } from '../types/validation.types';
@@ -208,16 +209,34 @@ export function ImportWizardModal({
       setIsProcessing(true);
       setProgress(0);
 
-      // Simulate processing (in real implementation, this would call an API)
-      const totalSteps = parsedRows.length;
-      for (let i = 0; i <= totalSteps; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        setProgress(Math.round((i / totalSteps) * 100));
-      }
+      try {
+        // Process the import using the service
+        const result = await processImport({
+          schemaId: schema.id,
+          uniqueKey: schema.uniqueKey,
+          rows: parsedRows,
+          onProgress: (progress, _message) => {
+            setProgress(progress);
+          },
+        });
 
-      setIsProcessing(false);
-      setStep('complete');
-      // Don't call onComplete here - wait for user to click "Done"
+        // Update summary with actual results from processing
+        setSummary({
+          total: parsedRows.length,
+          new: result.created,
+          modified: result.updated,
+          unchanged: result.unchanged,
+          errors: result.errors,
+          deleted: result.deleted,
+        });
+
+        setIsProcessing(false);
+        setStep('complete');
+      } catch (err) {
+        setIsProcessing(false);
+        setError(err instanceof Error ? err.message : 'Import failed');
+        setStep('confirm'); // Go back to confirm step on error
+      }
     }
   }, [step, parsedData, columnMapping, schema, existingData, validationResult, parsedRows, summary]);
 
