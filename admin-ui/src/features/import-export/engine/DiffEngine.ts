@@ -79,6 +79,7 @@ function normalizeValue(value: unknown, options: Required<DiffOptions>): unknown
 
 /**
  * Compare two values with type awareness
+ * Handles CSV string values being compared against typed data (numbers, booleans, etc.)
  */
 export function compareValues(
   importedValue: unknown,
@@ -100,6 +101,18 @@ export function compareValues(
   // One null, other not - not equal
   if (normalizedImported === null || normalizedExisting === null) {
     return { isEqual: false, normalizedImported, normalizedExisting };
+  }
+
+  // For string/enum types, do case-insensitive string comparison
+  // This handles CSV strings matching typed data regardless of case
+  if (column.type === 'string' || column.type === 'enum' || column.type === 'id') {
+    const importedStr = String(normalizedImported).toLowerCase().trim();
+    const existingStr = String(normalizedExisting).toLowerCase().trim();
+    return {
+      isEqual: importedStr === existingStr,
+      normalizedImported: normalizedImported,
+      normalizedExisting: normalizedExisting
+    };
   }
 
   // Type-specific comparison
