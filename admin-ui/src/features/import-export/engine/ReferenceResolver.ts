@@ -210,7 +210,7 @@ function resolveFuzzyByField(
   data: ReferenceData[],
   field: string,
   searchValue: string,
-  maxSuggestions: number
+  _maxSuggestions: number
 ): ResolveResult {
   let bestMatch: ReferenceData | null = null;
   let bestScore = 0;

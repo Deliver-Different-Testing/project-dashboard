@@ -329,9 +329,8 @@ export function diffAll(
   importedRows: Record<string, unknown>[],
   existingData: Record<string, unknown>[],
   schema: ImportSchema,
-  options?: DiffOptions
+  _options?: DiffOptions
 ): BatchDiffResult {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
 
   // Build lookup map of existing data by unique key for O(1) lookups
   const existingMap = new Map<string, Record<string, unknown>>();
@@ -363,7 +362,7 @@ export function diffAll(
     const uniqueKey = String(uniqueValue);
     const existingRecord = existingMap.get(uniqueKey) || null;
 
-    const diffResult = diffRow(importedRow, existingRecord, schema, options);
+    const diffResult = diffRow(importedRow, existingRecord, schema, _options);
     results.set(uniqueKey, diffResult);
 
     // Update summary

@@ -82,7 +82,6 @@ export function ImportConfirmationTabs({
   }, [activeTab, newRows, modifiedRows, unchangedRows, errorRows, deleteRows]);
 
   // Pagination
-  const totalPages = Math.ceil(currentRows.length / pageSize);
   const paginatedRows = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
@@ -93,13 +92,6 @@ export function ImportConfirmationTabs({
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId as TabId);
     setPage(1);
-  };
-
-  // Get identifier field (usually first column or unique key)
-  const getIdentifierValue = (row: ParsedRow): string => {
-    const uniqueKey = schema.uniqueKey;
-    const value = row.data[uniqueKey];
-    return value ? String(value) : `Row ${row.rowNumber}`;
   };
 
   // Get display name (usually second column or first string field)
@@ -212,9 +204,9 @@ export function ImportConfirmationTabs({
                 id: `error-${row.rowNumber}-${errorIdx}`,
                 _row: row,
                 row: row.rowNumber,
-                field: error.field || '-',
+                field: error.column || '-',
                 error: error.message || 'Unknown error',
-                value: error.field ? String(row.data[error.field] ?? '-') : '-'
+                value: error.column ? String(row.data[error.column] ?? '-') : '-'
               });
             });
           } else {

@@ -55,7 +55,7 @@ export function useImportExport({
 
   // Child hooks
   const csvParser = useCSVParser({
-    onSuccess: (result) => {
+    onSuccess: () => {
       // Auto-transition to map-columns when file is parsed
       setStep('map-columns');
     },
@@ -89,7 +89,7 @@ export function useImportExport({
     const idField = schema.columns.find(col => col.locked)?.key || 'id';
 
     // Run diff against existing data
-    const diffResult = diffAll(mappedRows, existingData, schema, { idField });
+    const diffResult = diffAll(mappedRows, existingData, schema);
 
     // Build ParsedRow array with validation results
     const newParsedRows: ParsedRow[] = mappedRows.map((row, index) => {

@@ -81,7 +81,7 @@ export function ImportWizardModal({
     errors: 0,
     deleted: 0,
   });
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -390,7 +390,7 @@ export function ImportWizardModal({
     }
 
     if (step === 'validate') {
-      const hasErrors = validationResult && validationResult.errors.length > 0;
+      const hasErrors = validationResult != null && validationResult.errors.length > 0;
       return (
         <>
           <Button variant="secondary" onClick={handleClose}>

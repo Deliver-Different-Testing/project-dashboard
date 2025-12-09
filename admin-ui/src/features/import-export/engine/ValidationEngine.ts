@@ -12,7 +12,7 @@
 
 import type { ColumnDef, ImportSchema } from '../types/schema.types';
 import type { FieldError, ValidationResult, RowValidationResult } from '../types/validation.types';
-import { parseDate, parseTime, parseDateTime } from './SmartDateParser';
+import { parseDate, parseDateTime } from './SmartDateParser';
 
 export interface ValidateRowOptions {
   autoFix?: boolean;         // Default true - attempt to fix minor issues

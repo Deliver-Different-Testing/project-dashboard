@@ -62,8 +62,6 @@ function getStatusLabel(status: ParsedRow['status']): string {
       return 'ERROR';
     case 'delete':
       return 'DELETE';
-    default:
-      return status.toUpperCase();
   }
 }
 
