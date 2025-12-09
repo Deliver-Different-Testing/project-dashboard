@@ -24,9 +24,9 @@ export function WizardModeSelector({ onSelect }: WizardModeSelectorProps): React
         className="p-6 rounded-lg border-2 border-gray-200 hover:border-brand-cyan transition-colors text-left"
       >
         <Wrench className="w-8 h-8 text-brand-cyan mb-3" />
-        <h3 className="font-semibold text-lg mb-1">Maintain & Improve</h3>
+        <h3 className="font-semibold text-lg mb-1">Upload, Download or Update</h3>
         <p className="text-sm text-text-secondary">
-          Scan for issues and optimize existing configuration
+          Download existing data, download templates, or upload new records
         </p>
       </button>
     </div>

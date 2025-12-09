@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Check } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
-import { WizardStepper } from './WizardStepper';
 import { WizardModeSelector } from './WizardModeSelector';
-import { MissingLinksScanner } from './MissingLinksScanner';
+import { NewSetupView } from './NewSetupView';
+import { DataManagementView } from './DataManagementView';
 import { ImportWizardModal } from '../../import-export/components';
 import { getSchema } from '../../import-export/schemas';
+import { generateTemplate, generateCSV, downloadCSV } from '../../import-export/engine/CSVGenerator';
 import wizardConfig from '../config/wizard-config.json';
 import type { WizardState, WizardStep } from '../types';
 
@@ -41,44 +41,53 @@ export function SetupWizard({
     return [];
   }, [state.mode]);
 
-  // Current step
-  const currentStep = steps[state.currentStepIndex];
-
   // Handlers
   const handleModeSelect = (mode: 'newSetup' | 'maintainImprove') => {
     setState(prev => ({ ...prev, mode, currentStepIndex: 0 }));
   };
 
-  const handleStartImport = () => {
-    if (currentStep) {
-      setCurrentSchemaId(currentStep.schemaId);
-      setImportModalOpen(true);
+  const handleUpload = (schemaId: string) => {
+    setCurrentSchemaId(schemaId);
+    setImportModalOpen(true);
+  };
+
+  const handleDownloadTemplate = (schemaId: string) => {
+    const schema = getSchema(schemaId);
+    if (schema) {
+      const template = generateTemplate(schema, { includeHintRow: true });
+      downloadCSV(template, `${schemaId}-template.csv`);
     }
   };
 
-  const handleSkipStep = () => {
-    setState(prev => ({
-      ...prev,
-      skippedSteps: [...prev.skippedSteps, currentStep.id],
-      currentStepIndex: prev.currentStepIndex + 1,
-    }));
+  const handleDownloadAllTemplates = () => {
+    steps.forEach(step => {
+      handleDownloadTemplate(step.schemaId);
+    });
+  };
+
+  const handleDownloadData = (schemaId: string) => {
+    const schema = getSchema(schemaId);
+    const data = existingData[schemaId] || [];
+    if (schema && data.length > 0) {
+      const csv = generateCSV(data, schema);
+      downloadCSV(csv, `${schemaId}-data.csv`);
+    }
   };
 
   const handleImportComplete = () => {
     setImportModalOpen(false);
-    setState(prev => ({
-      ...prev,
-      completedSteps: [...prev.completedSteps, currentStep.id],
-      currentStepIndex: prev.currentStepIndex + 1,
-    }));
+    // Find the step that matches the current schema and mark it complete
+    const step = steps.find(s => s.schemaId === currentSchemaId);
+    if (step) {
+      setState(prev => ({
+        ...prev,
+        completedSteps: [...prev.completedSteps, step.id],
+      }));
+    }
   };
 
   const handleBack = () => {
-    if (state.currentStepIndex > 0) {
-      setState(prev => ({ ...prev, currentStepIndex: prev.currentStepIndex - 1 }));
-    } else {
-      setState(prev => ({ ...prev, mode: null }));
-    }
+    setState(prev => ({ ...prev, mode: null }));
   };
 
   const handleFinish = () => {
@@ -95,33 +104,47 @@ export function SetupWizard({
     );
   }
 
-  // Render maintain & improve mode
+  // Render "Upload, Download or Update" mode (formerly Maintain & Improve)
   if (state.mode === 'maintainImprove') {
     return (
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Maintain & Improve"
-        size="lg"
-        footer={
-          <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => setState(prev => ({ ...prev, mode: null }))}>
-              Back
-            </Button>
-            <Button variant="primary" onClick={onClose}>
-              Done
-            </Button>
-          </div>
-        }
-      >
-        <MissingLinksScanner existingData={existingData} />
-      </Modal>
+      <>
+        <Modal
+          isOpen={isOpen && !importModalOpen}
+          onClose={onClose}
+          title="Upload, Download or Update"
+          size="lg"
+          footer={
+            <div className="flex justify-between w-full">
+              <Button variant="secondary" onClick={handleBack}>
+                Back
+              </Button>
+            </div>
+          }
+        >
+          <DataManagementView
+            existingData={existingData}
+            onUpload={handleUpload}
+            onDownloadData={handleDownloadData}
+            onDownloadTemplate={handleDownloadTemplate}
+            onDone={handleFinish}
+          />
+        </Modal>
+
+        {/* Import Modal */}
+        {currentSchemaId && (
+          <ImportWizardModal
+            isOpen={importModalOpen}
+            onClose={() => setImportModalOpen(false)}
+            schema={getSchema(currentSchemaId)!}
+            existingData={existingData[currentSchemaId] || []}
+            onComplete={handleImportComplete}
+          />
+        )}
+      </>
     );
   }
 
-  // Render new setup mode
-  const isComplete = state.currentStepIndex >= steps.length;
-
+  // Render new setup mode - table view showing ALL steps at once
   return (
     <>
       <Modal
@@ -134,58 +157,17 @@ export function SetupWizard({
             <Button variant="secondary" onClick={handleBack}>
               Back
             </Button>
-            <div className="flex gap-3">
-              {!isComplete && (
-                <>
-                  <Button variant="ghost" onClick={handleSkipStep}>
-                    Skip
-                  </Button>
-                  <Button variant="primary" onClick={handleStartImport}>
-                    Import {currentStep?.label}
-                  </Button>
-                </>
-              )}
-              {isComplete && (
-                <Button variant="save" onClick={handleFinish}>
-                  Finish Setup
-                </Button>
-              )}
-            </div>
           </div>
         }
       >
-        <WizardStepper
+        <NewSetupView
           steps={steps}
-          currentStepIndex={state.currentStepIndex}
           completedSteps={state.completedSteps}
-          skippedSteps={state.skippedSteps}
-          className="mb-6"
+          onUpload={handleUpload}
+          onDownloadTemplate={handleDownloadTemplate}
+          onDownloadAllTemplates={handleDownloadAllTemplates}
+          onDone={handleFinish}
         />
-
-        {!isComplete && currentStep && (
-          <div className="text-center py-8">
-            <h3 className="text-xl font-semibold text-text-primary mb-2">
-              {currentStep.label}
-            </h3>
-            <p className="text-text-secondary">
-              {currentStep.description || `Import your ${currentStep.label.toLowerCase()} data`}
-            </p>
-          </div>
-        )}
-
-        {isComplete && (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-green-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-text-primary mb-2">
-              Setup Complete!
-            </h3>
-            <p className="text-text-secondary">
-              You've completed the initial setup. You can always come back to import more data.
-            </p>
-          </div>
-        )}
       </Modal>
 
       {/* Import Modal */}
