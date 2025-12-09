@@ -217,16 +217,9 @@ export function ImportWizardModal({
 
       setIsProcessing(false);
       setStep('complete');
-
-      // Call onComplete callback
-      onComplete({
-        created: summary.new,
-        updated: summary.modified,
-        deleted: summary.deleted,
-        errors: summary.errors,
-      });
+      // Don't call onComplete here - wait for user to click "Done"
     }
-  }, [step, parsedData, columnMapping, schema, existingData, validationResult, parsedRows, summary, onComplete]);
+  }, [step, parsedData, columnMapping, schema, existingData, validationResult, parsedRows, summary]);
 
   // Handle back
   const handleBack = useCallback(() => {
@@ -243,6 +236,16 @@ export function ImportWizardModal({
   const handleClose = useCallback(() => {
     if (step === 'processing') {
       return; // Don't allow closing during processing
+    }
+
+    // If closing from complete step, call onComplete to notify parent
+    if (step === 'complete') {
+      onComplete({
+        created: summary.new,
+        updated: summary.modified,
+        deleted: summary.deleted,
+        errors: summary.errors,
+      });
     }
 
     // Reset state
@@ -265,7 +268,7 @@ export function ImportWizardModal({
     setError(null);
 
     onClose();
-  }, [step, onClose]);
+  }, [step, onClose, onComplete, summary]);
 
   // Render step content
   const renderStepContent = useCallback(() => {
@@ -325,10 +328,12 @@ export function ImportWizardModal({
             <div className="text-center">
               <div className="text-6xl mb-4"></div>
               <div className="text-2xl font-semibold text-text-primary mb-2">Import Complete</div>
-              <div className="text-text-secondary">Successfully imported your data</div>
+              <div className="text-text-secondary">
+                {summary.total} record{summary.total !== 1 ? 's' : ''} processed successfully
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
               <div className="border border-border rounded-lg p-4 text-center">
                 <div className="text-3xl font-bold text-green-600">{summary.new}</div>
                 <div className="text-sm text-text-secondary">Created</div>
@@ -337,6 +342,12 @@ export function ImportWizardModal({
                 <div className="text-3xl font-bold text-brand-cyan">{summary.modified}</div>
                 <div className="text-sm text-text-secondary">Updated</div>
               </div>
+              {summary.unchanged > 0 && (
+                <div className="border border-border rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-gray-500">{summary.unchanged}</div>
+                  <div className="text-sm text-text-secondary">Unchanged</div>
+                </div>
+              )}
               {summary.deleted > 0 && (
                 <div className="border border-border rounded-lg p-4 text-center">
                   <div className="text-3xl font-bold text-red-600">{summary.deleted}</div>
@@ -409,7 +420,10 @@ export function ImportWizardModal({
     }
 
     if (step === 'confirm') {
-      const totalRecords = summary.new + summary.modified + summary.deleted;
+      const changedRecords = summary.new + summary.modified + summary.deleted;
+      const buttonText = changedRecords > 0
+        ? `Import ${changedRecords} Record${changedRecords !== 1 ? 's' : ''}`
+        : `Confirm ${summary.total} Record${summary.total !== 1 ? 's' : ''}`;
       return (
         <>
           <Button variant="secondary" onClick={handleClose}>
@@ -420,7 +434,7 @@ export function ImportWizardModal({
               Back
             </Button>
             <Button variant="save" onClick={handleNext}>
-              Import {totalRecords} Record{totalRecords !== 1 ? 's' : ''}
+              {buttonText}
             </Button>
           </div>
         </>
