@@ -301,7 +301,6 @@ export function diffRow(
   options?: DiffOptions
 ): DiffResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  const debugMode = true; // Enable debug logging
 
   // Check for delete marker first
   if (hasDeleteMarker(importedRow)) {
@@ -328,10 +327,6 @@ export function diffRow(
   const changedFields: string[] = [];
   const unchangedFields: string[] = [];
 
-  if (debugMode) {
-    console.log(`[DiffEngine] Comparing row with ${schema.uniqueKey}:`, importedRow[schema.uniqueKey]);
-  }
-
   for (const column of schema.columns) {
     // Skip locked fields if option enabled
     if (opts.ignoreLocked && column.locked) {
@@ -349,16 +344,6 @@ export function diffRow(
     }
 
     const comparison = compareValues(importedValue, existingValue, column, options);
-
-    if (debugMode && !comparison.isEqual) {
-      console.log(`[DiffEngine] Field '${column.key}' differs:`, {
-        type: column.type,
-        imported: importedValue,
-        existing: existingValue,
-        normalizedImported: comparison.normalizedImported,
-        normalizedExisting: comparison.normalizedExisting,
-      });
-    }
 
     if (comparison.isEqual) {
       unchangedFields.push(column.key);
