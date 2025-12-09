@@ -296,6 +296,13 @@ export function diffRow(
     const importedValue = importedRow[column.key];
     const existingValue = existingRecord[column.key];
 
+    // Skip comparison if field wasn't in the import (undefined means not mapped)
+    // This allows partial updates where not all fields are included
+    if (importedValue === undefined && existingValue !== undefined) {
+      unchangedFields.push(column.key);
+      continue;
+    }
+
     const comparison = compareValues(importedValue, existingValue, column, options);
 
     if (comparison.isEqual) {
