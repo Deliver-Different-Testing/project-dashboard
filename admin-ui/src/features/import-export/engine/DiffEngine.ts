@@ -118,11 +118,21 @@ export function compareValues(
     return { isEqual: false, normalizedImported, normalizedExisting };
   }
 
+  // Phone numbers: compare digits only (ignore formatting like parentheses, dashes, spaces)
+  if (column.type === 'phone') {
+    const importedDigits = String(normalizedImported).replace(/\D/g, '');
+    const existingDigits = String(normalizedExisting).replace(/\D/g, '');
+    return {
+      isEqual: importedDigits === existingDigits,
+      normalizedImported: importedDigits,
+      normalizedExisting: existingDigits
+    };
+  }
+
   // For string-like types, do case-insensitive string comparison
   // This handles CSV strings matching typed data regardless of case
-  // Also handles phone, email, and reference types
   if (column.type === 'string' || column.type === 'enum' || column.type === 'id' ||
-      column.type === 'phone' || column.type === 'email' || column.type === 'reference') {
+      column.type === 'email' || column.type === 'reference') {
     const importedStr = String(normalizedImported).toLowerCase().trim();
     const existingStr = String(normalizedExisting).toLowerCase().trim();
     return {
