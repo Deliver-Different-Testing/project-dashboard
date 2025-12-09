@@ -147,6 +147,67 @@ The current implementation has UX issues:
 
 ---
 
+## Execution Approach: Parallel Subagent Development
+
+### Batch 1 (parallel - 2 agents)
+```
+├── Agent A: Task 1 (NewSetupView.tsx)
+└── Agent B: Task 2 (DataManagementView.tsx)
+```
+These are independent components with similar structure.
+
+### Batch 2 (sequential - after Batch 1)
+```
+└── Agent A: Task 3 + 4 (Update SetupWizard + WizardModeSelector)
+```
+Depends on the new views being created first.
+
+### Batch 3 (single agent)
+```
+└── Agent A: Task 5 (Wire up download functions)
+```
+Integration work across components.
+
+### Batch 4 (optional, single agent)
+```
+└── Agent A: Task 6 (Track completion state)
+```
+Enhancement after core functionality works.
+
+---
+
+### Subagent Prompt Template
+
+```
+You are implementing Task X for the Import/Export UX Redesign.
+
+PROJECT: C:\Users\dane\Documents\Mytests\Nov 25 - Admin manager menu\admin-ui
+
+YOUR TASK:
+[Task description]
+
+REFERENCE FILES TO READ FIRST:
+- src/features/setup-wizard/components/SetupWizard.tsx (current implementation)
+- src/features/import-export/engine/CSVGenerator.ts (download functions)
+- src/features/import-export/schemas/index.ts (schema registry)
+- tailwind.config.js (brand colors)
+
+REQUIREMENTS:
+- Use brand-cyan for accent colors
+- Follow existing component patterns
+- Table should be responsive
+
+RETURN FORMAT:
+1. Files created/modified (paths only)
+2. Key decisions made
+3. Any blockers or questions
+4. Build status (pass/fail)
+
+DO NOT return full code - just the summary above.
+```
+
+---
+
 ## Out of Scope (for this iteration)
 
 - "Download All Templates" as ZIP (nice-to-have)
