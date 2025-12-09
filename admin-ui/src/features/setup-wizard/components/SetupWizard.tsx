@@ -112,7 +112,7 @@ export function SetupWizard({
           isOpen={isOpen && !importModalOpen}
           onClose={onClose}
           title="Upload, Download or Update"
-          size="lg"
+          size="xl"
           footer={
             <div className="flex justify-between w-full">
               <Button variant="secondary" onClick={handleBack}>
@@ -151,7 +151,7 @@ export function SetupWizard({
         isOpen={isOpen && !importModalOpen}
         onClose={onClose}
         title="New Setup"
-        size="lg"
+        size="xl"
         footer={
           <div className="flex justify-between w-full">
             <Button variant="secondary" onClick={handleBack}>

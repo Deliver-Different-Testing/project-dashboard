@@ -9,7 +9,7 @@ export interface ModalProps {
   variant?: 'right-slide' | 'center';
   children: ReactNode;
   footer?: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
 }
 
 export const Modal = ({
@@ -24,10 +24,14 @@ export const Modal = ({
 }: ModalProps) => {
   if (!isOpen) return null;
 
+  // Responsive sizes - uses percentage-based widths for larger sizes
   const sizeClasses = {
     sm: 'max-w-md',
     md: 'max-w-lg',
-    lg: 'max-w-xl',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    '2xl': 'max-w-6xl',
+    full: 'max-w-[90vw] lg:max-w-[75vw]', // 90% on mobile, 75% on larger screens
   };
 
   const overlayClasses = 'fixed inset-0 bg-black/30 z-50';
