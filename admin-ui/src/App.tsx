@@ -177,15 +177,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-light flex">
+    <div className="h-screen bg-surface-light flex overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`bg-brand-dark flex flex-col transition-all duration-300 ${
+        className={`bg-brand-dark flex flex-col h-screen sticky top-0 transition-all duration-300 ${
           sidebarCollapsed ? 'w-16' : 'w-64'
         }`}
       >
         {/* Logo */}
-        <div className="p-4 border-b border-white/10">
+        <div className="p-4 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-brand-cyan flex items-center justify-center flex-shrink-0">
               <svg className="w-6 h-6 text-brand-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -204,7 +204,7 @@ function App() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="flex-1 overflow-y-auto py-4 min-h-0">
           {MENU_SECTIONS.map((section) => (
             <div key={section.id} className="mb-2">
               {/* Section Header */}
@@ -288,7 +288,7 @@ function App() {
         </nav>
 
         {/* Import & Export - Meta Feature */}
-        <div className="px-3 py-2 border-t border-white/10">
+        <div className="px-3 py-2 border-t border-white/10 flex-shrink-0">
           <button
             onClick={() => setWizardOpen(true)}
             className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200
@@ -308,7 +308,7 @@ function App() {
         </div>
 
         {/* Collapse Toggle */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 flex-shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-white/50 hover:text-white/80 hover:bg-white/5 rounded-lg transition-colors"
@@ -328,7 +328,7 @@ function App() {
 
         {/* User */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-white/10 flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-secondary-purple flex items-center justify-center text-white text-sm font-medium">
                 AD
