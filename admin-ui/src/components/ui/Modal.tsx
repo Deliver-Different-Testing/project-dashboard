@@ -106,7 +106,7 @@ export const Modal = ({
             </button>
           </div>
 
-          <div className="p-6 overflow-y-auto flex-1">{children}</div>
+          <div className="p-6 overflow-y-auto flex-1 modal-scroll-content">{children}</div>
 
           {footer && (
             <div className="sticky bottom-0 border-t p-4 flex justify-end gap-2 bg-white rounded-b-lg flex-shrink-0">

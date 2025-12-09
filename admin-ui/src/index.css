@@ -80,6 +80,15 @@ body {
   background: var(--text-muted);
 }
 
+/* Modal scrollable content - always show scrollbar */
+.modal-scroll-content {
+  scrollbar-gutter: stable;
+}
+
+.modal-scroll-content::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+}
+
 /* Sidebar Menu Animations */
 .menu-section-items {
   overflow: hidden;

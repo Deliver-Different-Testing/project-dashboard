@@ -35,8 +35,14 @@ export function DataManagementView({
 
       {/* Content Area - Scrollable */}
       <div className="flex-1 overflow-auto">
+        {/* Health Check Section - FIRST so it's visible immediately */}
+        <HealthCheckSection
+          existingData={existingData}
+          onUpload={onUpload}
+        />
+
         {/* Upload/Download Table */}
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden mt-6">
           <table className="w-full">
             <thead className="bg-surface-light border-b border-border">
               <tr>
@@ -128,12 +134,6 @@ export function DataManagementView({
             </tbody>
           </table>
         </div>
-
-        {/* Health Check Section */}
-        <HealthCheckSection
-          existingData={existingData}
-          onUpload={onUpload}
-        />
       </div>
 
       {/* Footer */}

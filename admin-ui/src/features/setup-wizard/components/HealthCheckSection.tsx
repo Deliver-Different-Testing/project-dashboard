@@ -98,7 +98,7 @@ export function HealthCheckSection({
   };
 
   return (
-    <div className="mt-8 border border-border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       {/* Header - Collapsible */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
