@@ -13,8 +13,6 @@ import { ScheduleTab } from './components/ScheduleTab';
 import { ContactsTab } from './components/ContactsTab';
 import { RatesTab } from './components/RatesTab';
 import { HistoryTab } from './components/HistoryTab';
-import { ImportExportButton } from '../../features/import-export/components';
-import { clientsSchema } from '../../features/import-export/schemas/clients.schema';
 import {
   sampleClients,
   sampleContacts,
@@ -112,23 +110,13 @@ export function ClientsPage() {
           title="Clients & Customers"
           subtitle="Manage client accounts, services, and billing"
           actions={
-            <div className="flex gap-3">
-              <ImportExportButton
-                schema={clientsSchema}
-                data={sampleClients as unknown as Record<string, unknown>[]}
-                onImportComplete={(result: { created: number; updated: number; deleted: number; errors: number }) => {
-                  console.log('Import complete:', result);
-                  // TODO: Refresh data or show toast notification
-                }}
-              />
-              <Button variant="primary">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Add Client
-              </Button>
-            </div>
+            <Button variant="primary">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Add Client
+            </Button>
           }
         />
       </div>

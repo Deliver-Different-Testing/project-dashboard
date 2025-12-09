@@ -4,6 +4,7 @@ import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 import { TasksPage } from './modules/tasks';
 import { AutomationsPage } from './modules/automations';
+import { SetupWizard } from './features/setup-wizard';
 
 type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
@@ -121,6 +122,7 @@ function App() {
     return section ? [section] : [];
   });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // Toggle section - pure toggle behavior for section headers
   const toggleSection = (sectionId: string) => {
@@ -285,6 +287,27 @@ function App() {
           ))}
         </nav>
 
+        {/* Import & Export - Meta Feature */}
+        <div className="px-3 py-2 border-t border-white/10">
+          <button
+            onClick={() => setWizardOpen(true)}
+            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200
+              bg-gradient-to-r from-secondary-purple/20 to-secondary-purple/10
+              hover:from-secondary-purple/30 hover:to-secondary-purple/20
+              border border-secondary-purple/30 hover:border-secondary-purple/50
+              ${sidebarCollapsed ? 'justify-center' : ''}`}
+          >
+            <svg className="w-5 h-5 text-secondary-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            {!sidebarCollapsed && (
+              <span className="text-sm font-medium text-secondary-purple">Import & Export</span>
+            )}
+          </button>
+        </div>
+
         {/* Collapse Toggle */}
         <div className="p-4 border-t border-white/10">
           <button
@@ -324,6 +347,16 @@ function App() {
       <main className="flex-1 overflow-auto">
         {renderModule()}
       </main>
+
+      {/* Setup Wizard Modal */}
+      <SetupWizard
+        isOpen={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onComplete={() => {
+          // Optionally refresh data or show toast
+          console.log('Setup wizard completed');
+        }}
+      />
     </div>
   );
 }
