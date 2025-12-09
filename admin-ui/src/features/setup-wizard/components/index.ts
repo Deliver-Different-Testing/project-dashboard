@@ -8,6 +8,9 @@ export { WizardModeSelector } from './WizardModeSelector';
 
 export { MissingLinksScanner } from './MissingLinksScanner';
 
+export { HealthCheckSection } from './HealthCheckSection';
+export type { HealthCheckSectionProps } from './HealthCheckSection';
+
 export { NewSetupView } from './NewSetupView';
 export type { NewSetupViewProps } from './NewSetupView';
 

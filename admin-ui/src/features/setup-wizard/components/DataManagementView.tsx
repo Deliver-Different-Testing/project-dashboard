@@ -2,6 +2,7 @@ import React from 'react';
 import { Download, Upload } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { getAllSchemas } from '../../import-export/schemas';
+import { HealthCheckSection } from './HealthCheckSection';
 
 export interface DataManagementViewProps {
   existingData: Record<string, Record<string, unknown>[]>;
@@ -32,8 +33,9 @@ export function DataManagementView({
         </p>
       </div>
 
-      {/* Table */}
+      {/* Content Area - Scrollable */}
       <div className="flex-1 overflow-auto">
+        {/* Upload/Download Table */}
         <div className="border border-border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-surface-light border-b border-border">
@@ -126,6 +128,12 @@ export function DataManagementView({
             </tbody>
           </table>
         </div>
+
+        {/* Health Check Section */}
+        <HealthCheckSection
+          existingData={existingData}
+          onUpload={onUpload}
+        />
       </div>
 
       {/* Footer */}
