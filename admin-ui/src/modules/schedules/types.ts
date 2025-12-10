@@ -276,6 +276,26 @@ export interface ScheduleFilterState {
 }
 
 // ============================================
+// SORT CONFIGURATION
+// ============================================
+
+export type SortDirection = 'asc' | 'desc';
+
+export type SortableColumn =
+  | 'name'
+  | 'originDepot'
+  | 'destDepot'
+  | 'speedDisplay'
+  | 'bookingMode'
+  | 'clientDisplay'
+  | 'status';
+
+export interface SortConfig {
+  column: SortableColumn;
+  direction: SortDirection;
+}
+
+// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
@@ -453,12 +473,20 @@ export function createEmptyScheduleGroup(): Omit<ScheduleGroup, 'id' | 'createdA
 // OVERRIDE SYSTEM HELPERS
 // ============================================
 
-export const OVERRIDABLE_FIELDS: { field: string; label: string }[] = [
-  { field: 'operatingSchedule.cutoffValue', label: 'Booking Cutoff' },
-  { field: 'operatingSchedule.days', label: 'Operating Days' },
-  { field: 'legs[0].config.pickupMinutesBefore', label: 'Pickup Time Offset' },
-  { field: 'defaultDeliverySpeedId', label: 'Delivery Speed' },
-  { field: 'defaultPickupSpeedId', label: 'Pickup Speed' },
+export const OVERRIDABLE_FIELDS: { field: string; label: string; category: string }[] = [
+  // Timing
+  { field: 'operatingSchedule.cutoffValue', label: 'Booking Cutoff', category: 'Timing' },
+  { field: 'operatingSchedule.days', label: 'Operating Days', category: 'Timing' },
+  { field: 'legs[0].config.pickupMinutesBefore', label: 'Pickup Time Offset', category: 'Timing' },
+  // Speeds
+  { field: 'defaultDeliverySpeedId', label: 'Delivery Speed', category: 'Speeds' },
+  { field: 'defaultPickupSpeedId', label: 'Pickup Speed', category: 'Speeds' },
+  { field: 'defaultLinehaulSpeedId', label: 'Linehaul Speed', category: 'Speeds' },
+  // Zones
+  { field: 'legs[0].config.pickupZoneIds', label: 'Pickup Zones', category: 'Zones' },
+  { field: 'legs[-1].config.deliveryZoneIds', label: 'Delivery Zones', category: 'Zones' },
+  // Pricing
+  { field: 'legs[-1].config.rateCardId', label: 'Rate Card', category: 'Pricing' },
 ];
 
 export const NON_OVERRIDABLE_FIELDS = [
@@ -470,4 +498,123 @@ export const NON_OVERRIDABLE_FIELDS = [
 
 export function isFieldOverridable(field: string): boolean {
   return !NON_OVERRIDABLE_FIELDS.some(nof => field.startsWith(nof));
+}
+
+// ============================================
+// TABLE VIEW TYPES
+// ============================================
+
+export interface ScheduleTableRow {
+  id: string;
+  name: string;
+  route: string;
+  legCount: number;
+  bookingMode: BookingMode;
+  clientDisplay: string;
+  status: 'active' | 'inactive';
+  isOverride: boolean;
+  baseScheduleId?: string;
+  overrideCount: number;
+  depth: number;
+  schedule: Schedule;
+  // Additional columns for dense view
+  originDepot: string;
+  destDepot: string;
+  hasLinehaul: boolean;
+  speedDisplay: string;
+}
+
+export function scheduleToTableRow(
+  schedule: Schedule,
+  depots: DepotReference[],
+  clients: ClientReference[],
+  speeds: SpeedReference[],
+  overrideCount: number = 0
+): ScheduleTableRow {
+  let clientDisplay = 'All';
+  if (schedule.clientVisibility === 'specific') {
+    if (schedule.clientIds.length === 1) {
+      const client = clients.find(c => c.id === schedule.clientIds[0]);
+      clientDisplay = client?.shortName || client?.name || 'Unknown';
+    } else if (schedule.clientIds.length <= 3) {
+      clientDisplay = schedule.clientIds
+        .map(id => {
+          const client = clients.find(c => c.id === id);
+          return client?.shortName || client?.name || '?';
+        })
+        .join(', ');
+    } else {
+      clientDisplay = `${schedule.clientIds.length} clients`;
+    }
+  }
+
+  // Extract origin depot
+  let originDepot = '—';
+  if (schedule.originDepotId) {
+    const depot = depots.find(d => d.id === schedule.originDepotId);
+    originDepot = depot?.code || depot?.name || schedule.originDepotId;
+  } else if (schedule.originType === 'client_address') {
+    originDepot = 'Client';
+  }
+
+  // Extract destination depot (last depot leg before delivery)
+  let destDepot = '—';
+  const depotLegs = schedule.legs.filter(l => l.config.type === 'depot');
+  if (depotLegs.length > 0) {
+    const lastDepotLeg = depotLegs[depotLegs.length - 1];
+    if (lastDepotLeg.config.type === 'depot') {
+      const depot = depots.find(d => d.id === lastDepotLeg.config.depotId);
+      destDepot = depot?.code || depot?.name || lastDepotLeg.config.depotId;
+    }
+  }
+
+  // Check for linehaul
+  const hasLinehaul = schedule.legs.some(l => l.config.type === 'linehaul');
+
+  // Get speed display (use delivery speed as primary)
+  let speedDisplay = '—';
+  if (schedule.defaultDeliverySpeedId) {
+    const speed = speeds.find(s => s.id === schedule.defaultDeliverySpeedId);
+    speedDisplay = speed?.code || speed?.name || '—';
+  }
+
+  return {
+    id: schedule.id,
+    name: schedule.name,
+    route: getRouteDescription(schedule, depots),
+    legCount: schedule.legs.length,
+    bookingMode: schedule.bookingMode,
+    clientDisplay,
+    status: schedule.isActive ? 'active' : 'inactive',
+    isOverride: schedule.isOverride,
+    baseScheduleId: schedule.baseScheduleId,
+    overrideCount,
+    depth: schedule.isOverride ? 1 : 0,
+    schedule,
+    originDepot,
+    destDepot,
+    hasLinehaul,
+    speedDisplay,
+  };
+}
+
+export function buildScheduleTableData(
+  schedules: Schedule[],
+  depots: DepotReference[],
+  clients: ClientReference[],
+  speeds: SpeedReference[]
+): ScheduleTableRow[] {
+  const rows: ScheduleTableRow[] = [];
+  const baseSchedules = schedules.filter(s => !s.isOverride);
+  const overrides = schedules.filter(s => s.isOverride);
+
+  baseSchedules.forEach(base => {
+    const childOverrides = overrides.filter(o => o.baseScheduleId === base.id);
+    rows.push(scheduleToTableRow(base, depots, clients, speeds, childOverrides.length));
+    childOverrides.forEach(override => {
+      rows.push(scheduleToTableRow(override, depots, clients, speeds, 0));
+    });
+  });
+
+  return rows;
 }

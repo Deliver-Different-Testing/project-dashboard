@@ -4,7 +4,7 @@ import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
 import { TagSidebar } from '../../components/tags';
-import { ScheduleListTab } from './components/ScheduleListTab';
+import { ScheduleTableView } from './components/ScheduleTableView';
 import { ScheduleGroupsTab } from './components/ScheduleGroupsTab';
 import type { SourceItem, EntityConnections } from '../territory/types';
 import { createEmptyConnections } from '../territory/types';
@@ -62,14 +62,14 @@ export function SchedulesPage() {
       <div className="px-6 pb-6">
         <Card padding="none">
           <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-          <div className="p-4">
-            {activeTab === 'schedules' && (
-              <ScheduleListTab onConnectionsClick={handleConnectionsClick} />
-            )}
-            {activeTab === 'groups' && (
+          {activeTab === 'schedules' && (
+            <ScheduleTableView onConnectionsClick={handleConnectionsClick} />
+          )}
+          {activeTab === 'groups' && (
+            <div className="p-4">
               <ScheduleGroupsTab onConnectionsClick={handleConnectionsClick} />
-            )}
-          </div>
+            </div>
+          )}
         </Card>
       </div>
 
