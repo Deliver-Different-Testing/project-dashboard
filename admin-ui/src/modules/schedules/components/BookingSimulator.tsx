@@ -1,16 +1,23 @@
 // src/modules/schedules/components/BookingSimulator.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from '../../../components/ui/Input';
-import { Select } from '../../../components/ui/Select';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
-import { Play, CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Play, CheckCircle, XCircle, Clock, AlertCircle, AlertTriangle } from 'lucide-react';
 import type { Schedule, DayOfWeek } from '../types';
 import { getLegTypeLabel, DAYS_OF_WEEK } from '../types';
 import { sampleZones } from '../data/sampleData';
+import { zipZonesData } from '../../territory/data/sampleData';
 
 interface BookingSimulatorProps {
   schedule: Schedule;
+}
+
+interface ZipLookupResult {
+  found: boolean;
+  zoneName: string | null;
+  zoneId: string | null;
+  errorMessage?: string;
 }
 
 interface SimulationResult {
@@ -25,15 +32,51 @@ interface SimulationResult {
   lateBookingImpact?: string;
 }
 
+// Lookup a zip code in the territory data
+function lookupZipCode(zipCode: string): ZipLookupResult {
+  if (!zipCode || zipCode.trim().length === 0) {
+    return { found: false, zoneName: null, zoneId: null };
+  }
+
+  const normalizedZip = zipCode.trim();
+  const zipZone = zipZonesData.find(z => z.zip === normalizedZip);
+
+  if (!zipZone) {
+    return {
+      found: false,
+      zoneName: null,
+      zoneId: null,
+      errorMessage: 'Zip code not assigned to any zone',
+    };
+  }
+
+  // Try to match to a schedule zone by code or name
+  const matchingZone = sampleZones.find(z =>
+    z.code === zipZone.zoneNumber ||
+    z.name.toLowerCase().includes(zipZone.zoneName.toLowerCase()) ||
+    zipZone.zoneName.toLowerCase().includes(z.name.toLowerCase())
+  );
+
+  return {
+    found: true,
+    zoneName: zipZone.zoneName,
+    zoneId: matchingZone?.id || null,
+  };
+}
+
 export function BookingSimulator({ schedule }: BookingSimulatorProps) {
   const [bookingDate, setBookingDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   });
   const [bookingTime, setBookingTime] = useState('09:00');
-  const [pickupZoneId, setPickupZoneId] = useState('');
-  const [deliveryZoneId, setDeliveryZoneId] = useState('');
+  const [pickupZip, setPickupZip] = useState('');
+  const [deliveryZip, setDeliveryZip] = useState('');
   const [result, setResult] = useState<SimulationResult | null>(null);
+
+  // Real-time zip lookups
+  const pickupLookup = useMemo(() => lookupZipCode(pickupZip), [pickupZip]);
+  const deliveryLookup = useMemo(() => lookupZipCode(deliveryZip), [deliveryZip]);
 
   const handleRunTest = () => {
     // Parse booking date/time
@@ -54,15 +97,15 @@ export function BookingSimulator({ schedule }: BookingSimulatorProps) {
       return;
     }
 
-    // Check zone coverage
+    // Check zone coverage using resolved zone IDs
     const collectionLeg = schedule.legs.find((leg) => leg.config.type === 'collection');
     const deliveryLeg = schedule.legs.find((leg) => leg.config.type === 'delivery');
 
-    if (collectionLeg?.config.type === 'collection' && pickupZoneId) {
-      if (!collectionLeg.config.pickupZoneIds.includes(pickupZoneId)) {
+    if (collectionLeg?.config.type === 'collection' && pickupLookup.zoneId) {
+      if (!collectionLeg.config.pickupZoneIds.includes(pickupLookup.zoneId)) {
         setResult({
           matches: false,
-          reason: 'Pickup zone not covered by this schedule',
+          reason: `Pickup zone (${pickupLookup.zoneName}) not covered by this schedule`,
           legs: [],
           cutoffExplanation: 'N/A',
         });
@@ -70,11 +113,11 @@ export function BookingSimulator({ schedule }: BookingSimulatorProps) {
       }
     }
 
-    if (deliveryLeg?.config.type === 'delivery' && deliveryZoneId) {
-      if (!deliveryLeg.config.deliveryZoneIds.includes(deliveryZoneId)) {
+    if (deliveryLeg?.config.type === 'delivery' && deliveryLookup.zoneId) {
+      if (!deliveryLeg.config.deliveryZoneIds.includes(deliveryLookup.zoneId)) {
         setResult({
           matches: false,
-          reason: 'Delivery zone not covered by this schedule',
+          reason: `Delivery zone (${deliveryLookup.zoneName}) not covered by this schedule`,
           legs: [],
           cutoffExplanation: 'N/A',
         });
@@ -117,7 +160,7 @@ export function BookingSimulator({ schedule }: BookingSimulatorProps) {
           hour: '2-digit',
           minute: '2-digit',
         });
-        description = `Pickup from ${sampleZones.find((z) => z.id === pickupZoneId)?.name || 'selected zone'}`;
+        description = `Pickup from ${pickupZip} (${pickupLookup.zoneName || 'Unknown zone'})`;
       } else if (leg.config.type === 'depot') {
         scheduledTime = 'TBD';
         description = 'Arrive at depot for processing';
@@ -126,7 +169,7 @@ export function BookingSimulator({ schedule }: BookingSimulatorProps) {
         description = `Transit (${leg.config.transitMinutes} minutes)`;
       } else if (leg.config.type === 'delivery') {
         scheduledTime = `${daySchedule.startTime} - ${daySchedule.endTime}`;
-        description = `Deliver to ${sampleZones.find((z) => z.id === deliveryZoneId)?.name || 'selected zone'}`;
+        description = `Deliver to ${deliveryZip} (${deliveryLookup.zoneName || 'Unknown zone'})`;
       }
 
       return {
@@ -189,30 +232,51 @@ export function BookingSimulator({ schedule }: BookingSimulatorProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Select
-            label="Pickup Zone"
-            value={pickupZoneId}
-            onChange={(e) => setPickupZoneId(e.target.value)}
-            options={[
-              { value: '', label: 'Select pickup zone...' },
-              ...sampleZones.map((z) => ({
-                value: z.id,
-                label: `${z.name} (${z.postcodeCount} postcodes)`,
-              })),
-            ]}
-          />
-          <Select
-            label="Delivery Zone"
-            value={deliveryZoneId}
-            onChange={(e) => setDeliveryZoneId(e.target.value)}
-            options={[
-              { value: '', label: 'Select delivery zone...' },
-              ...sampleZones.map((z) => ({
-                value: z.id,
-                label: `${z.name} (${z.postcodeCount} postcodes)`,
-              })),
-            ]}
-          />
+          {/* Pickup Zip Code */}
+          <div className="space-y-2">
+            <Input
+              type="text"
+              label="Pickup Zip Code"
+              placeholder="Enter zip code..."
+              value={pickupZip}
+              onChange={(e) => setPickupZip(e.target.value)}
+            />
+            {pickupZip && pickupLookup.found && (
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-green-700">Zone: {pickupLookup.zoneName}</span>
+              </div>
+            )}
+            {pickupZip && !pickupLookup.found && pickupLookup.errorMessage && (
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-orange-500" />
+                <span className="text-orange-600">{pickupLookup.errorMessage}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Delivery Zip Code */}
+          <div className="space-y-2">
+            <Input
+              type="text"
+              label="Delivery Zip Code"
+              placeholder="Enter zip code..."
+              value={deliveryZip}
+              onChange={(e) => setDeliveryZip(e.target.value)}
+            />
+            {deliveryZip && deliveryLookup.found && (
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-green-700">Zone: {deliveryLookup.zoneName}</span>
+              </div>
+            )}
+            {deliveryZip && !deliveryLookup.found && deliveryLookup.errorMessage && (
+              <div className="flex items-center gap-2 text-sm">
+                <AlertTriangle className="w-4 h-4 text-orange-500" />
+                <span className="text-orange-600">{deliveryLookup.errorMessage}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <Button variant="primary" onClick={handleRunTest} className="w-full">

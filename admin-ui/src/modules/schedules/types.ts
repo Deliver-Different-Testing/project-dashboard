@@ -155,14 +155,49 @@ export interface DaySchedule {
   endTime: string; // HH:MM
 }
 
+// Cutoff exception for specific delivery days (e.g., Mon delivery needs Fri cutoff)
+export interface CutoffException {
+  deliveryDay: DayOfWeek;  // Which delivery day this exception applies to
+  cutoffDay: DayOfWeek;    // When the cutoff occurs (e.g., Friday)
+  cutoffTime: string;      // HH:MM format (e.g., "17:00")
+}
+
 export interface OperatingSchedule {
   // If true, all weekdays use the same schedule
   uniformWeekdays: boolean;
   // Per-day configuration
   days: Record<DayOfWeek, DaySchedule>;
-  // Cutoff configuration
+  // Default cutoff configuration (applies to days without exceptions)
   cutoffValue: number;
   cutoffUnit: TimeUnit;
+  // Day-specific cutoff exceptions (e.g., Mon delivery → Fri 5pm cutoff)
+  cutoffExceptions?: CutoffException[];
+}
+
+// Helper: Calculate days between two DayOfWeek values
+export function getDaysBetween(cutoffDay: DayOfWeek, deliveryDay: DayOfWeek): number {
+  const dayOrder: Record<DayOfWeek, number> = {
+    mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6
+  };
+  const from = dayOrder[cutoffDay];
+  const to = dayOrder[deliveryDay];
+  let diff = to - from;
+  if (diff <= 0) diff += 7;
+  return diff;
+}
+
+// Helper: Get suggested cutoff day for a delivery day (skip weekends)
+export function getSuggestedCutoffDay(deliveryDay: DayOfWeek): DayOfWeek {
+  const suggestions: Record<DayOfWeek, DayOfWeek> = {
+    mon: 'fri',  // Skip weekend
+    tue: 'mon',
+    wed: 'tue',
+    thu: 'wed',
+    fri: 'thu',
+    sat: 'fri',
+    sun: 'fri',  // Skip Saturday
+  };
+  return suggestions[deliveryDay];
 }
 
 // ============================================
