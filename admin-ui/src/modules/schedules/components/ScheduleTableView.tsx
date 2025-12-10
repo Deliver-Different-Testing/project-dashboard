@@ -1,6 +1,6 @@
 // src/modules/schedules/components/ScheduleTableView.tsx
 import { useState, useCallback } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 import { ScheduleTable } from './ScheduleTable';
 import { ScheduleEditForm } from './ScheduleEditForm';
 import { OverrideEditor } from './OverrideEditor';
@@ -88,8 +88,7 @@ export function ScheduleTableView({
     setEditingClientId(null);
   }, []);
 
-  const handleCancelEdit = useCallback(() => {
-    // Close edit view entirely, return to table
+  const handleCloseModal = useCallback(() => {
     setSelectedSchedule(null);
     setEditingSchedule(null);
     setEditingClientId(null);
@@ -100,79 +99,11 @@ export function ScheduleTableView({
     ? schedules.find((s) => s.id === editingSchedule.baseScheduleId) || null
     : null;
 
-  // Are we in edit mode?
-  const isEditing = editingSchedule !== null;
+  const isModalOpen = editingSchedule !== null;
 
-  // Full-page edit mode: hide table, show edit form at full width
-  if (isEditing) {
-    return (
-      <div className="h-[calc(100vh-200px)] min-h-[500px] flex flex-col bg-white">
-        {/* Header with back button */}
-        <div className="flex items-center gap-4 p-4 border-b border-border bg-surface-light">
-          <button
-            onClick={handleCancelEdit}
-            className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Schedules
-          </button>
-          <div className="h-4 w-px bg-border" />
-          <h2 className="text-lg font-semibold text-text-primary">
-            {panelMode === 'edit'
-              ? (schedules.some((s) => s.id === editingSchedule.id) ? 'Edit Schedule' : 'New Schedule')
-              : (schedules.some((s) => s.id === editingSchedule.id) ? 'Edit Override' : 'New Override')
-            }
-          </h2>
-          <span className="text-sm text-text-muted">
-            {editingSchedule.name}
-          </span>
-        </div>
-
-        {/* Full-width edit content */}
-        <div className="flex-1 overflow-y-auto">
-          {panelMode === 'edit' && (
-            <div className="max-w-6xl mx-auto p-6">
-              <ScheduleEditForm
-                schedule={editingSchedule}
-                allSchedules={schedules}
-                onSave={handleSaveSchedule}
-                onCancel={handleCancelEdit}
-                isNew={!schedules.some((s) => s.id === editingSchedule.id)}
-              />
-            </div>
-          )}
-
-          {panelMode === 'override' && baseScheduleForOverride && (
-            <div className="max-w-6xl mx-auto p-6">
-              {editingClientId ? (
-                <ClientOverrideEditor
-                  schedule={editingSchedule}
-                  baseSchedule={baseScheduleForOverride}
-                  client={sampleClients.find((c) => c.id === editingClientId) || { id: editingClientId, name: editingClientId }}
-                  allClients={sampleClients}
-                  allSchedules={schedules}
-                  onSave={handleSaveSchedule}
-                  onCancel={handleCancelEdit}
-                  onCopyToClient={handleCopyToClient}
-                />
-              ) : (
-                <OverrideEditor
-                  schedule={editingSchedule}
-                  baseSchedule={baseScheduleForOverride}
-                  onSave={handleSaveSchedule}
-                  onCancel={handleCancelEdit}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Table view (no schedule selected)
   return (
-    <div className="h-[calc(100vh-200px)] min-h-[500px]">
+    <div className="h-[calc(100vh-200px)] min-h-[500px] relative">
+      {/* Table - always visible */}
       <ScheduleTable
         schedules={schedules}
         selectedId={selectedSchedule?.id || null}
@@ -182,6 +113,78 @@ export function ScheduleTableView({
         externalSearchQuery={searchQuery}
         externalTagSearch={tagSearch}
       />
+
+      {/* Modal Overlay */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-xl shadow-2xl w-[90vw] max-w-6xl h-[85vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface-light">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-text-primary">
+                  {panelMode === 'edit'
+                    ? (schedules.some((s) => s.id === editingSchedule.id) ? 'Edit Schedule' : 'New Schedule')
+                    : (schedules.some((s) => s.id === editingSchedule.id) ? 'Edit Override' : 'New Override')
+                  }
+                </h2>
+                <span className="text-sm text-text-muted px-2 py-0.5 bg-surface-cream rounded">
+                  {editingSchedule.name}
+                </span>
+              </div>
+              <button
+                onClick={handleCloseModal}
+                className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-cream rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {panelMode === 'edit' && (
+                <ScheduleEditForm
+                  schedule={editingSchedule}
+                  allSchedules={schedules}
+                  onSave={handleSaveSchedule}
+                  onCancel={handleCloseModal}
+                  isNew={!schedules.some((s) => s.id === editingSchedule.id)}
+                />
+              )}
+
+              {panelMode === 'override' && baseScheduleForOverride && (
+                <>
+                  {editingClientId ? (
+                    <ClientOverrideEditor
+                      schedule={editingSchedule}
+                      baseSchedule={baseScheduleForOverride}
+                      client={sampleClients.find((c) => c.id === editingClientId) || { id: editingClientId, name: editingClientId }}
+                      allClients={sampleClients}
+                      allSchedules={schedules}
+                      onSave={handleSaveSchedule}
+                      onCancel={handleCloseModal}
+                      onCopyToClient={handleCopyToClient}
+                    />
+                  ) : (
+                    <OverrideEditor
+                      schedule={editingSchedule}
+                      baseSchedule={baseScheduleForOverride}
+                      onSave={handleSaveSchedule}
+                      onCancel={handleCloseModal}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
