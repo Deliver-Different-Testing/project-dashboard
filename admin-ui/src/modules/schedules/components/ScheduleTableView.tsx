@@ -10,11 +10,17 @@ import { sampleSchedules, sampleClients } from '../data/sampleData';
 
 interface ScheduleTableViewProps {
   onConnectionsClick: (sourceItem: any, connections: any) => void;
+  searchQuery?: string;
+  tagSearch?: string;
 }
 
 type PanelMode = 'view' | 'edit' | 'override';
 
-export function ScheduleTableView({ onConnectionsClick: _onConnectionsClick }: ScheduleTableViewProps) {
+export function ScheduleTableView({
+  onConnectionsClick: _onConnectionsClick,
+  searchQuery = '',
+  tagSearch = '',
+}: ScheduleTableViewProps) {
   const [schedules, setSchedules] = useState<Schedule[]>(sampleSchedules);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [collapsedBaseIds, setCollapsedBaseIds] = useState<Set<string>>(new Set());
@@ -189,6 +195,8 @@ export function ScheduleTableView({ onConnectionsClick: _onConnectionsClick }: S
           onSelectSchedule={handleSelectSchedule}
           collapsedBaseIds={collapsedBaseIds}
           onToggleCollapse={handleToggleCollapse}
+          externalSearchQuery={searchQuery}
+          externalTagSearch={tagSearch}
         />
       </div>
 

@@ -3,6 +3,7 @@ import { clientsSchema } from './clients.schema';
 import { zipZonesSchema, zoneGroupsSchema, depotsSchema } from './territory.schema';
 import { servicesSchema } from './services.schema';
 import { notificationGroupsSchema } from './notifications.schema';
+import { schedulesSchema } from './schedules.schema';
 
 // Registry type
 export interface SchemaRegistry {
@@ -17,6 +18,7 @@ export const schemaRegistry: SchemaRegistry = {
   depots: depotsSchema,
   services: servicesSchema,
   notificationGroups: notificationGroupsSchema,
+  schedules: schedulesSchema,
 };
 
 // Helper functions
@@ -44,4 +46,5 @@ export {
   depotsSchema,
   servicesSchema,
   notificationGroupsSchema,
+  schedulesSchema,
 };

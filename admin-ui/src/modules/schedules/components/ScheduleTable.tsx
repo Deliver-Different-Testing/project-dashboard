@@ -14,6 +14,8 @@ interface ScheduleTableProps {
   onSelectSchedule: (schedule: Schedule) => void;
   collapsedBaseIds: Set<string>;
   onToggleCollapse: (baseId: string) => void;
+  externalSearchQuery?: string;
+  externalTagSearch?: string;
 }
 
 export function ScheduleTable({
@@ -22,6 +24,8 @@ export function ScheduleTable({
   onSelectSchedule,
   collapsedBaseIds,
   onToggleCollapse,
+  externalSearchQuery = '',
+  externalTagSearch = '',
 }: ScheduleTableProps) {
   const [filters, setFilters] = useState<ScheduleFilterState>({
     search: '',
@@ -51,15 +55,30 @@ export function ScheduleTable({
     return buildScheduleTableData(schedules, sampleDepots, sampleClients, sampleSpeeds);
   }, [schedules]);
 
+  // Combine external search with internal filters
+  const combinedSearch = externalSearchQuery || filters.search;
+
   // Apply filters
   const filteredRows = useMemo(() => {
     return allRows.filter((row) => {
-      // Search filter
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
+      // Search filter (combined with external search)
+      if (combinedSearch) {
+        const searchLower = combinedSearch.toLowerCase();
         if (!row.name.toLowerCase().includes(searchLower) &&
             !row.route.toLowerCase().includes(searchLower) &&
             !row.clientDisplay.toLowerCase().includes(searchLower)) {
+          return false;
+        }
+      }
+
+      // Tag search filter (connected entities)
+      if (externalTagSearch) {
+        const tagLower = externalTagSearch.toLowerCase();
+        // Search in client names, depot names, route info
+        if (!row.clientDisplay.toLowerCase().includes(tagLower) &&
+            !row.originDepot.toLowerCase().includes(tagLower) &&
+            !row.destDepot.toLowerCase().includes(tagLower) &&
+            !row.route.toLowerCase().includes(tagLower)) {
           return false;
         }
       }
@@ -75,7 +94,7 @@ export function ScheduleTable({
 
       return true;
     });
-  }, [allRows, filters]);
+  }, [allRows, filters, combinedSearch, externalTagSearch]);
 
   // Apply sorting
   const sortedRows = useMemo(() => {
