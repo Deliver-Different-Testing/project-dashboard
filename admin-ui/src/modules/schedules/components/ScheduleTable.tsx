@@ -1,6 +1,6 @@
 // src/modules/schedules/components/ScheduleTable.tsx
 import { useMemo, useState } from 'react';
-import { ChevronRight, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import { Badge } from '../../../components/ui/Badge';
 import { SearchInput } from '../../../components/filters/SearchInput';
 import { FilterDropdown } from '../../../components/filters/FilterDropdown';
@@ -13,19 +13,40 @@ interface ScheduleTableProps {
   schedules: Schedule[];
   selectedId: string | null;
   onSelectSchedule: (schedule: Schedule) => void;
-  collapsedBaseIds: Set<string>;
-  onToggleCollapse: (baseId: string) => void;
+  collapsedBaseIds?: Set<string>;
+  onToggleCollapse?: (baseId: string) => void;
   externalSearchQuery?: string;
   externalTagSearch?: string;
   onConnectionsClick?: (schedule: Schedule) => void;
+}
+
+// Count all connections for a schedule (clients, depots, linehauls, etc.)
+function getConnectionCount(schedule: Schedule): number {
+  let count = 0;
+
+  // Clients
+  if (schedule.clientVisibility === 'specific') {
+    count += schedule.clientIds.length;
+  }
+
+  // Origin depot
+  if (schedule.originDepotId) {
+    count += 1;
+  }
+
+  // Linehauls
+  count += schedule.legs.filter(l => l.config.type === 'linehaul').length;
+
+  // Depot legs (excluding first if it's origin)
+  count += schedule.legs.filter(l => l.config.type === 'depot').length;
+
+  return count;
 }
 
 export function ScheduleTable({
   schedules,
   selectedId,
   onSelectSchedule,
-  collapsedBaseIds,
-  onToggleCollapse,
   externalSearchQuery = '',
   externalTagSearch = '',
   onConnectionsClick,
@@ -129,16 +150,8 @@ export function ScheduleTable({
     });
   }, [filteredRows, sortConfig]);
 
-  // Apply collapse state
-  const visibleRows = useMemo(() => {
-    return sortedRows.filter((row) => {
-      // If this is an override, check if parent is collapsed
-      if (row.isOverride && row.baseScheduleId) {
-        return !collapsedBaseIds.has(row.baseScheduleId);
-      }
-      return true;
-    });
-  }, [sortedRows, collapsedBaseIds]);
+  // Since override rows are hidden by default, visibleRows is just sortedRows
+  const visibleRows = sortedRows;
 
   // Filter options
   const statusOptions = ['All Status', 'Active', 'Inactive'];
@@ -203,7 +216,7 @@ export function ScheduleTable({
         <table className="w-full text-sm table-fixed">
           <thead className="bg-surface-light sticky top-0 z-10">
             <tr className="border-b border-border">
-              <th className="text-left py-2 px-2 font-medium text-text-muted uppercase text-xs w-10"></th>
+              <th className="text-center py-2 px-2 font-medium text-text-muted uppercase text-xs w-24"></th>
               <th
                 onClick={() => handleSort('name')}
                 className={`text-left py-2 px-2 font-medium uppercase text-xs cursor-pointer hover:text-text-primary hover:bg-surface-cream select-none transition-colors w-[25%] ${sortConfig?.column === 'name' ? 'text-brand-dark bg-brand-cyan/5' : 'text-text-muted'}`}
@@ -265,17 +278,8 @@ export function ScheduleTable({
                   </span>
                 </div>
               </th>
-              <th
-                onClick={() => handleSort('clientDisplay')}
-                className={`text-left py-2 px-2 font-medium uppercase text-xs cursor-pointer hover:text-text-primary hover:bg-surface-cream select-none transition-colors w-[18%] ${sortConfig?.column === 'clientDisplay' ? 'text-brand-dark bg-brand-cyan/5' : 'text-text-muted'}`}
-              >
-                <div className="flex items-center gap-1">
-                  <span>Clients</span>
-                  <span className="w-4 h-4 flex items-center justify-center">
-                    {sortConfig?.column === 'clientDisplay' && sortConfig.direction === 'asc' && <ChevronUp className="w-3 h-3" />}
-                    {sortConfig?.column === 'clientDisplay' && sortConfig.direction === 'desc' && <ChevronDown className="w-3 h-3" />}
-                  </span>
-                </div>
+              <th className="text-left py-2 px-2 font-medium text-text-muted uppercase text-xs w-[18%]">
+                Connections
               </th>
               <th
                 onClick={() => handleSort('status')}
@@ -295,7 +299,6 @@ export function ScheduleTable({
             {visibleRows.map((row) => {
               const isSelected = selectedId === row.id;
               const hasOverrides = !row.isOverride && row.overrideCount > 0;
-              const isCollapsed = hasOverrides && collapsedBaseIds.has(row.id);
 
               return (
                 <tr
@@ -307,26 +310,8 @@ export function ScheduleTable({
                     ${row.depth > 0 ? 'bg-surface-cream/50' : ''}
                   `}
                 >
-                  {/* Expand/Collapse */}
-                  <td className="py-1.5 px-2">
-                    {hasOverrides ? (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleCollapse(row.id);
-                        }}
-                        className="p-0.5 hover:bg-surface-cream rounded"
-                      >
-                        {isCollapsed ? (
-                          <ChevronRight className="w-4 h-4 text-text-muted" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-text-muted" />
-                        )}
-                      </button>
-                    ) : row.depth > 0 ? (
-                      <span className="text-text-muted ml-2">└</span>
-                    ) : null}
-                  </td>
+                  {/* Empty first column - keeping for layout consistency */}
+                  <td className="py-1.5 px-2"></td>
 
                   {/* Name */}
                   <td className={`py-1.5 px-2 font-medium text-text-primary ${row.depth > 0 ? 'pl-5' : ''}`}>
@@ -374,20 +359,16 @@ export function ScheduleTable({
                     {row.isOverride ? '—' : getBookingModeLabel(row.bookingMode)}
                   </td>
 
-                  {/* Clients */}
-                  <td className="py-1.5 px-2 text-text-secondary text-xs">
-                    {row.schedule.clientVisibility === 'all' ? (
-                      <span className="text-text-muted">All Clients</span>
-                    ) : (
-                      <ConnectionBadge
-                        connectionCount={row.schedule.clientIds.length}
-                        onClick={(e) => {
-                          e?.stopPropagation();
-                          onConnectionsClick?.(row.schedule);
-                        }}
-                        size="sm"
-                      />
-                    )}
+                  {/* Connections */}
+                  <td className="py-1.5 px-2">
+                    <ConnectionBadge
+                      connectionCount={getConnectionCount(row.schedule)}
+                      onClick={(e) => {
+                        e?.stopPropagation();
+                        onConnectionsClick?.(row.schedule);
+                      }}
+                      size="sm"
+                    />
                   </td>
 
                   {/* Status */}
