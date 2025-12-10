@@ -1,12 +1,15 @@
 // src/modules/schedules/components/SideBySideOverrideEditor.tsx
 import { useState, useEffect } from 'react';
+import { ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
+import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
-import { OverrideFieldRow } from './OverrideFieldRow';
-import type { Schedule, DayOfWeek } from '../types';
-import { OVERRIDABLE_FIELDS, DAYS_OF_WEEK } from '../types';
-import { sampleSpeeds } from '../data/sampleData';
+import { ChainBuilder } from './ChainBuilder';
+import { OperatingScheduleSection } from './OperatingScheduleSection';
+import type { Schedule } from '../types';
+import { BOOKING_MODES } from '../types';
+import { sampleDepots, sampleSpeeds, sampleZones } from '../data/sampleData';
 
 interface ClientReference {
   id: string;
@@ -51,23 +54,21 @@ export function SideBySideOverrideEditor({
     };
   });
 
-  const [overrideToggles, setOverrideToggles] = useState<Record<string, boolean>>(() => {
-    const toggles: Record<string, boolean> = {};
-    OVERRIDABLE_FIELDS.forEach((field) => {
-      toggles[field.field] = formSchedule.overriddenFields.includes(field.field);
-    });
-    return toggles;
+  // Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    details: true,
+    overview: true,
+    operating: true,
   });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   // Reset form when client changes
   useEffect(() => {
     if (existingOverride) {
       setFormSchedule({ ...existingOverride });
-      const toggles: Record<string, boolean> = {};
-      OVERRIDABLE_FIELDS.forEach((field) => {
-        toggles[field.field] = existingOverride.overriddenFields.includes(field.field);
-      });
-      setOverrideToggles(toggles);
     } else {
       setFormSchedule({
         ...baseSchedule,
@@ -81,67 +82,24 @@ export function SideBySideOverrideEditor({
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      const toggles: Record<string, boolean> = {};
-      OVERRIDABLE_FIELDS.forEach((field) => {
-        toggles[field.field] = false;
-      });
-      setOverrideToggles(toggles);
     }
   }, [clientId, existingOverride, baseSchedule, client]);
 
-  const isFieldOverridden = (field: string): boolean => {
-    return overrideToggles[field] || false;
+  // Handlers
+  const handleNameChange = (value: string) => {
+    setFormSchedule((prev) => ({ ...prev, name: value }));
   };
 
-  const handleToggleOverride = (field: string) => {
-    const newEnabled = !overrideToggles[field];
-    setOverrideToggles((prev) => ({ ...prev, [field]: newEnabled }));
-
-    if (newEnabled) {
-      if (!formSchedule.overriddenFields.includes(field)) {
-        setFormSchedule((prev) => ({
-          ...prev,
-          overriddenFields: [...prev.overriddenFields, field],
-        }));
-      }
-    } else {
-      // Reset to base value when disabled
-      setFormSchedule((prev) => {
-        const updated = { ...prev };
-        updated.overriddenFields = updated.overriddenFields.filter((f) => f !== field);
-
-        // Reset field value to base
-        if (field === 'operatingSchedule.cutoffValue') {
-          updated.operatingSchedule = {
-            ...updated.operatingSchedule,
-            cutoffValue: baseSchedule.operatingSchedule.cutoffValue,
-          };
-        } else if (field === 'operatingSchedule.days') {
-          updated.operatingSchedule = {
-            ...updated.operatingSchedule,
-            days: { ...baseSchedule.operatingSchedule.days },
-          };
-        } else if (field === 'defaultDeliverySpeedId') {
-          updated.defaultDeliverySpeedId = baseSchedule.defaultDeliverySpeedId;
-        } else if (field === 'defaultPickupSpeedId') {
-          updated.defaultPickupSpeedId = baseSchedule.defaultPickupSpeedId;
-        } else if (field === 'defaultLinehaulSpeedId') {
-          updated.defaultLinehaulSpeedId = baseSchedule.defaultLinehaulSpeedId;
-        }
-
-        return updated;
-      });
-    }
+  const handleDescriptionChange = (value: string) => {
+    setFormSchedule((prev) => ({ ...prev, description: value }));
   };
 
-  const handleCutoffChange = (value: number) => {
-    setFormSchedule((prev) => ({
-      ...prev,
-      operatingSchedule: {
-        ...prev.operatingSchedule,
-        cutoffValue: value,
-      },
-    }));
+  const handleActiveToggle = (checked: boolean) => {
+    setFormSchedule((prev) => ({ ...prev, isActive: checked }));
+  };
+
+  const handleBookingModeChange = (mode: Schedule['bookingMode']) => {
+    setFormSchedule((prev) => ({ ...prev, bookingMode: mode }));
   };
 
   const handleSpeedChange = (
@@ -151,44 +109,42 @@ export function SideBySideOverrideEditor({
     setFormSchedule((prev) => ({ ...prev, [field]: value || undefined }));
   };
 
-  const handleDayToggle = (day: DayOfWeek, enabled: boolean) => {
-    setFormSchedule((prev) => ({
-      ...prev,
-      operatingSchedule: {
-        ...prev.operatingSchedule,
-        days: {
-          ...prev.operatingSchedule.days,
-          [day]: {
-            ...prev.operatingSchedule.days[day],
-            enabled,
-          },
-        },
-      },
-    }));
+  const handleOperatingScheduleChange = (operatingSchedule: Schedule['operatingSchedule']) => {
+    setFormSchedule((prev) => ({ ...prev, operatingSchedule }));
   };
 
   const handleSave = () => {
+    // Track which fields differ from base
+    const overriddenFields: string[] = [];
+
+    if (formSchedule.name !== baseSchedule.name) overriddenFields.push('name');
+    if (formSchedule.description !== baseSchedule.description) overriddenFields.push('description');
+    if (formSchedule.isActive !== baseSchedule.isActive) overriddenFields.push('isActive');
+    if (formSchedule.bookingMode !== baseSchedule.bookingMode) overriddenFields.push('bookingMode');
+    if (formSchedule.defaultDeliverySpeedId !== baseSchedule.defaultDeliverySpeedId) overriddenFields.push('defaultDeliverySpeedId');
+    if (formSchedule.defaultPickupSpeedId !== baseSchedule.defaultPickupSpeedId) overriddenFields.push('defaultPickupSpeedId');
+    if (formSchedule.defaultLinehaulSpeedId !== baseSchedule.defaultLinehaulSpeedId) overriddenFields.push('defaultLinehaulSpeedId');
+    if (JSON.stringify(formSchedule.operatingSchedule) !== JSON.stringify(baseSchedule.operatingSchedule)) {
+      overriddenFields.push('operatingSchedule');
+    }
+
     onSave({
       ...formSchedule,
+      overriddenFields,
       updatedAt: new Date().toISOString(),
     });
   };
 
-  // Get speed name by ID
-  const getSpeedName = (speedId?: string) => {
-    if (!speedId) return 'None';
-    const speed = sampleSpeeds.find((s) => s.id === speedId);
-    return speed?.name || speedId;
-  };
-
-  // Get active days string
-  const getActiveDays = (schedule: Schedule) => {
-    return DAYS_OF_WEEK.filter((day) => schedule.operatingSchedule.days[day.value]?.enabled)
-      .map((day) => day.short)
-      .join(', ') || 'None';
-  };
-
-  const hasChanges = formSchedule.overriddenFields.length > 0;
+  const hasChanges = (
+    formSchedule.name !== baseSchedule.name ||
+    formSchedule.description !== baseSchedule.description ||
+    formSchedule.isActive !== baseSchedule.isActive ||
+    formSchedule.bookingMode !== baseSchedule.bookingMode ||
+    formSchedule.defaultDeliverySpeedId !== baseSchedule.defaultDeliverySpeedId ||
+    formSchedule.defaultPickupSpeedId !== baseSchedule.defaultPickupSpeedId ||
+    formSchedule.defaultLinehaulSpeedId !== baseSchedule.defaultLinehaulSpeedId ||
+    JSON.stringify(formSchedule.operatingSchedule) !== JSON.stringify(baseSchedule.operatingSchedule)
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -203,140 +159,159 @@ export function SideBySideOverrideEditor({
           <div>
             <h3 className="text-sm font-semibold text-text-primary">{client.name}</h3>
             <p className="text-xs text-text-muted">
-              {existingOverride ? 'Edit Override' : 'Create Override'}
+              {existingOverride ? 'Edit Override' : 'Create Override'} • Based on "{baseSchedule.name}"
             </p>
           </div>
         </div>
       </div>
 
-      {/* Override Fields */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {/* Timing Category */}
-        <div className="mb-4">
-          <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-            Timing
-          </h4>
-
-          {/* Booking Cutoff */}
-          <OverrideFieldRow
-            label="Booking Cutoff"
-            baseValue={`${baseSchedule.operatingSchedule.cutoffValue} ${baseSchedule.operatingSchedule.cutoffUnit}`}
-            overrideValue={
-              <Input
-                type="number"
-                value={formSchedule.operatingSchedule.cutoffValue}
-                onChange={(e) => handleCutoffChange(parseInt(e.target.value) || 0)}
-                className="w-24"
-              />
-            }
-            isOverridden={isFieldOverridden('operatingSchedule.cutoffValue')}
-            onToggleOverride={() => handleToggleOverride('operatingSchedule.cutoffValue')}
-          />
-
-          {/* Operating Days */}
-          <div className="mt-2">
-            <OverrideFieldRow
-              label="Operating Days"
-              baseValue={getActiveDays(baseSchedule)}
-              overrideValue={
-                <div className="flex flex-wrap gap-1">
-                  {DAYS_OF_WEEK.map((day) => (
-                    <button
-                      key={day.value}
-                      onClick={() =>
-                        handleDayToggle(day.value, !formSchedule.operatingSchedule.days[day.value]?.enabled)
-                      }
-                      className={`px-2 py-1 text-xs rounded transition-colors ${
-                        formSchedule.operatingSchedule.days[day.value]?.enabled
-                          ? 'bg-brand-cyan text-white'
-                          : 'bg-gray-200 text-text-muted'
-                      }`}
-                    >
-                      {day.short}
-                    </button>
-                  ))}
-                </div>
-              }
-              isOverridden={isFieldOverridden('operatingSchedule.days')}
-              onToggleOverride={() => handleToggleOverride('operatingSchedule.days')}
+      {/* Form Content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Network Map - LOCKED (cannot change per client) */}
+        <div className="bg-gray-100 rounded-lg border border-gray-300 opacity-70">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-500">Network Map</h3>
+                <span className="text-xs text-gray-400 bg-gray-200 px-2 py-0.5 rounded">
+                  {baseSchedule.legs.length} legs • Cannot change per client
+                </span>
+              </div>
+            </div>
+            <ChainBuilder
+              schedule={baseSchedule}
+              selectedLegId={null}
+              onSelectLeg={() => {}}
+              readOnly={true}
+              depots={sampleDepots}
+              speeds={sampleSpeeds}
+              zones={sampleZones}
             />
           </div>
         </div>
 
-        {/* Speeds Category */}
-        <div className="mb-4">
-          <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-            Speeds
-          </h4>
-
-          <OverrideFieldRow
-            label="Delivery Speed"
-            baseValue={getSpeedName(baseSchedule.defaultDeliverySpeedId)}
-            overrideValue={
-              <Select
-                value={formSchedule.defaultDeliverySpeedId || ''}
-                onChange={(e) => handleSpeedChange('defaultDeliverySpeedId', e.target.value)}
-                options={[
-                  { value: '', label: 'None' },
-                  ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
-                ]}
-                className="w-40"
+        {/* Schedule Details - EDITABLE */}
+        <div className="bg-white rounded-lg border border-border">
+          <button
+            onClick={() => toggleSection('details')}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+          >
+            <h3 className="text-sm font-semibold text-text-primary">Schedule Details</h3>
+            {expandedSections.details ? (
+              <ChevronUp className="w-5 h-5 text-text-muted" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-text-muted" />
+            )}
+          </button>
+          {expandedSections.details && (
+            <div className="p-4 pt-0 space-y-4">
+              <Input
+                label="Override Name"
+                value={formSchedule.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="e.g., Next Day Standard (ACME)"
+                required
               />
-            }
-            isOverridden={isFieldOverridden('defaultDeliverySpeedId')}
-            onToggleOverride={() => handleToggleOverride('defaultDeliverySpeedId')}
-          />
+              <div>
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={formSchedule.description || ''}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
+                  placeholder="Custom description for this client..."
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-white text-text-primary
+                           placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-purple
+                           focus:border-brand-purple transition-colors resize-none"
+                  rows={2}
+                />
+              </div>
+              <Toggle
+                label="Active"
+                checked={formSchedule.isActive}
+                onChange={handleActiveToggle}
+              />
+            </div>
+          )}
+        </div>
 
-          <div className="mt-2">
-            <OverrideFieldRow
-              label="Pickup Speed"
-              baseValue={getSpeedName(baseSchedule.defaultPickupSpeedId)}
-              overrideValue={
+        {/* Overview Section - EDITABLE */}
+        <div className="bg-white rounded-lg border border-border">
+          <button
+            onClick={() => toggleSection('overview')}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+          >
+            <h3 className="text-sm font-semibold text-text-primary">Booking & Speeds</h3>
+            {expandedSections.overview ? (
+              <ChevronUp className="w-5 h-5 text-text-muted" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-text-muted" />
+            )}
+          </button>
+          {expandedSections.overview && (
+            <div className="p-4 pt-0 space-y-4">
+              <Select
+                label="Booking Mode"
+                value={formSchedule.bookingMode}
+                onChange={(e) => handleBookingModeChange(e.target.value as Schedule['bookingMode'])}
+                options={BOOKING_MODES.map((m) => ({ value: m.value, label: m.label }))}
+              />
+
+              <div className="grid grid-cols-3 gap-4">
                 <Select
+                  label="Delivery Speed"
+                  value={formSchedule.defaultDeliverySpeedId || ''}
+                  onChange={(e) => handleSpeedChange('defaultDeliverySpeedId', e.target.value)}
+                  options={[
+                    { value: '', label: 'None' },
+                    ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
+                  ]}
+                />
+                <Select
+                  label="Pickup Speed"
                   value={formSchedule.defaultPickupSpeedId || ''}
                   onChange={(e) => handleSpeedChange('defaultPickupSpeedId', e.target.value)}
                   options={[
                     { value: '', label: 'None' },
                     ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
                   ]}
-                  className="w-40"
                 />
-              }
-              isOverridden={isFieldOverridden('defaultPickupSpeedId')}
-              onToggleOverride={() => handleToggleOverride('defaultPickupSpeedId')}
-            />
-          </div>
-
-          <div className="mt-2">
-            <OverrideFieldRow
-              label="Linehaul Speed"
-              baseValue={getSpeedName(baseSchedule.defaultLinehaulSpeedId)}
-              overrideValue={
                 <Select
+                  label="Linehaul Speed"
                   value={formSchedule.defaultLinehaulSpeedId || ''}
                   onChange={(e) => handleSpeedChange('defaultLinehaulSpeedId', e.target.value)}
                   options={[
                     { value: '', label: 'None' },
                     ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
                   ]}
-                  className="w-40"
                 />
-              }
-              isOverridden={isFieldOverridden('defaultLinehaulSpeedId')}
-              onToggleOverride={() => handleToggleOverride('defaultLinehaulSpeedId')}
-            />
-          </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Non-Overridable Section */}
-        <div className="bg-gray-50 rounded-lg p-4 opacity-60">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Cannot Override (Route-Level)
-          </h4>
-          <div className="text-sm text-gray-400 space-y-1">
-            <p>Schedule Chain: {baseSchedule.legs.length} legs</p>
-            <p>Origin: {baseSchedule.originType === 'depot' ? 'Depot' : 'Client Address'}</p>
-          </div>
+        {/* Operating Schedule - EDITABLE */}
+        <div className="bg-white rounded-lg border border-border">
+          <button
+            onClick={() => toggleSection('operating')}
+            className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+          >
+            <h3 className="text-sm font-semibold text-text-primary">Operating Schedule</h3>
+            {expandedSections.operating ? (
+              <ChevronUp className="w-5 h-5 text-text-muted" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-text-muted" />
+            )}
+          </button>
+          {expandedSections.operating && (
+            <div className="p-4 pt-0">
+              <OperatingScheduleSection
+                schedule={formSchedule.operatingSchedule}
+                onChange={handleOperatingScheduleChange}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -344,11 +319,11 @@ export function SideBySideOverrideEditor({
       <div className="p-4 border-t border-border bg-surface-cream flex items-center justify-between">
         <div className="text-sm text-text-muted">
           {hasChanges ? (
-            <span className="text-yellow-600">
-              {formSchedule.overriddenFields.length} field(s) overridden
+            <span className="text-yellow-600 font-medium">
+              ● Unsaved changes
             </span>
           ) : (
-            'No overrides set'
+            <span className="text-text-muted">No changes from base schedule</span>
           )}
         </div>
         <div className="flex items-center gap-2">
