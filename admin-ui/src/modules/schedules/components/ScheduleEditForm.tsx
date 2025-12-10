@@ -9,6 +9,7 @@ import { ChainBuilder } from './ChainBuilder';
 import { LegConfigPanel } from './LegConfigPanel';
 import { OperatingScheduleSection } from './OperatingScheduleSection';
 import { TimelinePreview } from './TimelinePreview';
+import { BookingSimulator } from './BookingSimulator';
 import type { Schedule, ScheduleLeg, LegConfig, LegType, DayOfWeek } from '../types';
 import { BOOKING_MODES } from '../types';
 import {
@@ -44,6 +45,7 @@ export function ScheduleEditForm({
     chain: true,
     operating: true,
     timeline: true,
+    testSchedule: false,
   });
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -532,6 +534,26 @@ export function ScheduleEditForm({
               deliveryDay={previewDay}
               onDeliveryDayChange={setPreviewDay}
             />
+          </div>
+        )}
+      </div>
+
+      {/* Test Schedule Section */}
+      <div className="bg-white rounded-lg border border-border">
+        <button
+          onClick={() => toggleSection('testSchedule')}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+        >
+          <h3 className="text-sm font-semibold text-text-primary">Test Schedule</h3>
+          {expandedSections.testSchedule ? (
+            <ChevronUp className="w-5 h-5 text-text-muted" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-text-muted" />
+          )}
+        </button>
+        {expandedSections.testSchedule && (
+          <div className="p-4 pt-0">
+            <BookingSimulator schedule={formSchedule} />
           </div>
         )}
       </div>

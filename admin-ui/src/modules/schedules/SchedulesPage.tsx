@@ -5,14 +5,9 @@ import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
 import { TagSidebar } from '../../components/tags';
 import { ScheduleListTab } from './components/ScheduleListTab';
+import { ScheduleGroupsTab } from './components/ScheduleGroupsTab';
 import type { SourceItem, EntityConnections } from '../territory/types';
 import { createEmptyConnections } from '../territory/types';
-
-function ScheduleGroupsTabPlaceholder({ onConnectionsClick }: { onConnectionsClick?: (sourceItem: SourceItem, connections: EntityConnections) => void }) {
-  // onConnectionsClick will be used when implementing the real component
-  void onConnectionsClick; // Suppress unused warning
-  return <div className="p-8 text-center text-text-secondary">Schedule groups coming soon...</div>;
-}
 
 const tabs = [
   { id: 'schedules', label: 'Schedules' },
@@ -71,7 +66,9 @@ export function SchedulesPage() {
             {activeTab === 'schedules' && (
               <ScheduleListTab onConnectionsClick={handleConnectionsClick} />
             )}
-            {activeTab === 'groups' && <ScheduleGroupsTabPlaceholder onConnectionsClick={handleConnectionsClick} />}
+            {activeTab === 'groups' && (
+              <ScheduleGroupsTab onConnectionsClick={handleConnectionsClick} />
+            )}
           </div>
         </Card>
       </div>

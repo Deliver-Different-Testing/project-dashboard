@@ -9,6 +9,7 @@ import { getBookingModeLabel, getActiveDaysSummary, getRouteDescription, countLe
 import type { SourceItem, EntityConnections } from '../../territory/types';
 import { countConnectedCategories } from '../../territory/types';
 import { ScheduleEditForm } from './ScheduleEditForm';
+import { OverrideEditor } from './OverrideEditor';
 
 interface ScheduleListTabProps {
   onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
@@ -255,11 +256,11 @@ export function ScheduleListTab({ onConnectionsClick }: ScheduleListTabProps) {
                     }
                   >
                     <div className="p-4 bg-surface-cream rounded-lg">
-                      <ScheduleEditForm
+                      <OverrideEditor
                         schedule={override}
+                        baseSchedule={base}
                         onSave={handleScheduleSave}
                         onCancel={handleScheduleCancel}
-                        isNew={false}
                       />
                     </div>
                   </ExpandableRow>

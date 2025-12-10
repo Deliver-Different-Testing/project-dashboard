@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { Toggle } from '../../../components/ui/Toggle';
+import { ZoneSelector } from './ZoneSelector';
 import type { ScheduleLeg, LegConfig } from '../types';
 import {
   sampleSpeeds,
@@ -43,31 +44,13 @@ export function LegConfigPanel({ leg, onUpdate, onClose }: LegConfigPanelProps) 
           ]}
         />
 
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Pickup Zones
-          </label>
-          <div className="space-y-2">
-            {sampleZones.slice(0, 5).map((zone) => (
-              <label key={zone.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={config.pickupZoneIds.includes(zone.id)}
-                  onChange={(e) => {
-                    const newZones = e.target.checked
-                      ? [...config.pickupZoneIds, zone.id]
-                      : config.pickupZoneIds.filter((id) => id !== zone.id);
-                    handleUpdate({ pickupZoneIds: newZones });
-                  }}
-                  className="rounded border-border text-brand-cyan focus:ring-brand-cyan"
-                />
-                <span className="text-sm text-text-secondary">
-                  {zone.name} ({zone.code})
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <ZoneSelector
+          label="Pickup Zones"
+          selectedZoneIds={config.pickupZoneIds}
+          onChange={(zoneIds) => handleUpdate({ pickupZoneIds: zoneIds })}
+          helpText="Select zones where pickup is available"
+          zones={sampleZones}
+        />
 
         <Input
           type="number"
@@ -235,31 +218,13 @@ export function LegConfigPanel({ leg, onUpdate, onClose }: LegConfigPanelProps) 
           ]}
         />
 
-        <div>
-          <label className="block text-sm font-medium text-text-primary mb-2">
-            Delivery Zones
-          </label>
-          <div className="space-y-2">
-            {sampleZones.slice(0, 5).map((zone) => (
-              <label key={zone.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={config.deliveryZoneIds.includes(zone.id)}
-                  onChange={(e) => {
-                    const newZones = e.target.checked
-                      ? [...config.deliveryZoneIds, zone.id]
-                      : config.deliveryZoneIds.filter((id) => id !== zone.id);
-                    handleUpdate({ deliveryZoneIds: newZones });
-                  }}
-                  className="rounded border-border text-brand-cyan focus:ring-brand-cyan"
-                />
-                <span className="text-sm text-text-secondary">
-                  {zone.name} ({zone.code})
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <ZoneSelector
+          label="Delivery Zones"
+          selectedZoneIds={config.deliveryZoneIds}
+          onChange={(zoneIds) => handleUpdate({ deliveryZoneIds: zoneIds })}
+          helpText="Select zones where delivery is available"
+          zones={sampleZones}
+        />
 
         <Select
           label="Delivery State"
