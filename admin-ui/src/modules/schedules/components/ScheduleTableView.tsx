@@ -25,7 +25,6 @@ export function ScheduleTableView({
 }: ScheduleTableViewProps) {
   const [schedules, setSchedules] = useState<Schedule[]>(sampleSchedules);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
-  const [collapsedBaseIds, setCollapsedBaseIds] = useState<Set<string>>(new Set());
 
   // Panel mode: edit (default), override (for client overrides)
   const [panelMode, setPanelMode] = useState<PanelMode>('edit');
@@ -40,18 +39,6 @@ export function ScheduleTableView({
     setEditingSchedule({ ...schedule });
     setPanelMode(schedule.isOverride ? 'override' : 'edit');
     setEditingClientId(null);
-  }, []);
-
-  const handleToggleCollapse = useCallback((baseId: string) => {
-    setCollapsedBaseIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(baseId)) {
-        next.delete(baseId);
-      } else {
-        next.add(baseId);
-      }
-      return next;
-    });
   }, []);
 
   const handleCopyToClient = useCallback((targetClientId: string, sourceSchedule: Schedule) => {
@@ -143,8 +130,6 @@ export function ScheduleTableView({
         schedules={schedules}
         selectedId={selectedSchedule?.id || null}
         onSelectSchedule={handleSelectSchedule}
-        collapsedBaseIds={collapsedBaseIds}
-        onToggleCollapse={handleToggleCollapse}
         externalSearchQuery={searchQuery}
         externalTagSearch={tagSearch}
         onConnectionsClick={handleScheduleConnectionsClick}
