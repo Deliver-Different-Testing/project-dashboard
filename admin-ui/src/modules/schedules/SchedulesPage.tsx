@@ -127,8 +127,8 @@ export function SchedulesPage() {
             {/* Filter Row with Tag Search */}
             <div className="flex items-center gap-2 flex-wrap">
               {/* Tag/Connection Filter */}
-              <div className="flex items-center gap-1 px-3 py-1.5 border border-border rounded-md bg-white hover:border-gray-300 transition-colors">
-                <svg className="w-4 h-4 text-text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-center gap-2 px-3 py-2 border-2 border-brand-cyan/30 rounded-lg bg-brand-cyan/5 hover:border-brand-cyan hover:bg-brand-cyan/10 transition-colors focus-within:ring-2 focus-within:ring-brand-cyan focus-within:border-brand-cyan shadow-sm">
+                <svg className="w-4 h-4 text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
@@ -136,9 +136,19 @@ export function SchedulesPage() {
                   type="text"
                   value={tagSearch}
                   onChange={(e) => setTagSearch(e.target.value)}
-                  placeholder="Connected entity..."
-                  className="w-32 text-sm bg-transparent border-none outline-none placeholder:text-text-muted"
+                  placeholder="Filter by connected entity..."
+                  className="min-w-[180px] text-sm bg-transparent border-none outline-none placeholder:text-brand-cyan/60 text-brand-dark"
                 />
+                {tagSearch && (
+                  <button
+                    onClick={() => setTagSearch('')}
+                    className="text-brand-cyan hover:text-brand-dark transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
 
               {(searchQuery || tagSearch) && (

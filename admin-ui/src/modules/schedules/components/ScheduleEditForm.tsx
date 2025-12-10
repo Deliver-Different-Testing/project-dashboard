@@ -1,6 +1,6 @@
 // src/modules/schedules/components/ScheduleEditForm.tsx
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { Toggle } from '../../../components/ui/Toggle';
@@ -10,6 +10,7 @@ import { LegConfigPanel } from './LegConfigPanel';
 import { OperatingScheduleSection } from './OperatingScheduleSection';
 import { TimelinePreview } from './TimelinePreview';
 import { BookingSimulator } from './BookingSimulator';
+import { ClientOverridesTab } from './ClientOverridesTab';
 import type { Schedule, ScheduleLeg, LegConfig, LegType, DayOfWeek } from '../types';
 import { BOOKING_MODES } from '../types';
 import {
@@ -19,8 +20,11 @@ import {
   sampleClients,
 } from '../data/sampleData';
 
+type EditFormTab = 'config' | 'clients';
+
 interface ScheduleEditFormProps {
   schedule: Schedule;
+  allSchedules?: Schedule[];
   onSave: (schedule: Schedule) => void;
   onCancel: () => void;
   isNew?: boolean;
@@ -28,6 +32,7 @@ interface ScheduleEditFormProps {
 
 export function ScheduleEditForm({
   schedule: initialSchedule,
+  allSchedules = [],
   onSave,
   onCancel,
   isNew = false,
@@ -36,6 +41,14 @@ export function ScheduleEditForm({
   const [formSchedule, setFormSchedule] = useState<Schedule>(initialSchedule);
   const [selectedLegId, setSelectedLegId] = useState<string | null>(null);
   const [previewDay, setPreviewDay] = useState<DayOfWeek>('mon');
+  const [activeTab, setActiveTab] = useState<EditFormTab>('config');
+
+  // Count client overrides for this schedule
+  const clientOverrideCount = useMemo(() => {
+    return allSchedules.filter(
+      (s) => s.isOverride && s.baseScheduleId === formSchedule.id
+    ).length;
+  }, [allSchedules, formSchedule.id]);
 
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -237,13 +250,80 @@ export function ScheduleEditForm({
         )}
       </div>
 
-      {/* Overview Section */}
-      <div className="bg-white rounded-lg border border-border">
+      {/* Chain Visualization - Prominent Overview (moved to top) */}
+      <div className="bg-gradient-to-r from-surface-cream to-white rounded-lg border-2 border-brand-cyan/20">
         <button
-          onClick={() => toggleSection('overview')}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+          onClick={() => toggleSection('chain')}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-brand-cyan/5 transition-colors"
         >
-          <h3 className="text-sm font-semibold text-text-primary">Overview</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-text-primary">Schedule Chain</h3>
+            <span className="text-xs text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded">Visual Overview</span>
+          </div>
+          {expandedSections.chain ? (
+            <ChevronUp className="w-5 h-5 text-brand-cyan" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-brand-cyan" />
+          )}
+        </button>
+        {expandedSections.chain && (
+          <div className="p-4 pt-0">
+            <ChainBuilder
+              schedule={formSchedule}
+              selectedLegId={selectedLegId}
+              onSelectLeg={setSelectedLegId}
+              onAddLeg={handleAddLeg}
+              onRemoveLeg={handleRemoveLeg}
+              depots={sampleDepots}
+              speeds={sampleSpeeds}
+              zones={sampleZones}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Tab Navigation */}
+      {!formSchedule.isOverride && (
+        <div className="flex border-b border-border bg-white rounded-t-lg overflow-hidden">
+          <button
+            onClick={() => setActiveTab('config')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'config'
+                ? 'text-brand-cyan border-b-2 border-brand-cyan bg-brand-cyan/5'
+                : 'text-text-muted hover:text-text-primary hover:bg-surface-cream'
+            }`}
+          >
+            Schedule Config
+          </button>
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              activeTab === 'clients'
+                ? 'text-brand-purple border-b-2 border-brand-purple bg-brand-purple/5'
+                : 'text-text-muted hover:text-text-primary hover:bg-surface-cream'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Client Overrides
+            {clientOverrideCount > 0 && (
+              <span className="px-1.5 py-0.5 text-xs rounded-full bg-brand-purple/10 text-brand-purple">
+                {clientOverrideCount}
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Tab Content */}
+      {activeTab === 'config' && (
+        <>
+          {/* Overview Section */}
+          <div className="bg-white rounded-lg border border-border">
+            <button
+              onClick={() => toggleSection('overview')}
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-text-primary">Overview</h3>
           {expandedSections.overview ? (
             <ChevronUp className="w-5 h-5 text-text-muted" />
           ) : (
@@ -462,35 +542,6 @@ export function ScheduleEditForm({
         )}
       </div>
 
-      {/* Chain Builder Section */}
-      <div className="bg-white rounded-lg border border-border">
-        <button
-          onClick={() => toggleSection('chain')}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
-        >
-          <h3 className="text-sm font-semibold text-text-primary">Schedule Chain</h3>
-          {expandedSections.chain ? (
-            <ChevronUp className="w-5 h-5 text-text-muted" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-text-muted" />
-          )}
-        </button>
-        {expandedSections.chain && (
-          <div className="p-4 pt-0">
-            <ChainBuilder
-              schedule={formSchedule}
-              selectedLegId={selectedLegId}
-              onSelectLeg={setSelectedLegId}
-              onAddLeg={handleAddLeg}
-              onRemoveLeg={handleRemoveLeg}
-              depots={sampleDepots}
-              speeds={sampleSpeeds}
-              zones={sampleZones}
-            />
-          </div>
-        )}
-      </div>
-
       {/* Operating Schedule Section */}
       <div className="bg-white rounded-lg border border-border">
         <button
@@ -557,6 +608,19 @@ export function ScheduleEditForm({
           </div>
         )}
       </div>
+        </>
+      )}
+
+      {/* Client Overrides Tab */}
+      {activeTab === 'clients' && !formSchedule.isOverride && (
+        <div className="bg-white rounded-lg border border-border min-h-[400px]">
+          <ClientOverridesTab
+            baseSchedule={formSchedule}
+            allSchedules={allSchedules}
+            onSaveOverride={onSave}
+          />
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-3 p-4 bg-surface-cream rounded-lg border border-border">

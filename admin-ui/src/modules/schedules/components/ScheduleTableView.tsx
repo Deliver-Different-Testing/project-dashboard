@@ -1,7 +1,6 @@
 // src/modules/schedules/components/ScheduleTableView.tsx
 import { useState, useCallback } from 'react';
 import { ScheduleTable } from './ScheduleTable';
-import { ScheduleDetailPanel } from './ScheduleDetailPanel';
 import { ScheduleEditForm } from './ScheduleEditForm';
 import { OverrideEditor } from './OverrideEditor';
 import { ClientOverrideEditor } from './ClientOverrideEditor';
@@ -14,7 +13,8 @@ interface ScheduleTableViewProps {
   tagSearch?: string;
 }
 
-type PanelMode = 'view' | 'edit' | 'override';
+// Removed 'view' mode - clicking a schedule now opens edit directly
+type PanelMode = 'edit' | 'override';
 
 export function ScheduleTableView({
   onConnectionsClick: _onConnectionsClick,
@@ -25,17 +25,19 @@ export function ScheduleTableView({
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [collapsedBaseIds, setCollapsedBaseIds] = useState<Set<string>>(new Set());
 
-  // Panel mode: view (compact), edit (expanded), override (expanded)
-  const [panelMode, setPanelMode] = useState<PanelMode>('view');
+  // Panel mode: edit (default), override (for client overrides)
+  const [panelMode, setPanelMode] = useState<PanelMode>('edit');
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
 
   // Client override editing
   const [editingClientId, setEditingClientId] = useState<string | null>(null);
 
+  // Clicking a schedule opens it directly in edit mode (no intermediate view)
   const handleSelectSchedule = useCallback((schedule: Schedule) => {
     setSelectedSchedule(schedule);
-    setPanelMode('view');
-    setEditingSchedule(null);
+    setEditingSchedule({ ...schedule });
+    setPanelMode(schedule.isOverride ? 'override' : 'edit');
+    setEditingClientId(null);
   }, []);
 
   const handleToggleCollapse = useCallback((baseId: string) => {
@@ -49,77 +51,6 @@ export function ScheduleTableView({
       return next;
     });
   }, []);
-
-  const handleClosePanel = useCallback(() => {
-    setSelectedSchedule(null);
-    setPanelMode('view');
-    setEditingSchedule(null);
-  }, []);
-
-  const handleEdit = useCallback((schedule: Schedule) => {
-    setEditingSchedule({ ...schedule });
-    setPanelMode(schedule.isOverride ? 'override' : 'edit');
-  }, []);
-
-  const handleCreateOverride = useCallback((baseSchedule: Schedule) => {
-    // Create a new override schedule based on the base
-    const newOverride: Schedule = {
-      ...baseSchedule,
-      id: `override-${Date.now()}`,
-      name: `${baseSchedule.name} (New Override)`,
-      isOverride: true,
-      baseScheduleId: baseSchedule.id,
-      overriddenFields: [],
-      clientVisibility: 'specific',
-      clientIds: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setEditingSchedule(newOverride);
-    setPanelMode('override');
-  }, []);
-
-  const handleDuplicate = useCallback((schedule: Schedule) => {
-    const duplicate: Schedule = {
-      ...schedule,
-      id: `dup-${Date.now()}`,
-      name: `${schedule.name} (Copy)`,
-      isOverride: false,
-      baseScheduleId: undefined,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setEditingSchedule(duplicate);
-    setPanelMode('edit');
-  }, []);
-
-  const handleEditClientOverride = useCallback((baseSchedule: Schedule, clientId: string) => {
-    // Find existing override for this client, or create new
-    const existingOverride = schedules.find(
-      (s) => s.isOverride && s.baseScheduleId === baseSchedule.id && s.clientIds.includes(clientId)
-    );
-
-    if (existingOverride) {
-      setEditingSchedule({ ...existingOverride });
-    } else {
-      const client = sampleClients.find((c) => c.id === clientId);
-      const newOverride: Schedule = {
-        ...baseSchedule,
-        id: `override-${Date.now()}`,
-        name: `${baseSchedule.name} (${client?.shortName || client?.name || clientId})`,
-        isOverride: true,
-        baseScheduleId: baseSchedule.id,
-        overriddenFields: [],
-        clientVisibility: 'specific',
-        clientIds: [clientId],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setEditingSchedule(newOverride);
-    }
-    setEditingClientId(clientId);
-    setPanelMode('override');
-  }, [schedules]);
 
   const handleCopyToClient = useCallback((targetClientId: string, sourceSchedule: Schedule) => {
     const targetClient = sampleClients.find((c) => c.id === targetClientId);
@@ -141,20 +72,6 @@ export function ScheduleTableView({
     setPanelMode('override');
   }, [schedules]);
 
-  const handleConnectionsClick = useCallback((schedule: Schedule) => {
-    console.log('Connections clicked for:', schedule.name, schedule.connections);
-    // Full implementation would open TagSidebar via prop from SchedulesPage
-  }, []);
-
-  const handleToggleActive = useCallback((schedule: Schedule, active: boolean) => {
-    setSchedules((prev) =>
-      prev.map((s) => (s.id === schedule.id ? { ...s, isActive: active } : s))
-    );
-    if (selectedSchedule?.id === schedule.id) {
-      setSelectedSchedule({ ...schedule, isActive: active });
-    }
-  }, [selectedSchedule]);
-
   const handleSaveSchedule = useCallback((updatedSchedule: Schedule) => {
     setSchedules((prev) => {
       const exists = prev.some((s) => s.id === updatedSchedule.id);
@@ -164,14 +81,15 @@ export function ScheduleTableView({
         return [...prev, updatedSchedule];
       }
     });
-    setPanelMode('view');
-    setEditingSchedule(null);
-    setEditingClientId(null);
+    // Stay in edit mode after saving, update the editing state with saved data
     setSelectedSchedule(updatedSchedule);
+    setEditingSchedule({ ...updatedSchedule });
+    setEditingClientId(null);
   }, []);
 
   const handleCancelEdit = useCallback(() => {
-    setPanelMode('view');
+    // Close panel entirely (no view mode to return to)
+    setSelectedSchedule(null);
     setEditingSchedule(null);
     setEditingClientId(null);
   }, []);
@@ -181,9 +99,8 @@ export function ScheduleTableView({
     ? schedules.find((s) => s.id === editingSchedule.baseScheduleId) || null
     : null;
 
-  // Panel is expanded when editing
-  const isEditing = panelMode === 'edit' || panelMode === 'override';
-  const showPanel = selectedSchedule || isEditing;
+  // Panel is always expanded (600px) since we go directly to edit mode
+  const showPanel = editingSchedule !== null;
 
   return (
     <div className="flex h-[calc(100vh-200px)] min-h-[500px]">
@@ -200,23 +117,9 @@ export function ScheduleTableView({
         />
       </div>
 
-      {/* Right: Detail/Edit Panel */}
+      {/* Right: Edit Panel (always 600px - no view mode) */}
       {showPanel && (
-        <div className={`${isEditing ? 'w-[600px]' : 'w-[450px]'} flex-shrink-0 transition-all duration-200 flex flex-col h-full overflow-hidden`}>
-          {panelMode === 'view' && selectedSchedule && (
-            <ScheduleDetailPanel
-              schedule={selectedSchedule}
-              allSchedules={schedules}
-              onClose={handleClosePanel}
-              onEdit={handleEdit}
-              onCreateOverride={handleCreateOverride}
-              onDuplicate={handleDuplicate}
-              onToggleActive={handleToggleActive}
-              onEditClientOverride={handleEditClientOverride}
-              onConnectionsClick={handleConnectionsClick}
-            />
-          )}
-
+        <div className="w-[600px] flex-shrink-0 transition-all duration-200 flex flex-col h-full overflow-hidden">
           {panelMode === 'edit' && editingSchedule && (
             <div className="h-full flex flex-col bg-white">
               <div className="flex items-center justify-between p-4 border-b border-border bg-surface-light">
@@ -233,6 +136,7 @@ export function ScheduleTableView({
               <div className="flex-1 overflow-y-auto p-4">
                 <ScheduleEditForm
                   schedule={editingSchedule}
+                  allSchedules={schedules}
                   onSave={handleSaveSchedule}
                   onCancel={handleCancelEdit}
                   isNew={!schedules.some((s) => s.id === editingSchedule.id)}
