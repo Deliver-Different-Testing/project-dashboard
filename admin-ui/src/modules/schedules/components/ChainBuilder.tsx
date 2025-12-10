@@ -52,9 +52,9 @@ export function ChainBuilder({
     <div className="bg-white rounded-lg border border-border p-4">
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-text-primary mb-1">Schedule Chain</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-1">Delivery Route</h3>
         <p className="text-xs text-text-secondary">
-          Click a node to configure it. Add legs with the + button between nodes.
+          {readOnly ? 'Visual overview of the delivery journey' : 'Click a node to configure it. Add legs with the + button between nodes.'}
         </p>
       </div>
 

@@ -211,88 +211,40 @@ export function ScheduleEditForm({
 
   return (
     <div className="space-y-4">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg border border-border">
-        <button
-          onClick={() => toggleSection('header')}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
-        >
-          <h3 className="text-lg font-semibold text-text-primary">
-            {isNew ? 'New Schedule' : 'Edit Schedule'}
-          </h3>
-          {expandedSections.header ? (
-            <ChevronUp className="w-5 h-5 text-text-muted" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-text-muted" />
-          )}
-        </button>
-        {expandedSections.header && (
-          <div className="p-4 pt-0 space-y-4">
-            <Input
-              label="Schedule Name"
-              value={formSchedule.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="e.g., Next Day Standard"
-              required
-            />
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                Description
-              </label>
-              <textarea
-                value={formSchedule.description || ''}
-                onChange={(e) => handleDescriptionChange(e.target.value)}
-                placeholder="Optional description..."
-                className="w-full px-3 py-2 rounded-lg border border-border bg-white text-text-primary
-                         placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan
-                         focus:border-brand-cyan transition-colors resize-none"
-                rows={3}
-              />
-            </div>
-            <Toggle
-              label="Active"
-              checked={formSchedule.isActive}
-              onChange={handleActiveToggle}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Chain Visualization - Prominent Overview (moved to top) */}
+      {/* Network Map - Always visible at top (read-only overview of the delivery route) */}
       <div className="bg-gradient-to-r from-surface-cream to-white rounded-lg border-2 border-brand-cyan/20">
-        <button
-          onClick={() => toggleSection('chain')}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-brand-cyan/5 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-text-primary">Schedule Chain</h3>
-            <span className="text-xs text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded">Visual Overview</span>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-text-primary">Network Map</h3>
+              <span className="text-xs text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded">
+                {formSchedule.legs.length} legs
+              </span>
+            </div>
+            {activeTab === 'config' && !formSchedule.isOverride && (
+              <span className="text-xs text-text-muted">Click nodes to configure</span>
+            )}
+            {activeTab === 'clients' && (
+              <span className="text-xs text-text-muted italic">Route cannot be changed per client</span>
+            )}
           </div>
-          {expandedSections.chain ? (
-            <ChevronUp className="w-5 h-5 text-brand-cyan" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-brand-cyan" />
-          )}
-        </button>
-        {expandedSections.chain && (
-          <div className="p-4 pt-0">
-            <ChainBuilder
-              schedule={formSchedule}
-              selectedLegId={selectedLegId}
-              onSelectLeg={setSelectedLegId}
-              onAddLeg={handleAddLeg}
-              onRemoveLeg={handleRemoveLeg}
-              depots={sampleDepots}
-              speeds={sampleSpeeds}
-              zones={sampleZones}
-            />
-          </div>
-        )}
+          <ChainBuilder
+            schedule={formSchedule}
+            selectedLegId={activeTab === 'config' ? selectedLegId : null}
+            onSelectLeg={activeTab === 'config' ? setSelectedLegId : () => {}}
+            onAddLeg={activeTab === 'config' ? handleAddLeg : undefined}
+            onRemoveLeg={activeTab === 'config' ? handleRemoveLeg : undefined}
+            readOnly={activeTab === 'clients' || formSchedule.isOverride}
+            depots={sampleDepots}
+            speeds={sampleSpeeds}
+            zones={sampleZones}
+          />
+        </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - Right below Network Map */}
       {!formSchedule.isOverride && (
-        <div className="flex border-b border-border bg-white rounded-t-lg overflow-hidden">
+        <div className="flex border-b border-border bg-white rounded-lg overflow-hidden shadow-sm">
           <button
             onClick={() => handleTabChange('config')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
@@ -325,6 +277,52 @@ export function ScheduleEditForm({
       {/* Tab Content */}
       {activeTab === 'config' && (
         <>
+          {/* Header Section - Name, Description, Active */}
+          <div className="bg-white rounded-lg border border-border">
+            <button
+              onClick={() => toggleSection('header')}
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-cream transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-text-primary">
+                {isNew ? 'New Schedule' : 'Schedule Details'}
+              </h3>
+              {expandedSections.header ? (
+                <ChevronUp className="w-5 h-5 text-text-muted" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-text-muted" />
+              )}
+            </button>
+            {expandedSections.header && (
+              <div className="p-4 pt-0 space-y-4">
+                <Input
+                  label="Schedule Name"
+                  value={formSchedule.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="e.g., Next Day Standard"
+                  required
+                />
+                <div>
+                  <label className="block text-sm font-medium text-text-primary mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={formSchedule.description || ''}
+                    onChange={(e) => handleDescriptionChange(e.target.value)}
+                    placeholder="Optional description..."
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-white text-text-primary
+                             placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-cyan
+                             focus:border-brand-cyan transition-colors resize-none"
+                    rows={3}
+                  />
+                </div>
+                <Toggle
+                  label="Active"
+                  checked={formSchedule.isActive}
+                  onChange={handleActiveToggle}
+                />
+              </div>
+            )}
+          </div>
           {/* Overview Section */}
           <div className="bg-white rounded-lg border border-border">
             <button
