@@ -1,7 +1,7 @@
 // src/modules/schedules/components/ScheduleTableView.tsx
 import { useState, useCallback } from 'react';
 import { ScheduleTable } from './ScheduleTable';
-import { ScheduleEditForm } from './ScheduleEditForm';
+import { ScheduleEditForm, type EditFormTab } from './ScheduleEditForm';
 import { OverrideEditor } from './OverrideEditor';
 import { ClientOverrideEditor } from './ClientOverrideEditor';
 import type { Schedule } from '../types';
@@ -29,6 +29,9 @@ export function ScheduleTableView({
   const [panelMode, setPanelMode] = useState<PanelMode>('edit');
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
 
+  // Track which tab is active in the edit form (for panel width)
+  const [editFormTab, setEditFormTab] = useState<EditFormTab>('config');
+
   // Client override editing
   const [editingClientId, setEditingClientId] = useState<string | null>(null);
 
@@ -38,6 +41,7 @@ export function ScheduleTableView({
     setEditingSchedule({ ...schedule });
     setPanelMode(schedule.isOverride ? 'override' : 'edit');
     setEditingClientId(null);
+    setEditFormTab('config'); // Reset tab when selecting new schedule
   }, []);
 
   const handleToggleCollapse = useCallback((baseId: string) => {
@@ -117,9 +121,9 @@ export function ScheduleTableView({
         />
       </div>
 
-      {/* Right: Edit Panel (always 600px - no view mode) */}
+      {/* Right: Edit Panel - wider for Client Overrides tab */}
       {showPanel && (
-        <div className="w-[600px] flex-shrink-0 transition-all duration-200 flex flex-col h-full overflow-hidden">
+        <div className={`${editFormTab === 'clients' ? 'w-[1000px]' : 'w-[600px]'} flex-shrink-0 transition-all duration-200 flex flex-col h-full overflow-hidden`}>
           {panelMode === 'edit' && editingSchedule && (
             <div className="h-full flex flex-col bg-white">
               <div className="flex items-center justify-between p-4 border-b border-border bg-surface-light">
@@ -139,6 +143,7 @@ export function ScheduleTableView({
                   allSchedules={schedules}
                   onSave={handleSaveSchedule}
                   onCancel={handleCancelEdit}
+                  onTabChange={setEditFormTab}
                   isNew={!schedules.some((s) => s.id === editingSchedule.id)}
                 />
               </div>

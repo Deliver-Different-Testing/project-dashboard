@@ -20,13 +20,14 @@ import {
   sampleClients,
 } from '../data/sampleData';
 
-type EditFormTab = 'config' | 'clients';
+export type EditFormTab = 'config' | 'clients';
 
 interface ScheduleEditFormProps {
   schedule: Schedule;
   allSchedules?: Schedule[];
   onSave: (schedule: Schedule) => void;
   onCancel: () => void;
+  onTabChange?: (tab: EditFormTab) => void;
   isNew?: boolean;
 }
 
@@ -35,6 +36,7 @@ export function ScheduleEditForm({
   allSchedules = [],
   onSave,
   onCancel,
+  onTabChange,
   isNew = false,
 }: ScheduleEditFormProps) {
   // Local state for form values
@@ -42,6 +44,12 @@ export function ScheduleEditForm({
   const [selectedLegId, setSelectedLegId] = useState<string | null>(null);
   const [previewDay, setPreviewDay] = useState<DayOfWeek>('mon');
   const [activeTab, setActiveTab] = useState<EditFormTab>('config');
+
+  // Handle tab change and notify parent
+  const handleTabChange = (tab: EditFormTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
 
   // Count client overrides for this schedule
   const clientOverrideCount = useMemo(() => {
@@ -286,7 +294,7 @@ export function ScheduleEditForm({
       {!formSchedule.isOverride && (
         <div className="flex border-b border-border bg-white rounded-t-lg overflow-hidden">
           <button
-            onClick={() => setActiveTab('config')}
+            onClick={() => handleTabChange('config')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === 'config'
                 ? 'text-brand-cyan border-b-2 border-brand-cyan bg-brand-cyan/5'
@@ -296,7 +304,7 @@ export function ScheduleEditForm({
             Schedule Config
           </button>
           <button
-            onClick={() => setActiveTab('clients')}
+            onClick={() => handleTabChange('clients')}
             className={`flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
               activeTab === 'clients'
                 ? 'text-brand-purple border-b-2 border-brand-purple bg-brand-purple/5'
