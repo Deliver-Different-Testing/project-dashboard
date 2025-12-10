@@ -90,19 +90,18 @@ export function ScheduleTable({
         if (b.baseScheduleId === a.id) return -1;
       }
 
-      let aVal = a[column] ?? '';
-      let bVal = b[column] ?? '';
+      const aVal = a[column] ?? '';
+      const bVal = b[column] ?? '';
 
-      if (typeof aVal === 'boolean') {
-        aVal = aVal ? 1 : 0;
-        bVal = bVal ? 1 : 0;
+      if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+        return ((aVal ? 1 : 0) - (bVal ? 1 : 0)) * multiplier;
       }
 
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return aVal.localeCompare(bVal) * multiplier;
       }
 
-      return ((aVal as number) - (bVal as number)) * multiplier;
+      return (Number(aVal) - Number(bVal)) * multiplier;
     });
   }, [filteredRows, sortConfig]);
 

@@ -563,8 +563,9 @@ export function scheduleToTableRow(
   if (depotLegs.length > 0) {
     const lastDepotLeg = depotLegs[depotLegs.length - 1];
     if (lastDepotLeg.config.type === 'depot') {
-      const depot = depots.find(d => d.id === lastDepotLeg.config.depotId);
-      destDepot = depot?.code || depot?.name || lastDepotLeg.config.depotId;
+      const depotConfig = lastDepotLeg.config as DepotLegConfig;
+      const depot = depots.find(d => d.id === depotConfig.depotId);
+      destDepot = depot?.code || depot?.name || depotConfig.depotId;
     }
   }
 

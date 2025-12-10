@@ -30,7 +30,7 @@ export function ScheduleDetailPanel({
   allSchedules,
   onClose,
   onEdit,
-  onCreateOverride,
+  onCreateOverride: _onCreateOverride,
   onDuplicate,
   onToggleActive,
   onEditClientOverride,
@@ -53,7 +53,6 @@ export function ScheduleDetailPanel({
   // For overrides, show simplified view
   if (schedule.isOverride) {
     const baseSchedule = allSchedules.find((s) => s.id === schedule.baseScheduleId);
-    const route = getRouteDescription(schedule, sampleDepots);
 
     return (
       <div className="h-full flex flex-col bg-white border-l border-border">

@@ -7,7 +7,7 @@ interface LegNodeProps {
   isSelected: boolean;
   isFirstLeg: boolean;
   isLastLeg: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   onDelete?: () => void;
   readOnly?: boolean;
   depots: DepotReference[];

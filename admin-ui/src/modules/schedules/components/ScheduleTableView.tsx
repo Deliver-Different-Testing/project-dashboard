@@ -14,7 +14,7 @@ interface ScheduleTableViewProps {
 
 type PanelMode = 'view' | 'edit' | 'override';
 
-export function ScheduleTableView({ onConnectionsClick }: ScheduleTableViewProps) {
+export function ScheduleTableView({ onConnectionsClick: _onConnectionsClick }: ScheduleTableViewProps) {
   const [schedules, setSchedules] = useState<Schedule[]>(sampleSchedules);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [collapsedBaseIds, setCollapsedBaseIds] = useState<Set<string>>(new Set());

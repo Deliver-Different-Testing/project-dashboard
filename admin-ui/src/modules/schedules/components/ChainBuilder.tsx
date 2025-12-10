@@ -103,7 +103,7 @@ export function ChainBuilder({
                 isSelected={isSelected}
                 isFirstLeg={isFirstLeg}
                 isLastLeg={isLastLeg}
-                onClick={() => onSelectLeg(leg.id)}
+                onClick={!readOnly ? () => onSelectLeg(leg.id) : undefined}
                 onDelete={
                   !readOnly && !isLastLeg && onRemoveLeg
                     ? () => onRemoveLeg(leg.id)
