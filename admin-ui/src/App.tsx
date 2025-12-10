@@ -4,6 +4,7 @@ import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
 import { TasksPage } from './modules/tasks';
 import { AutomationsPage } from './modules/automations';
+import { SchedulesPage } from './modules/schedules';
 import { SetupWizard } from './features/setup-wizard';
 
 // Import sample data for import/export functionality
@@ -17,7 +18,7 @@ import { initializeDataStore, getAllData, subscribeToChanges } from './features/
 type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holidays' | 'rates' |
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
   'staff-users' | 'client-users' |
-  'tasks' | 'notifications' | 'automations' | 'territory' | 'dashboards' | 'site-settings';
+  'tasks' | 'schedules' | 'notifications' | 'automations' | 'territory' | 'dashboards' | 'site-settings';
 
 interface MenuItem {
   id: ModuleId;
@@ -99,6 +100,7 @@ const MENU_SECTIONS: MenuSection[] = [
     ),
     items: [
       { id: 'tasks', label: 'Tasks' },
+      { id: 'schedules', label: 'Schedules' },
       { id: 'notifications', label: 'Notifications' },
       { id: 'automations', label: 'Automations' },
       { id: 'territory', label: 'Territory & Locations' },
@@ -109,7 +111,7 @@ const MENU_SECTIONS: MenuSection[] = [
 ];
 
 // Modules that are implemented
-const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'automations'];
+const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'schedules', 'automations'];
 
 // Helper to find which section contains a module
 const findSectionForModule = (moduleId: ModuleId): string | null => {
@@ -194,6 +196,8 @@ function App() {
         return <NotificationsPage />;
       case 'tasks':
         return <TasksPage />;
+      case 'schedules':
+        return <SchedulesPage />;
       case 'automations':
         return <AutomationsPage />;
       default:

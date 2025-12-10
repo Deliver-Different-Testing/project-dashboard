@@ -91,9 +91,10 @@ export interface EntityConnections {
  * Identifies what item we're showing connections for.
  */
 export interface SourceItem {
-  type: 'zipZone' | 'zoneGroup' | 'depot' | 'customer' | 'rateCard' | 'service';
+  type: 'zipZone' | 'zoneGroup' | 'depot' | 'customer' | 'rateCard' | 'service' | 'schedule';
   id: string;
   name: string;
+  subtitle?: string;
 }
 
 /**
