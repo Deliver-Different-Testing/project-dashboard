@@ -1,15 +1,14 @@
 // src/modules/schedules/components/ClientOverridesTab.tsx
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Lock } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { Input } from '../../../components/ui/Input';
 import { Select } from '../../../components/ui/Select';
 import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
-import { ChainBuilder } from './ChainBuilder';
 import { OperatingScheduleSection } from './OperatingScheduleSection';
 import type { Schedule } from '../types';
 import { BOOKING_MODES, DAYS_OF_WEEK } from '../types';
-import { sampleClients, sampleDepots, sampleSpeeds, sampleZones } from '../data/sampleData';
+import { sampleClients, sampleSpeeds } from '../data/sampleData';
 
 interface ClientOverridesTabProps {
   baseSchedule: Schedule;
@@ -158,80 +157,55 @@ export function ClientOverridesTab({
 
   return (
     <div className="flex flex-col h-full">
-      {/* TOP SECTION: Network Map & Client Search (Blue area) */}
-      <div className="bg-brand-cyan/10 border-b-2 border-brand-cyan/30 p-4">
-        <div className="flex items-start gap-6">
-          {/* Network Map */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Lock className="w-4 h-4 text-brand-cyan" />
-              <h3 className="text-sm font-semibold text-text-primary">Network Map</h3>
-              <span className="text-xs text-brand-cyan bg-brand-cyan/20 px-2 py-0.5 rounded">
-                {baseSchedule.legs.length} legs • Same for all clients
-              </span>
-            </div>
-            <div className="bg-white rounded-lg border border-brand-cyan/20 p-3">
-              <ChainBuilder
-                schedule={baseSchedule}
-                selectedLegId={null}
-                onSelectLeg={() => {}}
-                readOnly={true}
-                depots={sampleDepots}
-                speeds={sampleSpeeds}
-                zones={sampleZones}
-              />
-            </div>
+      {/* TOP BAR: Client Search */}
+      <div className="bg-surface-light border-b border-border px-4 py-3">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium text-text-primary whitespace-nowrap">
+            Select Client:
+          </label>
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+            <input
+              type="text"
+              value={clientSearch}
+              onChange={(e) => setClientSearch(e.target.value)}
+              placeholder="Search clients..."
+              className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-brand-cyan"
+            />
           </div>
-
-          {/* Client Search */}
-          <div className="w-64">
-            <label className="block text-sm font-medium text-text-primary mb-2">
-              Select Client
-            </label>
-            <div className="relative mb-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input
-                type="text"
-                value={clientSearch}
-                onChange={(e) => setClientSearch(e.target.value)}
-                placeholder="Search clients..."
-                className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-cyan focus:border-brand-cyan"
-              />
-            </div>
-            <select
-              value={selectedClientId || ''}
-              onChange={(e) => setSelectedClientId(e.target.value || null)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-cyan"
-              size={5}
-            >
-              {filteredClients.map((client) => {
-                const hasOverride = clientOverrideMap.has(client.id);
-                return (
-                  <option key={client.id} value={client.id}>
-                    {hasOverride ? '● ' : ''}{client.shortName || client.name}
-                  </option>
-                );
-              })}
-            </select>
-            <p className="text-xs text-text-muted mt-1">
-              ● = has override • {existingOverrides.length} total overrides
-            </p>
-          </div>
+          <select
+            value={selectedClientId || ''}
+            onChange={(e) => setSelectedClientId(e.target.value || null)}
+            className="px-3 py-2 text-sm border border-border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-cyan min-w-[200px]"
+          >
+            <option value="">-- Select a client --</option>
+            {filteredClients.map((client) => {
+              const hasOverride = clientOverrideMap.has(client.id);
+              return (
+                <option key={client.id} value={client.id}>
+                  {hasOverride ? '● ' : ''}{client.shortName || client.name}
+                </option>
+              );
+            })}
+          </select>
+          <span className="text-xs text-text-muted">
+            ● = has override • {existingOverrides.length} total
+          </span>
         </div>
       </div>
 
       {/* BOTTOM SECTION: Default vs Override side-by-side */}
       {selectedClient && formSchedule ? (
         <div className="flex-1 flex overflow-hidden">
-          {/* LEFT: Default/Base (Yellow area - read-only) */}
-          <div className="flex-1 bg-yellow-50 border-r border-yellow-200 overflow-y-auto p-4">
+          {/* LEFT: Default/Base (neutral gray - read-only) */}
+          <div className="flex-1 bg-gray-50 border-r border-gray-200 overflow-y-auto p-4">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-yellow-800">Default Schedule</h3>
-              <p className="text-sm text-yellow-600">Base values (read-only)</p>
+              <h3 className="text-lg font-semibold text-gray-700">Default Schedule</h3>
+              <p className="text-sm text-gray-500">Base values (read-only)</p>
             </div>
 
             {/* Schedule Details */}
-            <div className="bg-white/80 rounded-lg border border-yellow-200 p-4 mb-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Schedule Details</h4>
               <div className="space-y-3">
                 <div>
@@ -250,7 +224,7 @@ export function ClientOverridesTab({
             </div>
 
             {/* Booking & Speeds */}
-            <div className="bg-white/80 rounded-lg border border-yellow-200 p-4 mb-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Booking & Speeds</h4>
               <div className="space-y-3">
                 <div>
@@ -277,7 +251,7 @@ export function ClientOverridesTab({
             </div>
 
             {/* Operating Schedule */}
-            <div className="bg-white/80 rounded-lg border border-yellow-200 p-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Operating Schedule</h4>
               <div className="space-y-3">
                 <div>
@@ -294,26 +268,26 @@ export function ClientOverridesTab({
             </div>
           </div>
 
-          {/* RIGHT: Override (Green area - editable) */}
-          <div className="flex-1 bg-green-50 overflow-y-auto p-4">
+          {/* RIGHT: Override (brand cyan - editable) */}
+          <div className="flex-1 bg-brand-cyan/5 overflow-y-auto p-4">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-green-800">
+              <h3 className="text-lg font-semibold text-brand-cyan">
                 {selectedClient.name} Override
               </h3>
-              <p className="text-sm text-green-600">
+              <p className="text-sm text-brand-cyan/70">
                 {existingOverride ? 'Edit override values' : 'Create new override'}
               </p>
             </div>
 
             {/* Schedule Details - EDITABLE */}
-            <div className="bg-white/80 rounded-lg border border-green-200 p-4 mb-4">
+            <div className="bg-white rounded-lg border border-brand-cyan/30 p-4 mb-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Schedule Details</h4>
               <div className="space-y-3">
                 <Input
                   label="Name"
                   value={formSchedule.name}
                   onChange={(e) => handleOverrideChange('name', e.target.value)}
-                  className={formSchedule.name !== baseSchedule.name ? 'ring-2 ring-green-400' : ''}
+                  className={formSchedule.name !== baseSchedule.name ? 'ring-2 ring-brand-cyan' : ''}
                 />
                 <div>
                   <label className="block text-xs text-text-muted mb-1">Description</label>
@@ -321,8 +295,8 @@ export function ClientOverridesTab({
                     value={formSchedule.description || ''}
                     onChange={(e) => handleOverrideChange('description', e.target.value)}
                     placeholder="Custom description..."
-                    className={`w-full px-3 py-2 text-sm rounded-lg border border-border bg-white focus:outline-none focus:ring-2 focus:ring-green-400 resize-none ${
-                      formSchedule.description !== baseSchedule.description ? 'ring-2 ring-green-400' : ''
+                    className={`w-full px-3 py-2 text-sm rounded-lg border border-border bg-white focus:outline-none focus:ring-2 focus:ring-brand-cyan resize-none ${
+                      formSchedule.description !== baseSchedule.description ? 'ring-2 ring-brand-cyan' : ''
                     }`}
                     rows={2}
                   />
@@ -336,7 +310,7 @@ export function ClientOverridesTab({
             </div>
 
             {/* Booking & Speeds - EDITABLE */}
-            <div className="bg-white/80 rounded-lg border border-green-200 p-4 mb-4">
+            <div className="bg-white rounded-lg border border-brand-cyan/30 p-4 mb-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Booking & Speeds</h4>
               <div className="space-y-3">
                 <Select
@@ -344,7 +318,7 @@ export function ClientOverridesTab({
                   value={formSchedule.bookingMode}
                   onChange={(e) => handleOverrideChange('bookingMode', e.target.value)}
                   options={BOOKING_MODES.map((m) => ({ value: m.value, label: m.label }))}
-                  className={formSchedule.bookingMode !== baseSchedule.bookingMode ? 'ring-2 ring-green-400' : ''}
+                  className={formSchedule.bookingMode !== baseSchedule.bookingMode ? 'ring-2 ring-brand-cyan' : ''}
                 />
                 <div className="grid grid-cols-3 gap-3">
                   <Select
@@ -355,7 +329,7 @@ export function ClientOverridesTab({
                       { value: '', label: 'None' },
                       ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
                     ]}
-                    className={formSchedule.defaultDeliverySpeedId !== baseSchedule.defaultDeliverySpeedId ? 'ring-2 ring-green-400' : ''}
+                    className={formSchedule.defaultDeliverySpeedId !== baseSchedule.defaultDeliverySpeedId ? 'ring-2 ring-brand-cyan' : ''}
                   />
                   <Select
                     label="Pickup"
@@ -365,7 +339,7 @@ export function ClientOverridesTab({
                       { value: '', label: 'None' },
                       ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
                     ]}
-                    className={formSchedule.defaultPickupSpeedId !== baseSchedule.defaultPickupSpeedId ? 'ring-2 ring-green-400' : ''}
+                    className={formSchedule.defaultPickupSpeedId !== baseSchedule.defaultPickupSpeedId ? 'ring-2 ring-brand-cyan' : ''}
                   />
                   <Select
                     label="Linehaul"
@@ -375,14 +349,14 @@ export function ClientOverridesTab({
                       { value: '', label: 'None' },
                       ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
                     ]}
-                    className={formSchedule.defaultLinehaulSpeedId !== baseSchedule.defaultLinehaulSpeedId ? 'ring-2 ring-green-400' : ''}
+                    className={formSchedule.defaultLinehaulSpeedId !== baseSchedule.defaultLinehaulSpeedId ? 'ring-2 ring-brand-cyan' : ''}
                   />
                 </div>
               </div>
             </div>
 
             {/* Operating Schedule - EDITABLE */}
-            <div className="bg-white/80 rounded-lg border border-green-200 p-4 mb-4">
+            <div className="bg-white rounded-lg border border-brand-cyan/30 p-4 mb-4">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Operating Schedule</h4>
               <OperatingScheduleSection
                 schedule={formSchedule.operatingSchedule}
@@ -394,12 +368,12 @@ export function ClientOverridesTab({
             <div className="flex items-center justify-between pt-2">
               <span className="text-sm">
                 {hasChanges ? (
-                  <span className="text-green-700 font-medium">● Changes pending</span>
+                  <span className="text-brand-cyan font-medium">● Changes pending</span>
                 ) : (
                   <span className="text-text-muted">No changes</span>
                 )}
               </span>
-              <Button variant="primary" onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+              <Button variant="primary" onClick={handleSave}>
                 {existingOverride ? 'Save Override' : 'Create Override'}
               </Button>
             </div>
