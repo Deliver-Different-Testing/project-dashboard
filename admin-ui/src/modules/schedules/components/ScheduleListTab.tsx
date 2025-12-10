@@ -4,11 +4,12 @@ import { ExpandableRow } from '../../../components/data/ExpandableRow';
 import { SearchInput } from '../../../components/filters/SearchInput';
 import { FilterDropdown } from '../../../components/filters/FilterDropdown';
 import { Badge } from '../../../components/ui/Badge';
-import { sampleSchedules, sampleDepots, scheduleFilterOptions } from '../data/sampleData';
+import { sampleSchedules, sampleDepots, sampleSpeeds, sampleZones, scheduleFilterOptions } from '../data/sampleData';
 import type { Schedule, ScheduleFilterState } from '../types';
 import { getBookingModeLabel, getActiveDaysSummary, getRouteDescription, countLegs } from '../types';
 import type { SourceItem, EntityConnections } from '../../territory/types';
 import { countConnectedCategories } from '../../territory/types';
+import { ChainBuilder } from './ChainBuilder';
 
 interface ScheduleListTabProps {
   onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
@@ -16,6 +17,7 @@ interface ScheduleListTabProps {
 
 export function ScheduleListTab({ onConnectionsClick }: ScheduleListTabProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [selectedLegId, setSelectedLegId] = useState<string | null>(null);
   const [schedules] = useState<Schedule[]>(sampleSchedules);
   const [filters, setFilters] = useState<ScheduleFilterState>({
     search: '',
@@ -200,23 +202,49 @@ export function ScheduleListTab({ onConnectionsClick }: ScheduleListTabProps) {
                 )
               }
             >
-              {/* Expanded content - edit form will go here */}
-              <div className="p-4 bg-surface-cream rounded-lg">
-                <p className="text-sm text-text-secondary mb-2">
-                  {base.description || 'No description'}
-                </p>
-                <div className="flex gap-2">
-                  <Badge variant="blue" size="sm">
-                    {base.clientVisibility === 'all' ? 'All Clients' : `${base.clientIds.length} Clients`}
-                  </Badge>
-                  {overrides.length > 0 && (
-                    <Badge variant="system" size="sm">
-                      {overrides.length} Override{overrides.length !== 1 ? 's' : ''}
+              {/* Expanded content with ChainBuilder */}
+              <div className="p-4 bg-surface-cream rounded-lg space-y-4">
+                {/* Description and badges */}
+                <div>
+                  <p className="text-sm text-text-secondary mb-2">
+                    {base.description || 'No description'}
+                  </p>
+                  <div className="flex gap-2">
+                    <Badge variant="blue" size="sm">
+                      {base.clientVisibility === 'all' ? 'All Clients' : `${base.clientIds.length} Clients`}
                     </Badge>
-                  )}
+                    {overrides.length > 0 && (
+                      <Badge variant="system" size="sm">
+                        {overrides.length} Override{overrides.length !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-text-muted mt-2">
-                  Full edit form coming in next task...
+
+                {/* Chain Builder */}
+                <ChainBuilder
+                  schedule={base}
+                  selectedLegId={selectedLegId}
+                  onSelectLeg={(legId) => {
+                    setSelectedLegId(legId);
+                    console.log('Selected leg:', legId);
+                  }}
+                  onAddLeg={(afterLegId, type) => {
+                    console.log('Add leg after:', afterLegId, 'Type:', type);
+                    // TODO: Implement leg addition
+                  }}
+                  onRemoveLeg={(legId) => {
+                    console.log('Remove leg:', legId);
+                    // TODO: Implement leg removal
+                  }}
+                  readOnly={false}
+                  depots={sampleDepots}
+                  speeds={sampleSpeeds}
+                  zones={sampleZones}
+                />
+
+                <p className="text-xs text-text-muted">
+                  Click a leg to select it. Full leg configuration panel coming in next task...
                 </p>
               </div>
             </ExpandableRow>
