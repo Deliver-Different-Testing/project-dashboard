@@ -7,7 +7,7 @@ import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
 import { OperatingScheduleSection } from './OperatingScheduleSection';
 import type { Schedule } from '../types';
-import { BOOKING_MODES, DAYS_OF_WEEK } from '../types';
+import { BOOKING_MODES } from '../types';
 import { sampleClients, sampleSpeeds } from '../data/sampleData';
 
 interface ClientOverridesTabProps {
@@ -133,17 +133,6 @@ export function ClientOverridesTab({
     });
   };
 
-  const getSpeedName = (speedId?: string) => {
-    if (!speedId) return 'None';
-    return sampleSpeeds.find((s) => s.id === speedId)?.name || speedId;
-  };
-
-  const getActiveDays = (schedule: Schedule) => {
-    return DAYS_OF_WEEK.filter((day) => schedule.operatingSchedule.days[day.value]?.enabled)
-      .map((day) => day.short)
-      .join(', ') || 'None';
-  };
-
   const hasChanges = formSchedule && (
     formSchedule.name !== baseSchedule.name ||
     formSchedule.description !== baseSchedule.description ||
@@ -197,73 +186,95 @@ export function ClientOverridesTab({
       {/* BOTTOM SECTION: Default vs Override side-by-side */}
       {selectedClient && formSchedule ? (
         <div className="flex-1 flex overflow-hidden">
-          {/* LEFT: Default/Base (neutral gray - read-only) */}
+          {/* LEFT: Default/Base (neutral gray - read-only, same form layout) */}
           <div className="flex-1 bg-gray-50 border-r border-gray-200 overflow-y-auto p-4">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-700">Default Schedule</h3>
               <p className="text-sm text-gray-500">Base values (read-only)</p>
             </div>
 
-            {/* Schedule Details */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+            {/* Schedule Details - DISABLED */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 opacity-75">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Schedule Details</h4>
               <div className="space-y-3">
+                <Input
+                  label="Name"
+                  value={baseSchedule.name}
+                  onChange={() => {}}
+                  disabled
+                />
                 <div>
-                  <label className="text-xs text-text-muted">Name</label>
-                  <p className="text-sm font-medium">{baseSchedule.name}</p>
+                  <label className="block text-xs text-text-muted mb-1">Description</label>
+                  <textarea
+                    value={baseSchedule.description || ''}
+                    disabled
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-gray-100 text-gray-500 resize-none cursor-not-allowed"
+                    rows={2}
+                  />
                 </div>
-                <div>
-                  <label className="text-xs text-text-muted">Description</label>
-                  <p className="text-sm">{baseSchedule.description || '—'}</p>
-                </div>
-                <div>
-                  <label className="text-xs text-text-muted">Status</label>
-                  <p className="text-sm">{baseSchedule.isActive ? 'Active' : 'Inactive'}</p>
-                </div>
+                <Toggle
+                  label="Active"
+                  checked={baseSchedule.isActive}
+                  onChange={() => {}}
+                  disabled
+                />
               </div>
             </div>
 
-            {/* Booking & Speeds */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+            {/* Booking & Speeds - DISABLED */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4 opacity-75">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Booking & Speeds</h4>
               <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-text-muted">Booking Mode</label>
-                  <p className="text-sm font-medium">
-                    {BOOKING_MODES.find(m => m.value === baseSchedule.bookingMode)?.label || baseSchedule.bookingMode}
-                  </p>
-                </div>
+                <Select
+                  label="Booking Mode"
+                  value={baseSchedule.bookingMode}
+                  onChange={() => {}}
+                  options={BOOKING_MODES.map((m) => ({ value: m.value, label: m.label }))}
+                  disabled
+                />
                 <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-xs text-text-muted">Delivery</label>
-                    <p className="text-sm">{getSpeedName(baseSchedule.defaultDeliverySpeedId)}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-text-muted">Pickup</label>
-                    <p className="text-sm">{getSpeedName(baseSchedule.defaultPickupSpeedId)}</p>
-                  </div>
-                  <div>
-                    <label className="text-xs text-text-muted">Linehaul</label>
-                    <p className="text-sm">{getSpeedName(baseSchedule.defaultLinehaulSpeedId)}</p>
-                  </div>
+                  <Select
+                    label="Delivery"
+                    value={baseSchedule.defaultDeliverySpeedId || ''}
+                    onChange={() => {}}
+                    options={[
+                      { value: '', label: 'None' },
+                      ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
+                    ]}
+                    disabled
+                  />
+                  <Select
+                    label="Pickup"
+                    value={baseSchedule.defaultPickupSpeedId || ''}
+                    onChange={() => {}}
+                    options={[
+                      { value: '', label: 'None' },
+                      ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
+                    ]}
+                    disabled
+                  />
+                  <Select
+                    label="Linehaul"
+                    value={baseSchedule.defaultLinehaulSpeedId || ''}
+                    onChange={() => {}}
+                    options={[
+                      { value: '', label: 'None' },
+                      ...sampleSpeeds.map((s) => ({ value: s.id, label: s.name })),
+                    ]}
+                    disabled
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Operating Schedule */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            {/* Operating Schedule - DISABLED */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4 opacity-75">
               <h4 className="text-sm font-semibold text-text-primary mb-3">Operating Schedule</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-text-muted">Active Days</label>
-                  <p className="text-sm font-medium">{getActiveDays(baseSchedule)}</p>
-                </div>
-                <div>
-                  <label className="text-xs text-text-muted">Booking Cutoff</label>
-                  <p className="text-sm">
-                    {baseSchedule.operatingSchedule.cutoffValue} {baseSchedule.operatingSchedule.cutoffUnit} before
-                  </p>
-                </div>
+              <div className="pointer-events-none">
+                <OperatingScheduleSection
+                  schedule={baseSchedule.operatingSchedule}
+                  onChange={() => {}}
+                />
               </div>
             </div>
           </div>
