@@ -102,27 +102,41 @@ Opens at http://localhost:5173
 
 ## What's Already Built
 
+### ✅ Design System (COMPLETE)
+- `DESIGN-SYSTEM.md` - 2000+ lines of specs
+- Tailwind config with design tokens
+- All UI components built
+
 ### ✅ Tag Navigation System (COMPLETE)
 - `TagSidebar` - Shows 10 connection categories with ✓/✗
 - `ConnectionBadge` - "7 Connections" button with warning state
 - `TagSearchInput` - Filter input on every page
 - Cross-page navigation with pre-filled search
 
-### ✅ Territory Module (COMPLETE)
-- 3 tabs: Zip Zones, Zone Groups, Depots
-- ExpandableRow with connection badges
-- Sample data: 53 zips, 12 zone groups, 8 depots
-- Connection data for all items
-
-### ✅ Design System (COMPLETE)
-- `DESIGN-SYSTEM.md` - 2000+ lines of specs
-- Tailwind config with design tokens
-- All UI components built
-
 ### ✅ Agent Workflow System (COMPLETE - Nov 27, 2024)
 - 13 agents defined in `.claude/agents/`
 - Auto-run at checkpoints
 - Commit blocking on failures
+
+### ✅ Implemented Modules (5 total)
+
+| Module | Location | Features |
+|--------|----------|----------|
+| Territory | `modules/territory/` | 3 tabs: Zip Zones, Zone Groups, Depots. ExpandableRow with connection badges. |
+| Clients | `modules/clients/` | Client management with search/filters |
+| Notifications | `modules/notifications/` | Notification templates and settings |
+| Tasks | `modules/tasks/` | 2 tabs: Tasks, Task Groups. Drag-and-drop sequencing with @dnd-kit. |
+| Automations | `modules/automations/` | "If this then that" rules. 7 condition types, 6 action types, scope selection. |
+
+### Module Structure Pattern
+```
+modules/[name]/
+├── [Name]Page.tsx       # Main page component
+├── components/          # Module-specific components
+├── data/               # Sample/mock data
+├── types.ts            # TypeScript interfaces
+└── index.ts            # Exports
+```
 
 ---
 

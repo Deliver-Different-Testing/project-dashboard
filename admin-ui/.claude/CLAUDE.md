@@ -79,6 +79,23 @@ npm run dev    # Starts at http://localhost:5173
 ```
 
 ### Implemented Modules
-- Territory (zones, service areas)
-- Services (service types, pricing rules)
-- Tasks (tasks, task groups with drag-and-drop sequencing)
+
+| Module | Menu Section | Features |
+|--------|--------------|----------|
+| Territory | Advanced | 3 tabs: Zip Zones, Zone Groups, Depots. Connection badges. |
+| Clients | General | Client management with search/filters |
+| Notifications | Advanced | Notification templates and settings |
+| Tasks | Advanced | 2 tabs: Tasks, Task Groups. Drag-and-drop with @dnd-kit. |
+| Automations | Advanced | "If this then that" rules. Conditions, Actions, Scope. |
+
+### Key UI Patterns
+
+#### ExpandableRow
+- **Row click** = expand/collapse
+- **Toggle** = ONLY for Active/Inactive status (never for expand)
+- `ConnectionBadge` uses `stopPropagation()` to avoid row toggle
+
+#### Automations Module (Latest)
+- **Conditions** (7 types): job_unassigned, job_assigned, before/after/at_scheduled_time, status, scan
+- **Actions** (6 types): update_job_status, create_task, complete_task, trigger_notification, send_sms, change_status
+- **Scope**: Select customers and/or speeds (or "all")
