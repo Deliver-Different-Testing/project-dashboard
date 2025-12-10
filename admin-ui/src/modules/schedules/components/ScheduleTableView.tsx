@@ -6,10 +6,11 @@ import { ScheduleEditForm } from './ScheduleEditForm';
 import { OverrideEditor } from './OverrideEditor';
 import { ClientOverrideEditor } from './ClientOverrideEditor';
 import type { Schedule } from '../types';
+import type { SourceItem, EntityConnections } from '../../territory/types';
 import { sampleSchedules, sampleClients } from '../data/sampleData';
 
 interface ScheduleTableViewProps {
-  onConnectionsClick: (sourceItem: any, connections: any) => void;
+  onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
   searchQuery?: string;
   tagSearch?: string;
 }
@@ -18,7 +19,7 @@ interface ScheduleTableViewProps {
 type PanelMode = 'edit' | 'override';
 
 export function ScheduleTableView({
-  onConnectionsClick: _onConnectionsClick,
+  onConnectionsClick,
   searchQuery = '',
   tagSearch = '',
 }: ScheduleTableViewProps) {
@@ -94,6 +95,40 @@ export function ScheduleTableView({
     setEditingClientId(null);
   }, []);
 
+  // Handle connections badge click - opens TagSidebar with client connections
+  const handleScheduleConnectionsClick = useCallback((schedule: Schedule) => {
+    const sourceItem: SourceItem = {
+      type: 'schedule',
+      id: schedule.id,
+      name: schedule.name,
+      subtitle: schedule.clientVisibility === 'all' ? 'All Clients' : `${schedule.clientIds.length} clients`,
+    };
+
+    // Build connections showing client associations
+    const clientCount = schedule.clientVisibility === 'all'
+      ? sampleClients.length
+      : schedule.clientIds.length;
+
+    const connections: EntityConnections = {
+      customers: {
+        hasConnections: schedule.clientVisibility === 'specific',
+        count: clientCount,
+        connectionPath: '/clients',
+      },
+      zoneGroups: { hasConnections: false, count: 0 },
+      depots: { hasConnections: !!schedule.originDepotId, count: schedule.originDepotId ? 1 : 0 },
+      rateCards: { hasConnections: false, count: 0 },
+      services: { hasConnections: false, count: 0 },
+      vehicles: { hasConnections: false, count: 0 },
+      notifications: { hasConnections: false, count: 0 },
+      airports: { hasConnections: false, count: 0 },
+      linehauls: { hasConnections: schedule.legs.some(l => l.config.type === 'linehaul'), count: schedule.legs.filter(l => l.config.type === 'linehaul').length },
+      regions: { hasConnections: false, count: 0 },
+    };
+
+    onConnectionsClick(sourceItem, connections);
+  }, [onConnectionsClick]);
+
   // Find base schedule for override editing
   const baseScheduleForOverride = editingSchedule?.isOverride
     ? schedules.find((s) => s.id === editingSchedule.baseScheduleId) || null
@@ -112,6 +147,7 @@ export function ScheduleTableView({
         onToggleCollapse={handleToggleCollapse}
         externalSearchQuery={searchQuery}
         externalTagSearch={tagSearch}
+        onConnectionsClick={handleScheduleConnectionsClick}
       />
 
       {/* Modal Overlay */}

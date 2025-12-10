@@ -4,6 +4,7 @@ import { ChevronRight, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 import { Badge } from '../../../components/ui/Badge';
 import { SearchInput } from '../../../components/filters/SearchInput';
 import { FilterDropdown } from '../../../components/filters/FilterDropdown';
+import { ConnectionBadge } from '../../../components/tags/ConnectionBadge';
 import type { Schedule, ScheduleFilterState, SortConfig, SortableColumn } from '../types';
 import { buildScheduleTableData, getBookingModeLabel } from '../types';
 import { sampleDepots, sampleClients, sampleSpeeds } from '../data/sampleData';
@@ -16,6 +17,7 @@ interface ScheduleTableProps {
   onToggleCollapse: (baseId: string) => void;
   externalSearchQuery?: string;
   externalTagSearch?: string;
+  onConnectionsClick?: (schedule: Schedule) => void;
 }
 
 export function ScheduleTable({
@@ -26,6 +28,7 @@ export function ScheduleTable({
   onToggleCollapse,
   externalSearchQuery = '',
   externalTagSearch = '',
+  onConnectionsClick,
 }: ScheduleTableProps) {
   const [filters, setFilters] = useState<ScheduleFilterState>({
     search: '',
@@ -61,6 +64,12 @@ export function ScheduleTable({
   // Apply filters
   const filteredRows = useMemo(() => {
     return allRows.filter((row) => {
+      // Hide override rows by default - only show base schedules
+      // Client overrides are managed via the Client Overrides tab in the edit modal
+      if (row.isOverride) {
+        return false;
+      }
+
       // Search filter (combined with external search)
       if (combinedSearch) {
         const searchLower = combinedSearch.toLowerCase();
@@ -87,10 +96,6 @@ export function ScheduleTable({
       if (filters.status !== 'all' && row.status !== filters.status) {
         return false;
       }
-
-      // Type filter
-      if (filters.type === 'base' && row.isOverride) return false;
-      if (filters.type === 'override' && !row.isOverride) return false;
 
       return true;
     });
@@ -370,8 +375,19 @@ export function ScheduleTable({
                   </td>
 
                   {/* Clients */}
-                  <td className="py-1.5 px-2 text-text-secondary text-xs truncate">
-                    {row.clientDisplay}
+                  <td className="py-1.5 px-2 text-text-secondary text-xs">
+                    {row.schedule.clientVisibility === 'all' ? (
+                      <span className="text-text-muted">All Clients</span>
+                    ) : (
+                      <ConnectionBadge
+                        connectionCount={row.schedule.clientIds.length}
+                        onClick={(e) => {
+                          e?.stopPropagation();
+                          onConnectionsClick?.(row.schedule);
+                        }}
+                        size="sm"
+                      />
+                    )}
                   </td>
 
                   {/* Status */}
