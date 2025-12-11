@@ -1,19 +1,36 @@
 // src/modules/schedules/components/ScheduleGroupsTab.tsx
 import { useState, useMemo } from 'react';
+import { Copy, UserPlus } from 'lucide-react';
 import { ExpandableRow } from '../../../components/data/ExpandableRow';
 import { SearchInput } from '../../../components/filters/SearchInput';
 import { Badge } from '../../../components/ui/Badge';
-import { sampleScheduleGroups, sampleSchedules } from '../data/sampleData';
+import { Button } from '../../../components/ui/Button';
+import { CopyGroupModal } from './CopyGroupModal';
+import { AddClientOverrideModal } from './AddClientOverrideModal';
+import { sampleScheduleGroups, sampleClients } from '../data/sampleData';
 import type { SourceItem, EntityConnections } from '../../territory/types';
 import { countConnectedCategories } from '../../territory/types';
+import type { ScheduleGroup, Schedule, BulkEditField } from '../types';
 
 interface ScheduleGroupsTabProps {
   onConnectionsClick: (sourceItem: SourceItem, connections: EntityConnections) => void;
+  schedules: Schedule[];
+  onCopyGroup: (newGroupName: string, scheduleIds: string[], edits: BulkEditField[]) => void;
+  onApplyClientOverrides: (clientId: string, scheduleIds: string[], edits: BulkEditField[]) => void;
+  onViewSchedule: (scheduleId: string) => void;
 }
 
-export function ScheduleGroupsTab({ onConnectionsClick }: ScheduleGroupsTabProps) {
+export function ScheduleGroupsTab({
+  onConnectionsClick,
+  schedules,
+  onCopyGroup,
+  onApplyClientOverrides,
+  onViewSchedule,
+}: ScheduleGroupsTabProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [copyModalGroup, setCopyModalGroup] = useState<ScheduleGroup | null>(null);
+  const [overrideModalGroup, setOverrideModalGroup] = useState<ScheduleGroup | null>(null);
 
   const filteredGroups = useMemo(() => {
     return sampleScheduleGroups.filter((group) => {
@@ -48,7 +65,7 @@ export function ScheduleGroupsTab({ onConnectionsClick }: ScheduleGroupsTabProps
       {/* Groups List */}
       <div className="space-y-2">
         {filteredGroups.map((group) => {
-          const memberSchedules = sampleSchedules.filter((s) =>
+          const memberSchedules = schedules.filter((s) =>
             group.scheduleIds.includes(s.id)
           );
 
@@ -81,49 +98,79 @@ export function ScheduleGroupsTab({ onConnectionsClick }: ScheduleGroupsTabProps
                 )
               }
             >
-              {/* Expanded content - show member schedules */}
-              <div className="p-4 bg-surface-cream rounded-lg">
-                <h4 className="text-sm font-semibold text-text-primary mb-3">
-                  Member Schedules ({memberSchedules.length})
-                </h4>
-                {memberSchedules.length === 0 ? (
-                  <div className="text-sm text-text-muted text-center py-4">
-                    No schedules in this group
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {memberSchedules.map((schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="flex items-center justify-between p-3 bg-white rounded-lg border border-border"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Badge
-                            variant={schedule.isActive ? 'customized' : 'system'}
-                            size="sm"
-                          >
-                            {schedule.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
-                          <div>
-                            <div className="text-sm font-medium text-text-primary">
-                              {schedule.name}
-                            </div>
-                            {schedule.description && (
-                              <div className="text-xs text-text-muted">
-                                {schedule.description}
+              {/* Expanded content - show member schedules and actions */}
+              <div className="p-4 bg-surface-cream rounded-lg space-y-4">
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCopyModalGroup(group);
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-1" />
+                    Copy Group
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOverrideModalGroup(group);
+                    }}
+                  >
+                    <UserPlus className="w-4 h-4 mr-1" />
+                    Add Client Override
+                  </Button>
+                </div>
+
+                {/* Member schedules list */}
+                <div>
+                  <h4 className="text-sm font-semibold text-text-primary mb-3">
+                    Member Schedules ({memberSchedules.length})
+                  </h4>
+                  {memberSchedules.length === 0 ? (
+                    <div className="text-sm text-text-muted text-center py-4">
+                      No schedules in this group
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {memberSchedules.map((schedule) => (
+                        <div
+                          key={schedule.id}
+                          onClick={() => onViewSchedule(schedule.id)}
+                          className="flex items-center justify-between p-3 bg-white rounded-lg border border-border hover:border-brand-cyan cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              variant={schedule.isActive ? 'customized' : 'system'}
+                              size="sm"
+                            >
+                              {schedule.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
+                            <div>
+                              <div className="text-sm font-medium text-text-primary">
+                                {schedule.name}
                               </div>
-                            )}
+                              {schedule.description && (
+                                <div className="text-xs text-text-muted">
+                                  {schedule.description}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-text-muted">
+                              {schedule.legs.length} legs
+                            </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xs text-text-muted">
-                            {schedule.legs.length} legs
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </ExpandableRow>
           );
@@ -135,6 +182,35 @@ export function ScheduleGroupsTab({ onConnectionsClick }: ScheduleGroupsTabProps
           </div>
         )}
       </div>
+
+      {/* Copy Group Modal */}
+      {copyModalGroup && (
+        <CopyGroupModal
+          group={copyModalGroup}
+          schedules={schedules}
+          onClose={() => setCopyModalGroup(null)}
+          onCreateCopies={(name, ids, edits) => {
+            onCopyGroup(name, ids, edits);
+            setCopyModalGroup(null);
+          }}
+          onViewSchedule={onViewSchedule}
+        />
+      )}
+
+      {/* Add Client Override Modal */}
+      {overrideModalGroup && (
+        <AddClientOverrideModal
+          group={overrideModalGroup}
+          schedules={schedules}
+          clients={sampleClients}
+          onClose={() => setOverrideModalGroup(null)}
+          onApplyOverrides={(clientId, ids, edits) => {
+            onApplyClientOverrides(clientId, ids, edits);
+            setOverrideModalGroup(null);
+          }}
+          onViewSchedule={onViewSchedule}
+        />
+      )}
     </div>
   );
 }
