@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
-import type { BulkEditField, BulkEditFieldType, BulkEditMode, TimeUnit } from '../types';
+import type { BulkEditField, BulkEditFieldType, TimeUnit } from '../types';
 import { BULK_EDITABLE_FIELDS } from '../types';
 
 interface BulkEditFieldSelectorProps {

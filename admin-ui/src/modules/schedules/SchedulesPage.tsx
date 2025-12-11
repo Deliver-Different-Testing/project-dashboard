@@ -33,8 +33,8 @@ export function SchedulesPage() {
     createEmptyConnections()
   );
   const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
-  const [scheduleGroups, setScheduleGroups] = useState<ScheduleGroup[]>(initialScheduleGroups);
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
+  const [_scheduleGroups, setScheduleGroups] = useState<ScheduleGroup[]>(initialScheduleGroups);
+  const [_selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
 
   const handleConnectionsClick = (sourceItem: SourceItem, connections: EntityConnections) => {
     setSidebarSourceItem(sourceItem);

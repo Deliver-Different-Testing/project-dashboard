@@ -1,5 +1,5 @@
 // src/modules/schedules/components/CopyGroupModal.tsx
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { X, Copy, ArrowRight } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { BulkEditPreview } from './BulkEditPreview';
