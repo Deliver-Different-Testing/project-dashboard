@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
@@ -11,7 +11,8 @@ import { ScheduleTableView } from './components/ScheduleTableView';
 import { ScheduleGroupsTab } from './components/ScheduleGroupsTab';
 import type { SourceItem, EntityConnections } from '../territory/types';
 import { createEmptyConnections } from '../territory/types';
-import { sampleSchedules } from './data/sampleData';
+import { sampleSchedules as initialSchedules, sampleScheduleGroups as initialScheduleGroups, sampleClients } from './data/sampleData';
+import type { Schedule, ScheduleGroup, BulkEditField } from './types';
 
 const tabs = [
   { id: 'schedules', label: 'Schedules' },
@@ -31,6 +32,9 @@ export function SchedulesPage() {
   const [sidebarConnections, setSidebarConnections] = useState<EntityConnections>(
     createEmptyConnections()
   );
+  const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
+  const [scheduleGroups, setScheduleGroups] = useState<ScheduleGroup[]>(initialScheduleGroups);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
 
   const handleConnectionsClick = (sourceItem: SourceItem, connections: EntityConnections) => {
     setSidebarSourceItem(sourceItem);
@@ -60,8 +64,116 @@ export function SchedulesPage() {
     // Refresh data after import
   };
 
+  const handleCopyGroup = useCallback(
+    (newGroupName: string, scheduleIds: string[], edits: BulkEditField[]) => {
+      // Create copies of selected schedules
+      const newSchedules: Schedule[] = scheduleIds.map((id) => {
+        const original = schedules.find((s) => s.id === id);
+        if (!original) return null;
+
+        const copy: Schedule = {
+          ...original,
+          id: `${original.id}-copy-${Date.now()}`,
+          name: `${original.name} (Copy)`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Apply edits
+        edits.forEach((edit) => {
+          if (edit.field === 'cutoffValue') {
+            if (edit.mode === 'relative') {
+              copy.operatingSchedule.cutoffValue += Number(edit.value);
+            } else {
+              copy.operatingSchedule.cutoffValue = Number(edit.value);
+            }
+            if (edit.unit) {
+              copy.operatingSchedule.cutoffUnit = edit.unit;
+            }
+          }
+          // Add more field handlers as needed
+        });
+
+        return copy;
+      }).filter(Boolean) as Schedule[];
+
+      // Create new group
+      const newGroup: ScheduleGroup = {
+        id: `group-${Date.now()}`,
+        name: newGroupName,
+        description: `Copied from original group`,
+        scheduleIds: newSchedules.map((s) => s.id),
+        isActive: true,
+        connections: createEmptyConnections(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Update state
+      setSchedules((prev) => [...prev, ...newSchedules]);
+      setScheduleGroups((prev) => [...prev, newGroup]);
+
+      console.log('Created group:', newGroup.name, 'with', newSchedules.length, 'schedules');
+    },
+    [schedules]
+  );
+
+  const handleApplyClientOverrides = useCallback(
+    (clientId: string, scheduleIds: string[], edits: BulkEditField[]) => {
+      const client = sampleClients.find((c) => c.id === clientId);
+
+      const newOverrides: Schedule[] = scheduleIds.map((id) => {
+        const base = schedules.find((s) => s.id === id);
+        if (!base) return null;
+
+        const override: Schedule = {
+          ...base,
+          id: `${base.id}-override-${clientId}-${Date.now()}`,
+          name: `${base.name} (${client?.shortName || client?.name || clientId})`,
+          isOverride: true,
+          baseScheduleId: base.id,
+          clientVisibility: 'specific',
+          clientIds: [clientId],
+          overriddenFields: edits.map((e) => e.field),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Apply edits
+        edits.forEach((edit) => {
+          if (edit.field === 'cutoffValue') {
+            if (edit.mode === 'relative') {
+              override.operatingSchedule.cutoffValue += Number(edit.value);
+            } else {
+              override.operatingSchedule.cutoffValue = Number(edit.value);
+            }
+            if (edit.unit) {
+              override.operatingSchedule.cutoffUnit = edit.unit;
+            }
+          }
+          // Add more field handlers as needed
+        });
+
+        return override;
+      }).filter(Boolean) as Schedule[];
+
+      setSchedules((prev) => [...prev, ...newOverrides]);
+
+      console.log('Created', newOverrides.length, 'overrides for client:', client?.name);
+    },
+    [schedules]
+  );
+
+  const handleViewScheduleFromGroup = useCallback((scheduleId: string) => {
+    const schedule = schedules.find((s) => s.id === scheduleId);
+    if (schedule) {
+      setSelectedSchedule(schedule);
+      setActiveTab('schedules'); // Switch to schedules tab to show detail
+    }
+  }, [schedules]);
+
   // Transform schedule data for export
-  const scheduleExportData = sampleSchedules.map(schedule => {
+  const scheduleExportData = schedules.map(schedule => {
     // Get active days from the days object
     const activeDays = Object.entries(schedule.operatingSchedule.days)
       .filter(([_, daySchedule]) => daySchedule.enabled)
@@ -174,7 +286,13 @@ export function SchedulesPage() {
           )}
           {activeTab === 'groups' && (
             <div className="p-4">
-              <ScheduleGroupsTab onConnectionsClick={handleConnectionsClick} />
+              <ScheduleGroupsTab
+                onConnectionsClick={handleConnectionsClick}
+                schedules={schedules}
+                onCopyGroup={handleCopyGroup}
+                onApplyClientOverrides={handleApplyClientOverrides}
+                onViewSchedule={handleViewScheduleFromGroup}
+              />
             </div>
           )}
         </Card>
