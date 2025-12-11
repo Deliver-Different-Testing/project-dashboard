@@ -1,13 +1,12 @@
 // src/modules/schedules/components/BulkEditPreview.tsx
 import { Check, AlertTriangle, XCircle, ChevronRight } from 'lucide-react';
-import type { BulkEditPreviewRow, Schedule } from '../types';
+import type { BulkEditPreviewRow } from '../types';
 
 interface BulkEditPreviewProps {
   rows: BulkEditPreviewRow[];
   fieldLabel: string;
   onToggleInclude: (scheduleId: string) => void;
   onViewSchedule: (scheduleId: string) => void;
-  _schedules?: Schedule[];
 }
 
 export function BulkEditPreview({
@@ -15,7 +14,6 @@ export function BulkEditPreview({
   fieldLabel,
   onToggleInclude,
   onViewSchedule,
-  _schedules,
 }: BulkEditPreviewProps) {
   const includedCount = rows.filter((r) => r.included).length;
   const warningCount = rows.filter((r) => r.included && r.warningLevel === 'caution').length;

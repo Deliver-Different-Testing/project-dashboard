@@ -246,7 +246,6 @@ export function AddClientOverrideModal({
                   fieldLabel={editFields[0].label}
                   onToggleInclude={toggleSchedule}
                   onViewSchedule={onViewSchedule}
-                  schedules={memberSchedules}
                 />
               )}
 

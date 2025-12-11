@@ -232,7 +232,6 @@ export function CopyGroupModal({
                   fieldLabel={editFields[0].label}
                   onToggleInclude={(id) => toggleSchedule(id)}
                   onViewSchedule={onViewSchedule}
-                  schedules={memberSchedules}
                 />
               )}
             </div>
