@@ -654,3 +654,52 @@ export function buildScheduleTableData(
 
   return rows;
 }
+
+// ============================================
+// BULK OPERATION TYPES
+// ============================================
+
+export type BulkEditMode = 'absolute' | 'relative';
+
+export type BulkEditFieldType =
+  | 'cutoffValue'
+  | 'cutoffUnit'
+  | 'pickupMinutesBefore'
+  | 'departureTime'
+  | 'deliveryWindowStart'
+  | 'deliveryWindowEnd'
+  | 'operatingDays';
+
+export interface BulkEditField {
+  field: BulkEditFieldType;
+  label: string;
+  mode: BulkEditMode;
+  value: string | number;
+  unit?: TimeUnit;
+}
+
+export type WarningLevel = 'ok' | 'caution' | 'conflict';
+
+export interface BulkEditPreviewRow {
+  scheduleId: string;
+  scheduleName: string;
+  included: boolean;
+  beforeValue: string;
+  afterValue: string;
+  warningLevel: WarningLevel;
+  warningMessage?: string;
+}
+
+export interface BulkEditState {
+  fields: BulkEditField[];
+  previews: BulkEditPreviewRow[];
+}
+
+export const BULK_EDITABLE_FIELDS: { field: BulkEditFieldType; label: string; supportsRelative: boolean }[] = [
+  { field: 'cutoffValue', label: 'Booking Cutoff', supportsRelative: true },
+  { field: 'pickupMinutesBefore', label: 'Pickup Time Offset', supportsRelative: true },
+  { field: 'departureTime', label: 'Departure Time', supportsRelative: true },
+  { field: 'deliveryWindowStart', label: 'Delivery Window Start', supportsRelative: true },
+  { field: 'deliveryWindowEnd', label: 'Delivery Window End', supportsRelative: true },
+  { field: 'operatingDays', label: 'Operating Days', supportsRelative: false },
+];
