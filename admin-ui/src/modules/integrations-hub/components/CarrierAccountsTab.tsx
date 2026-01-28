@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Badge } from '../../../components/ui/Badge';
 import { Toggle } from '../../../components/ui/Toggle';
 import { sampleCarrierAccounts } from '../data/sampleData';
-import { CARRIER_LABELS, CARRIER_COLORS } from '../types';
+import { CARRIER_LABELS } from '../types';
 import type { CarrierAccount, CarrierType } from '../types';
 
 interface CarrierAccountsTabProps {

@@ -9,7 +9,6 @@ import { ServiceMappingsTab } from './components/ServiceMappingsTab';
 import { FedExSetupTab } from './components/FedExSetupTab';
 import { FuelSurchargesTab } from './components/FuelSurchargesTab';
 import type { CarrierType } from './types';
-import { CARRIER_LABELS } from './types';
 
 interface Integration {
   id: CarrierType;
