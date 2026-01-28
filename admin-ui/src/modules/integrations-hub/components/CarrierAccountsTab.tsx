@@ -3,10 +3,16 @@ import { Badge } from '../../../components/ui/Badge';
 import { Toggle } from '../../../components/ui/Toggle';
 import { sampleCarrierAccounts } from '../data/sampleData';
 import { CARRIER_LABELS, CARRIER_COLORS } from '../types';
-import type { CarrierAccount } from '../types';
+import type { CarrierAccount, CarrierType } from '../types';
 
-export function CarrierAccountsTab() {
-  const [accounts, setAccounts] = useState<CarrierAccount[]>(sampleCarrierAccounts);
+interface CarrierAccountsTabProps {
+  carrier: CarrierType;
+}
+
+export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
+  const [accounts, setAccounts] = useState<CarrierAccount[]>(
+    sampleCarrierAccounts.filter(a => a.carrier === carrier)
+  );
 
   const handleToggleActive = (id: string) => {
     setAccounts(accounts.map(account =>
@@ -30,7 +36,7 @@ export function CarrierAccountsTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-text-secondary">
-          {accounts.length} carrier account{accounts.length !== 1 ? 's' : ''} configured
+          {accounts.length} {CARRIER_LABELS[carrier]} account{accounts.length !== 1 ? 's' : ''} configured
         </p>
       </div>
 
@@ -52,9 +58,6 @@ export function CarrierAccountsTab() {
                   <h4 className="font-medium text-text-primary truncate">
                     {account.accountName}
                   </h4>
-                  <Badge className={CARRIER_COLORS[account.carrier]}>
-                    {CARRIER_LABELS[account.carrier]}
-                  </Badge>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
@@ -100,8 +103,8 @@ export function CarrierAccountsTab() {
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-text-primary mb-1">No carrier accounts</h3>
-          <p className="text-text-secondary mb-4">Add your first carrier account to get started</p>
+          <h3 className="text-lg font-medium text-text-primary mb-1">No {CARRIER_LABELS[carrier]} accounts</h3>
+          <p className="text-text-secondary mb-4">Add your first {CARRIER_LABELS[carrier]} account to get started</p>
         </div>
       )}
     </div>

@@ -1,16 +1,71 @@
 import { useState } from 'react';
 import { Button } from '../../../components/ui/Button';
-import { fedExSetupSteps } from '../data/sampleData';
-import type { FedExSetupStep } from '../types';
+import { CARRIER_LABELS } from '../types';
+import type { CarrierType } from '../types';
 
-export function FedExSetupTab() {
-  const [steps] = useState<FedExSetupStep[]>(fedExSetupSteps);
+interface SetupStep {
+  id: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'error';
+}
+
+interface FedExSetupTabProps {
+  carrier: CarrierType;
+}
+
+const setupStepsByCarrier: Record<CarrierType, SetupStep[]> = {
+  fedex: [
+    { id: '1', title: 'Create FedEx Developer Account', description: 'Register for a FedEx Developer Portal account to get API access', status: 'completed' },
+    { id: '2', title: 'Configure OAuth Credentials', description: 'Set up Client ID and Client Secret for API authentication', status: 'completed' },
+    { id: '3', title: 'Add Shipping Account', description: 'Link your FedEx shipping account number', status: 'in_progress' },
+    { id: '4', title: 'Test Connection', description: 'Verify API connectivity with a test request', status: 'pending' },
+    { id: '5', title: 'Enable Production Mode', description: 'Switch from sandbox to production environment', status: 'pending' },
+  ],
+  ups: [
+    { id: '1', title: 'Create UPS Developer Account', description: 'Register at developer.ups.com for API access', status: 'completed' },
+    { id: '2', title: 'Generate API Key', description: 'Create an API key in the UPS Developer Portal', status: 'in_progress' },
+    { id: '3', title: 'Add UPS Account Number', description: 'Link your UPS shipper account number', status: 'pending' },
+    { id: '4', title: 'Test Connection', description: 'Verify API connectivity with a test request', status: 'pending' },
+  ],
+  usps: [
+    { id: '1', title: 'Register for USPS Web Tools', description: 'Sign up at usps.com/webtools for API access', status: 'pending' },
+    { id: '2', title: 'Obtain User ID', description: 'Get your USPS Web Tools User ID', status: 'pending' },
+    { id: '3', title: 'Configure Endpoints', description: 'Set up shipping and tracking endpoints', status: 'pending' },
+    { id: '4', title: 'Test Connection', description: 'Verify API connectivity', status: 'pending' },
+  ],
+  dhl: [
+    { id: '1', title: 'Create DHL Developer Account', description: 'Register at developer.dhl.com for API access', status: 'pending' },
+    { id: '2', title: 'Generate API Key', description: 'Create credentials in the DHL Developer Portal', status: 'pending' },
+    { id: '3', title: 'Add DHL Account Number', description: 'Link your DHL Express account', status: 'pending' },
+    { id: '4', title: 'Configure Services', description: 'Select which DHL services to enable', status: 'pending' },
+    { id: '5', title: 'Test Connection', description: 'Verify API connectivity with a test shipment', status: 'pending' },
+  ],
+};
+
+const carrierColors: Record<CarrierType, { bg: string; text: string; border: string }> = {
+  fedex: { bg: 'from-purple-50 to-purple-100', text: 'text-purple-900', border: 'border-purple-200' },
+  ups: { bg: 'from-amber-50 to-amber-100', text: 'text-amber-900', border: 'border-amber-200' },
+  usps: { bg: 'from-blue-50 to-blue-100', text: 'text-blue-900', border: 'border-blue-200' },
+  dhl: { bg: 'from-red-50 to-red-100', text: 'text-red-900', border: 'border-red-200' },
+};
+
+const carrierLogoBg: Record<CarrierType, string> = {
+  fedex: 'bg-purple-600',
+  ups: 'bg-amber-600',
+  usps: 'bg-blue-600',
+  dhl: 'bg-red-600',
+};
+
+export function FedExSetupTab({ carrier }: FedExSetupTabProps) {
+  const [steps] = useState<SetupStep[]>(setupStepsByCarrier[carrier] || []);
+  const colors = carrierColors[carrier];
 
   const completedSteps = steps.filter(s => s.status === 'completed').length;
   const totalSteps = steps.length;
-  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
+  const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
-  const getStepIcon = (status: FedExSetupStep['status']) => {
+  const getStepIcon = (status: SetupStep['status']) => {
     switch (status) {
       case 'completed':
         return (
@@ -45,55 +100,39 @@ export function FedExSetupTab() {
     }
   };
 
-  const getStepAction = (step: FedExSetupStep) => {
+  const getStepAction = (step: SetupStep) => {
     switch (step.status) {
       case 'completed':
-        return (
-          <span className="text-sm text-green-600 font-medium">Completed</span>
-        );
+        return <span className="text-sm text-green-600 font-medium">Completed</span>;
       case 'in_progress':
-        return (
-          <Button variant="primary" size="sm">
-            Continue
-          </Button>
-        );
+        return <Button variant="primary" size="sm">Continue</Button>;
       case 'error':
-        return (
-          <Button variant="danger" size="sm">
-            Retry
-          </Button>
-        );
+        return <Button variant="danger" size="sm">Retry</Button>;
       default:
-        return (
-          <Button variant="secondary" size="sm" disabled>
-            Start
-          </Button>
-        );
+        return <Button variant="secondary" size="sm" disabled>Start</Button>;
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Progress Overview */}
-      <div className="p-6 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200">
+      <div className={`p-6 rounded-lg bg-gradient-to-r ${colors.bg} border ${colors.border}`}>
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-purple-600 flex items-center justify-center">
-            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+          <div className={`w-12 h-12 rounded-lg ${carrierLogoBg[carrier]} flex items-center justify-center`}>
+            <span className="text-white font-bold">{CARRIER_LABELS[carrier].substring(0, 2).toUpperCase()}</span>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-purple-900">FedEx Integration Setup</h3>
-            <p className="text-sm text-purple-700">
+            <h3 className={`text-lg font-semibold ${colors.text}`}>{CARRIER_LABELS[carrier]} Integration Setup</h3>
+            <p className={`text-sm ${colors.text} opacity-80`}>
               {completedSteps} of {totalSteps} steps completed
             </p>
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div className="h-2 bg-purple-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-white/50 rounded-full overflow-hidden">
           <div
-            className="h-full bg-purple-600 transition-all duration-500"
+            className={`h-full ${carrierLogoBg[carrier]} transition-all duration-500`}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -115,28 +154,17 @@ export function FedExSetupTab() {
             }`}
           >
             <div className="flex items-center gap-4">
-              {/* Step Number & Icon */}
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-text-muted w-6">
-                  {index + 1}.
-                </span>
+                <span className="text-sm font-medium text-text-muted w-6">{index + 1}.</span>
                 {getStepIcon(step.status)}
               </div>
-
-              {/* Step Content */}
               <div className="flex-1 min-w-0">
-                <h4 className={`font-medium ${
-                  step.status === 'completed' ? 'text-green-700' : 'text-text-primary'
-                }`}>
+                <h4 className={`font-medium ${step.status === 'completed' ? 'text-green-700' : 'text-text-primary'}`}>
                   {step.title}
                 </h4>
                 <p className="text-sm text-text-secondary">{step.description}</p>
               </div>
-
-              {/* Action */}
-              <div className="flex-shrink-0">
-                {getStepAction(step)}
-              </div>
+              <div className="flex-shrink-0">{getStepAction(step)}</div>
             </div>
           </div>
         ))}
@@ -153,11 +181,7 @@ export function FedExSetupTab() {
           <div>
             <h4 className="font-medium text-text-primary mb-1">Need help?</h4>
             <p className="text-sm text-text-secondary">
-              Visit the{' '}
-              <a href="https://developer.fedex.com" target="_blank" rel="noopener noreferrer" className="text-brand-cyan hover:underline">
-                FedEx Developer Portal
-              </a>
-              {' '}for API documentation and support.
+              Contact support or visit the {CARRIER_LABELS[carrier]} developer documentation for assistance.
             </p>
           </div>
         </div>

@@ -1,12 +1,17 @@
 import { useState } from 'react';
-import { Badge } from '../../../components/ui/Badge';
 import { Toggle } from '../../../components/ui/Toggle';
 import { sampleServiceMappings } from '../data/sampleData';
-import { CARRIER_LABELS, CARRIER_COLORS } from '../types';
-import type { ServiceMapping } from '../types';
+import { CARRIER_LABELS } from '../types';
+import type { ServiceMapping, CarrierType } from '../types';
 
-export function ServiceMappingsTab() {
-  const [mappings, setMappings] = useState<ServiceMapping[]>(sampleServiceMappings);
+interface ServiceMappingsTabProps {
+  carrier: CarrierType;
+}
+
+export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
+  const [mappings, setMappings] = useState<ServiceMapping[]>(
+    sampleServiceMappings.filter(m => m.carrier === carrier)
+  );
 
   const handleToggleActive = (id: string) => {
     setMappings(mappings.map(mapping =>
@@ -14,95 +19,65 @@ export function ServiceMappingsTab() {
     ));
   };
 
-  // Group mappings by job type
-  const groupedMappings = mappings.reduce((acc, mapping) => {
-    if (!acc[mapping.jobType]) {
-      acc[mapping.jobType] = [];
-    }
-    acc[mapping.jobType].push(mapping);
-    return acc;
-  }, {} as Record<string, ServiceMapping[]>);
-
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-text-secondary">
-          {mappings.length} service mapping{mappings.length !== 1 ? 's' : ''} configured
+          {mappings.length} service mapping{mappings.length !== 1 ? 's' : ''} for {CARRIER_LABELS[carrier]}
         </p>
       </div>
 
       {/* Mappings Table */}
-      <div className="overflow-hidden rounded-lg border border-border">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50 border-b border-border">
-              <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                Job Type
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                Carrier Service
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                Carrier
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
-                DIM Factor
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-text-muted uppercase tracking-wider">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border bg-white">
-            {mappings.map((mapping) => (
-              <tr
-                key={mapping.id}
-                className={`hover:bg-gray-50 transition-colors ${
-                  !mapping.isActive ? 'opacity-50' : ''
-                }`}
-              >
-                <td className="px-4 py-3">
-                  <span className="font-medium text-text-primary">{mapping.jobType}</span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="text-text-secondary">{mapping.carrierService}</span>
-                </td>
-                <td className="px-4 py-3">
-                  <Badge className={CARRIER_COLORS[mapping.carrier]}>
-                    {CARRIER_LABELS[mapping.carrier]}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <span className="font-mono text-sm text-text-secondary">{mapping.dimensionalFactor}</span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Toggle
-                    checked={mapping.isActive}
-                    onChange={() => handleToggleActive(mapping.id)}
-                    size="sm"
-                  />
-                </td>
+      {mappings.length > 0 && (
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-border">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  Job Type
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  {CARRIER_LABELS[carrier]} Service
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  DIM Factor
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  Status
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Summary by Job Type */}
-      <div className="grid grid-cols-3 gap-4">
-        {Object.entries(groupedMappings).map(([jobType, typeMappings]) => {
-          const activeCount = typeMappings.filter(m => m.isActive).length;
-          return (
-            <div key={jobType} className="p-4 rounded-lg bg-gray-50 border border-border">
-              <h4 className="font-medium text-text-primary mb-1">{jobType}</h4>
-              <p className="text-sm text-text-secondary">
-                {activeCount} of {typeMappings.length} carrier{typeMappings.length !== 1 ? 's' : ''} active
-              </p>
-            </div>
-          );
-        })}
-      </div>
+            </thead>
+            <tbody className="divide-y divide-border bg-white">
+              {mappings.map((mapping) => (
+                <tr
+                  key={mapping.id}
+                  className={`hover:bg-gray-50 transition-colors ${
+                    !mapping.isActive ? 'opacity-50' : ''
+                  }`}
+                >
+                  <td className="px-4 py-3">
+                    <span className="font-medium text-text-primary">{mapping.jobType}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-text-secondary">{mapping.carrierService}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-sm text-text-secondary">{mapping.dimensionalFactor}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Toggle
+                      checked={mapping.isActive}
+                      onChange={() => handleToggleActive(mapping.id)}
+                      size="sm"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Empty State */}
       {mappings.length === 0 && (
@@ -118,7 +93,7 @@ export function ServiceMappingsTab() {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-text-primary mb-1">No service mappings</h3>
-          <p className="text-text-secondary mb-4">Map your job types to carrier services</p>
+          <p className="text-text-secondary mb-4">Map your job types to {CARRIER_LABELS[carrier]} services</p>
         </div>
       )}
     </div>
