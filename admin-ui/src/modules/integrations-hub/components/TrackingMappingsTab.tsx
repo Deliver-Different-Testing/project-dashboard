@@ -3,6 +3,7 @@ import { Toggle } from '../../../components/ui/Toggle';
 import { Badge } from '../../../components/ui/Badge';
 import { trackingMappingsApi } from '../../../api/trackingMappings';
 import { carrierServiceMappingsApi } from '../../../api/carrierServiceMappings';
+import { sampleTrackingMappings, sampleCarrierTypes } from '../../../api/sampleData';
 import { CARRIER_LABELS, CARRIER_CODES } from '../types';
 import type { CarrierType } from '../types';
 
@@ -15,19 +16,29 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
   const carrierCode = CARRIER_CODES[carrier];
 
   // Fetch carrier types to get the ID
-  const { data: carrierTypes = [] } = useQuery({
+  const { data: apiCarrierTypes, error: carrierTypesError } = useQuery({
     queryKey: ['carrierTypes'],
     queryFn: () => carrierServiceMappingsApi.getCarrierTypes(),
   });
 
+  // Use sample data if API fails
+  const useSampleCarrierTypes = !!carrierTypesError || !apiCarrierTypes || apiCarrierTypes.length === 0;
+  const carrierTypes = useSampleCarrierTypes ? sampleCarrierTypes : apiCarrierTypes;
+
   const carrierTypeId = carrierTypes.find(ct => ct.code === carrierCode)?.id;
 
   // Fetch tracking mappings for this carrier
-  const { data: mappings = [], isLoading } = useQuery({
+  const { data: apiMappings, isLoading, error: mappingsError } = useQuery({
     queryKey: ['trackingMappings', carrierTypeId],
     queryFn: () => trackingMappingsApi.getAll({ carrierIntegrationTypeId: carrierTypeId }),
     enabled: !!carrierTypeId,
   });
+
+  // Use sample data if API fails or returns empty
+  const useSampleData = !!mappingsError || (!isLoading && (!apiMappings || apiMappings.length === 0));
+  const mappings = useSampleData
+    ? sampleTrackingMappings.filter(m => m.carrierIntegrationTypeId === carrierTypeId)
+    : (apiMappings || []);
 
   // Mutation for updating mappings
   const updateMutation = useMutation({
@@ -61,7 +72,7 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !useSampleData) {
     return (
       <div className="flex justify-center py-12">
         <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
@@ -71,6 +82,11 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
 
   return (
     <div className="space-y-4">
+      {useSampleData && (
+        <div className="text-xs text-amber-600 mb-2">
+          Showing sample data - connect to backend for live data
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-text-secondary">

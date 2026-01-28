@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card } from '../../../components/layout/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { integrationLogsApi } from '../../../api/integrationLogs';
+import { sampleIntegrationLogs, sampleLogDetails } from '../../../api/sampleData';
 import type { IntegrationLog } from '../../../api/integrationLogs';
 
 const getStatusBadge = (log: IntegrationLog) => {
@@ -32,12 +33,33 @@ const getCarrierColor = (carrier: string) => {
 
 interface LogDetailProps {
   logId: number;
+  useSampleData: boolean;
 }
 
-function LogDetail({ logId }: LogDetailProps) {
-  const { data: logDetail, isLoading } = useQuery({
+interface LogDetailData {
+  requestBody?: string;
+  responseBody?: string;
+  isSuccess?: boolean;
+  errorMessage?: string;
+}
+
+function LogDetail({ logId, useSampleData }: LogDetailProps) {
+  const { data: logDetail, isLoading } = useQuery<LogDetailData>({
     queryKey: ['integrationLog', logId],
-    queryFn: () => integrationLogsApi.getById(logId),
+    queryFn: async (): Promise<LogDetailData> => {
+      if (useSampleData) {
+        const detail = sampleLogDetails[logId];
+        const log = sampleIntegrationLogs.logs.find(l => l.id === logId);
+        return {
+          requestBody: detail?.requestBody,
+          responseBody: detail?.responseBody,
+          isSuccess: log?.isSuccess,
+          errorMessage: log?.errorMessage,
+        };
+      }
+      const result = await integrationLogsApi.getById(logId);
+      return result as LogDetailData;
+    },
   });
 
   if (isLoading) {
@@ -96,7 +118,9 @@ export function TroubleshootingLogs() {
       }),
   });
 
-  const logs = data?.logs || [];
+  // Use sample data if API fails or returns empty
+  const useSampleData = !!error || (!isLoading && (!data?.logs || data.logs.length === 0));
+  const logs = useSampleData ? sampleIntegrationLogs.logs : (data?.logs || []);
 
   // Filter logs based on filter selection
   const filteredLogs = logs.filter((log) => {
@@ -108,7 +132,14 @@ export function TroubleshootingLogs() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-text-primary">Troubleshooting & Logs</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-text-primary">Troubleshooting & Logs</h3>
+          {useSampleData && (
+            <span className="text-xs text-amber-600">
+              Showing sample data - connect to backend for live data
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <select
             value={filter}
@@ -125,13 +156,9 @@ export function TroubleshootingLogs() {
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading && !useSampleData ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
-        </div>
-      ) : error ? (
-        <div className="text-center py-8 text-red-600">
-          <p>Failed to load logs. Please try again.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -153,7 +180,7 @@ export function TroubleshootingLogs() {
                 <span className="text-xs text-text-muted w-16 text-right">
                   {log.durationMs}ms
                 </span>
-                {getStatusBadge(log)}
+                {getStatusBadge(log as IntegrationLog)}
                 <svg
                   className={`w-4 h-4 text-text-muted transition-transform ${expandedLog === log.id ? 'rotate-180' : ''}`}
                   viewBox="0 0 24 24"
@@ -165,7 +192,7 @@ export function TroubleshootingLogs() {
                 </svg>
               </button>
 
-              {expandedLog === log.id && <LogDetail logId={log.id} />}
+              {expandedLog === log.id && <LogDetail logId={log.id} useSampleData={useSampleData} />}
             </div>
           ))}
         </div>

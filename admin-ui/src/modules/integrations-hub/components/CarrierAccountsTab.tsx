@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
 import { carrierAccountsApi } from '../../../api/carrierAccounts';
+import { sampleCarrierAccounts } from '../../../api/sampleData';
 import { CARRIER_LABELS, CARRIER_CODES } from '../types';
 import type { CarrierType } from '../types';
 
@@ -14,10 +15,17 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
   const carrierCode = CARRIER_CODES[carrier];
 
   // Fetch accounts from API
-  const { data: accounts = [], isLoading } = useQuery({
+  const { data: apiAccounts, isLoading, error } = useQuery({
     queryKey: ['carrierAccounts', carrier],
     queryFn: () => carrierAccountsApi.getAll({ carrierTypeCode: carrierCode }),
   });
+
+  // Use sample data if API fails or returns empty
+  const useSampleData = !!error || (!isLoading && (!apiAccounts || apiAccounts.length === 0));
+  const allAccounts = useSampleData
+    ? sampleCarrierAccounts.filter(a => a.carrierType === carrierCode)
+    : (apiAccounts || []);
+  const accounts = allAccounts;
 
   // Mutation for updating account status
   const updateMutation = useMutation({
@@ -49,7 +57,7 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
     });
   };
 
-  if (isLoading) {
+  if (isLoading && !useSampleData) {
     return (
       <div className="flex justify-center py-12">
         <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
@@ -59,6 +67,11 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
 
   return (
     <div className="space-y-6">
+      {useSampleData && (
+        <div className="text-xs text-amber-600 mb-2">
+          Showing sample data - connect to backend for live data
+        </div>
+      )}
       {/* Primary Account Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
