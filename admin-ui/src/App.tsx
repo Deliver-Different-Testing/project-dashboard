@@ -6,6 +6,8 @@ import { TasksPage } from './modules/tasks';
 import { AutomationsPage } from './modules/automations';
 import { SchedulesPage } from './modules/schedules';
 import { IntegrationsHubPage } from './modules/integrations-hub';
+import { RateCalculatorPage } from './modules/rate-calculator';
+import { ImportToolPage } from './modules/import-tool';
 import { SetupWizard } from './features/setup-wizard';
 
 // Import sample data for import/export functionality
@@ -20,7 +22,7 @@ type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holid
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
   'staff-users' | 'client-users' |
   'tasks' | 'schedules' | 'notifications' | 'automations' | 'territory' | 'dashboards' | 'site-settings' |
-  'integrations-hub';
+  'integrations-hub' | 'rate-calculator' | 'import-tool';
 
 interface MenuItem {
   id: ModuleId;
@@ -107,6 +109,8 @@ const MENU_SECTIONS: MenuSection[] = [
       { id: 'automations', label: 'Automations' },
       { id: 'territory', label: 'Territory & Locations' },
       { id: 'integrations-hub', label: 'Integrations Hub' },
+      { id: 'rate-calculator', label: 'Rate Calculator' },
+      { id: 'import-tool', label: 'Import Tool' },
       { id: 'dashboards', label: 'Dashboards' },
       { id: 'site-settings', label: 'Site Settings & Integrations' },
     ],
@@ -114,7 +118,7 @@ const MENU_SECTIONS: MenuSection[] = [
 ];
 
 // Modules that are implemented
-const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'schedules', 'automations', 'integrations-hub'];
+const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'schedules', 'automations', 'integrations-hub', 'rate-calculator', 'import-tool'];
 
 // Helper to find which section contains a module
 const findSectionForModule = (moduleId: ModuleId): string | null => {
@@ -205,6 +209,10 @@ function App() {
         return <AutomationsPage />;
       case 'integrations-hub':
         return <IntegrationsHubPage />;
+      case 'rate-calculator':
+        return <RateCalculatorPage />;
+      case 'import-tool':
+        return <ImportToolPage />;
       default:
         return (
           <div className="min-h-screen bg-surface-light flex items-center justify-center">
