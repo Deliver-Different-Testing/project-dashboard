@@ -10,6 +10,7 @@ import { FedExSetupTab } from './components/FedExSetupTab';
 import { FuelSurchargesTab } from './components/FuelSurchargesTab';
 import { ZoneMappingsTab } from './components/ZoneMappingsTab';
 import { ContractTiersTab } from './components/ContractTiersTab';
+import { RateCalculatorTab } from './components/RateCalculatorTab';
 import type { CarrierType } from './types';
 
 interface Integration {
@@ -141,6 +142,7 @@ export function IntegrationsHubPage() {
     { id: 'fuel-surcharges', label: 'Fuel Surcharges' },
     { id: 'zone-mappings', label: 'Zone Mappings' },
     { id: 'contract-tiers', label: 'Contract Tiers' },
+    { id: 'rate-calculator', label: 'Rate Calculator' },
     { id: 'setup', label: 'Setup Wizard' },
   ];
 
@@ -183,6 +185,7 @@ export function IntegrationsHubPage() {
               {activeTab === 'fuel-surcharges' && <FuelSurchargesTab carrier={selectedIntegration} />}
               {activeTab === 'zone-mappings' && <ZoneMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'contract-tiers' && <ContractTiersTab carrier={selectedIntegration} />}
+              {activeTab === 'rate-calculator' && <RateCalculatorTab carrier={selectedIntegration} />}
               {activeTab === 'setup' && <FedExSetupTab carrier={selectedIntegration} />}
             </div>
           </Card>
