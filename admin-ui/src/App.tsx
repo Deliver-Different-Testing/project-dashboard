@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TerritoryPage } from './modules/territory';
 import { ClientsPage } from './modules/clients';
 import { NotificationsPage } from './modules/notifications';
@@ -7,6 +8,17 @@ import { AutomationsPage } from './modules/automations';
 import { SchedulesPage } from './modules/schedules';
 import { IntegrationsHubPage } from './modules/integrations-hub';
 import { SetupWizard } from './features/setup-wizard';
+
+// React Query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30000, // 30 seconds
+    },
+  },
+});
 
 // Import sample data for import/export functionality
 import { sampleClients } from './modules/clients/data/sampleData';
@@ -226,6 +238,7 @@ function App() {
   };
 
   return (
+    <QueryClientProvider client={queryClient}>
     <div className="h-screen bg-surface-light flex overflow-hidden">
       {/* Sidebar */}
       <aside
@@ -407,6 +420,7 @@ function App() {
         }}
       />
     </div>
+    </QueryClientProvider>
   );
 }
 

@@ -1,23 +1,61 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
-import { sampleServiceMappings } from '../data/sampleData';
-import { CARRIER_LABELS } from '../types';
-import type { ServiceMapping, CarrierType } from '../types';
+import { carrierServiceMappingsApi } from '../../../api/carrierServiceMappings';
+import { CARRIER_LABELS, CARRIER_CODES } from '../types';
+import type { CarrierType } from '../types';
 
 interface ServiceMappingsTabProps {
   carrier: CarrierType;
 }
 
 export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
-  const [mappings, setMappings] = useState<ServiceMapping[]>(
-    sampleServiceMappings.filter(m => m.carrier === carrier)
-  );
+  const queryClient = useQueryClient();
+  const carrierCode = CARRIER_CODES[carrier];
 
-  const handleToggleActive = (id: string) => {
-    setMappings(mappings.map(mapping =>
-      mapping.id === id ? { ...mapping, isActive: !mapping.isActive } : mapping
-    ));
+  // Fetch carrier types to get the ID
+  const { data: carrierTypes = [] } = useQuery({
+    queryKey: ['carrierTypes'],
+    queryFn: () => carrierServiceMappingsApi.getCarrierTypes(),
+  });
+
+  const carrierTypeId = carrierTypes.find(ct => ct.code === carrierCode)?.id;
+
+  // Fetch service mappings for this carrier
+  const { data: mappings = [], isLoading } = useQuery({
+    queryKey: ['serviceMappings', carrierTypeId],
+    queryFn: () => carrierServiceMappingsApi.getAll({ carrierIntegrationTypeId: carrierTypeId }),
+    enabled: !!carrierTypeId,
+  });
+
+  // Mutation for updating mapping status
+  const updateMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) => {
+      const mapping = mappings.find(m => m.id === id);
+      if (!mapping) throw new Error('Mapping not found');
+      return carrierServiceMappingsApi.update(id, {
+        carrierServiceCode: mapping.carrierServiceCode,
+        carrierServiceName: mapping.carrierServiceName,
+        dimFactor: mapping.dimFactor,
+        isDefault: mapping.isDefault,
+        isActive,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['serviceMappings', carrierTypeId] });
+    },
+  });
+
+  const handleToggleActive = (id: number, currentActive: boolean) => {
+    updateMutation.mutate({ id, isActive: !currentActive });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -41,7 +79,13 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
                   {CARRIER_LABELS[carrier]} Service
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  Service Code
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
                   DIM Factor
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  Default
                 </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-text-muted uppercase tracking-wider">
                   Status
@@ -57,18 +101,30 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
                   }`}
                 >
                   <td className="px-4 py-3">
-                    <span className="font-medium text-text-primary">{mapping.jobType}</span>
+                    <span className="font-medium text-text-primary">{mapping.jobTypeName || `Job Type #${mapping.jobTypeId}`}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-text-secondary">{mapping.carrierService}</span>
+                    <span className="text-text-secondary">{mapping.carrierServiceName}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="font-mono text-sm text-text-secondary">{mapping.dimensionalFactor}</span>
+                    <code className="px-2 py-1 rounded bg-gray-100 text-xs font-mono text-text-secondary">
+                      {mapping.carrierServiceCode}
+                    </code>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-sm text-text-secondary">{mapping.dimFactor}</span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {mapping.isDefault && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-cyan/10 text-brand-cyan">
+                        Default
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Toggle
                       checked={mapping.isActive}
-                      onChange={() => handleToggleActive(mapping.id)}
+                      onChange={() => handleToggleActive(mapping.id, mapping.isActive)}
                       size="sm"
                     />
                   </td>

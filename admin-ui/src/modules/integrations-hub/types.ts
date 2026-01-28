@@ -41,6 +41,14 @@ export const CARRIER_LABELS: Record<CarrierType, string> = {
   dhl: 'DHL',
 };
 
+// Backend carrier type codes for API calls
+export const CARRIER_CODES: Record<CarrierType, string> = {
+  fedex: 'FEDEX',
+  ups: 'UPS',
+  usps: 'USPS',
+  dhl: 'DHL',
+};
+
 export const FINANCIAL_LABELS: Record<FinancialIntegrationType, string> = {
   quickbooks: 'QuickBooks',
   xero: 'Xero',

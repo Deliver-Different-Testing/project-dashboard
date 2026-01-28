@@ -1,66 +1,73 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
 import { Badge } from '../../../components/ui/Badge';
-import { CARRIER_LABELS } from '../types';
+import { trackingMappingsApi } from '../../../api/trackingMappings';
+import { carrierServiceMappingsApi } from '../../../api/carrierServiceMappings';
+import { CARRIER_LABELS, CARRIER_CODES } from '../types';
 import type { CarrierType } from '../types';
-
-interface TrackingMapping {
-  id: string;
-  carrierStatus: string;
-  carrierDescription: string;
-  internalStatus: string;
-  triggerNotification: boolean;
-  isActive: boolean;
-}
 
 interface TrackingMappingsTabProps {
   carrier: CarrierType;
 }
 
-const sampleTrackingMappings: Record<CarrierType, TrackingMapping[]> = {
-  fedex: [
-    { id: '1', carrierStatus: 'PU', carrierDescription: 'Picked Up', internalStatus: 'In Transit', triggerNotification: true, isActive: true },
-    { id: '2', carrierStatus: 'IT', carrierDescription: 'In Transit', internalStatus: 'In Transit', triggerNotification: false, isActive: true },
-    { id: '3', carrierStatus: 'OD', carrierDescription: 'Out for Delivery', internalStatus: 'Out for Delivery', triggerNotification: true, isActive: true },
-    { id: '4', carrierStatus: 'DL', carrierDescription: 'Delivered', internalStatus: 'Delivered', triggerNotification: true, isActive: true },
-    { id: '5', carrierStatus: 'DE', carrierDescription: 'Delivery Exception', internalStatus: 'Exception', triggerNotification: true, isActive: true },
-    { id: '6', carrierStatus: 'CA', carrierDescription: 'Shipment Cancelled', internalStatus: 'Cancelled', triggerNotification: true, isActive: true },
-  ],
-  ups: [
-    { id: '1', carrierStatus: 'P', carrierDescription: 'Pickup Scan', internalStatus: 'In Transit', triggerNotification: true, isActive: true },
-    { id: '2', carrierStatus: 'I', carrierDescription: 'In Transit', internalStatus: 'In Transit', triggerNotification: false, isActive: true },
-    { id: '3', carrierStatus: 'O', carrierDescription: 'Out for Delivery', internalStatus: 'Out for Delivery', triggerNotification: true, isActive: true },
-    { id: '4', carrierStatus: 'D', carrierDescription: 'Delivered', internalStatus: 'Delivered', triggerNotification: true, isActive: true },
-    { id: '5', carrierStatus: 'X', carrierDescription: 'Exception', internalStatus: 'Exception', triggerNotification: true, isActive: true },
-  ],
-  usps: [
-    { id: '1', carrierStatus: 'AC', carrierDescription: 'Accepted', internalStatus: 'In Transit', triggerNotification: true, isActive: true },
-    { id: '2', carrierStatus: 'OF', carrierDescription: 'Out for Delivery', internalStatus: 'Out for Delivery', triggerNotification: true, isActive: true },
-    { id: '3', carrierStatus: 'DL', carrierDescription: 'Delivered', internalStatus: 'Delivered', triggerNotification: true, isActive: true },
-  ],
-  dhl: [
-    { id: '1', carrierStatus: 'PU', carrierDescription: 'Shipment Picked Up', internalStatus: 'In Transit', triggerNotification: true, isActive: true },
-    { id: '2', carrierStatus: 'DF', carrierDescription: 'Departed Facility', internalStatus: 'In Transit', triggerNotification: false, isActive: true },
-    { id: '3', carrierStatus: 'AR', carrierDescription: 'Arrived at Destination', internalStatus: 'In Transit', triggerNotification: false, isActive: true },
-    { id: '4', carrierStatus: 'WC', carrierDescription: 'With Delivery Courier', internalStatus: 'Out for Delivery', triggerNotification: true, isActive: true },
-    { id: '5', carrierStatus: 'OK', carrierDescription: 'Delivered', internalStatus: 'Delivered', triggerNotification: true, isActive: true },
-  ],
-};
-
 export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
-  const [mappings, setMappings] = useState<TrackingMapping[]>(sampleTrackingMappings[carrier] || []);
+  const queryClient = useQueryClient();
+  const carrierCode = CARRIER_CODES[carrier];
 
-  const handleToggleActive = (id: string) => {
-    setMappings(mappings.map(mapping =>
-      mapping.id === id ? { ...mapping, isActive: !mapping.isActive } : mapping
-    ));
+  // Fetch carrier types to get the ID
+  const { data: carrierTypes = [] } = useQuery({
+    queryKey: ['carrierTypes'],
+    queryFn: () => carrierServiceMappingsApi.getCarrierTypes(),
+  });
+
+  const carrierTypeId = carrierTypes.find(ct => ct.code === carrierCode)?.id;
+
+  // Fetch tracking mappings for this carrier
+  const { data: mappings = [], isLoading } = useQuery({
+    queryKey: ['trackingMappings', carrierTypeId],
+    queryFn: () => trackingMappingsApi.getAll({ carrierIntegrationTypeId: carrierTypeId }),
+    enabled: !!carrierTypeId,
+  });
+
+  // Mutation for updating mappings
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { isActive?: boolean; triggerNotification?: boolean } }) => {
+      const mapping = mappings.find(m => m.id === id);
+      if (!mapping) throw new Error('Mapping not found');
+      return trackingMappingsApi.update(id, {
+        carrierStatusCode: mapping.carrierStatusCode,
+        carrierDescription: mapping.carrierDescription,
+        internalStatus: mapping.internalStatus,
+        triggerNotification: data.triggerNotification ?? mapping.triggerNotification,
+        isActive: data.isActive ?? mapping.isActive,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trackingMappings', carrierTypeId] });
+    },
+  });
+
+  const handleToggleActive = (id: number) => {
+    const mapping = mappings.find(m => m.id === id);
+    if (mapping) {
+      updateMutation.mutate({ id, data: { isActive: !mapping.isActive } });
+    }
   };
 
-  const handleToggleNotification = (id: string) => {
-    setMappings(mappings.map(mapping =>
-      mapping.id === id ? { ...mapping, triggerNotification: !mapping.triggerNotification } : mapping
-    ));
+  const handleToggleNotification = (id: number) => {
+    const mapping = mappings.find(m => m.id === id);
+    if (mapping) {
+      updateMutation.mutate({ id, data: { triggerNotification: !mapping.triggerNotification } });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -120,7 +127,7 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
                 >
                   <td className="px-4 py-3">
                     <code className="px-2 py-1 rounded bg-gray-100 text-sm font-mono text-text-primary">
-                      {mapping.carrierStatus}
+                      {mapping.carrierStatusCode}
                     </code>
                   </td>
                   <td className="px-4 py-3">
@@ -128,10 +135,11 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
                   </td>
                   <td className="px-4 py-3">
                     <Badge className={
-                      mapping.internalStatus === 'Delivered' ? 'bg-green-100 text-green-700' :
-                      mapping.internalStatus === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' :
-                      mapping.internalStatus === 'In Transit' ? 'bg-gray-100 text-gray-700' :
-                      mapping.internalStatus === 'Exception' ? 'bg-red-100 text-red-700' :
+                      mapping.internalStatus.toLowerCase().includes('delivered') ? 'bg-green-100 text-green-700' :
+                      mapping.internalStatus.toLowerCase().includes('out for delivery') ? 'bg-blue-100 text-blue-700' :
+                      mapping.internalStatus.toLowerCase().includes('transit') ? 'bg-gray-100 text-gray-700' :
+                      mapping.internalStatus.toLowerCase().includes('exception') ? 'bg-red-100 text-red-700' :
+                      mapping.internalStatus.toLowerCase().includes('cancelled') ? 'bg-gray-100 text-gray-700' :
                       'bg-amber-100 text-amber-700'
                     }>
                       {mapping.internalStatus}

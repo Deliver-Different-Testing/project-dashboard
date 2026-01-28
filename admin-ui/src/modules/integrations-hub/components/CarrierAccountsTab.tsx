@@ -1,26 +1,41 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
-import { sampleCarrierAccounts } from '../data/sampleData';
-import { CARRIER_LABELS } from '../types';
-import type { CarrierAccount, CarrierType } from '../types';
+import { carrierAccountsApi } from '../../../api/carrierAccounts';
+import { CARRIER_LABELS, CARRIER_CODES } from '../types';
+import type { CarrierType } from '../types';
 
 interface CarrierAccountsTabProps {
   carrier: CarrierType;
 }
 
 export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
-  const [accounts, setAccounts] = useState<CarrierAccount[]>(
-    sampleCarrierAccounts.filter(a => a.carrier === carrier)
-  );
+  const queryClient = useQueryClient();
+  const carrierCode = CARRIER_CODES[carrier];
 
-  const primaryAccount = accounts.find(a => a.clientId === null || a.clientId === undefined);
-  const secondaryAccounts = accounts.filter(a => a.clientId !== null && a.clientId !== undefined);
+  // Fetch accounts from API
+  const { data: accounts = [], isLoading } = useQuery({
+    queryKey: ['carrierAccounts', carrier],
+    queryFn: () => carrierAccountsApi.getAll({ carrierTypeCode: carrierCode }),
+  });
 
-  const handleToggleActive = (id: string) => {
-    setAccounts(accounts.map(account =>
-      account.id === id ? { ...account, isActive: !account.isActive } : account
-    ));
+  // Mutation for updating account status
+  const updateMutation = useMutation({
+    mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+      carrierAccountsApi.update(id, {
+        accountNumber: accounts.find(a => a.id === id)?.accountNumber || '',
+        isActive,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['carrierAccounts', carrier] });
+    },
+  });
+
+  const primaryAccount = accounts.find(a => a.clientId === null);
+  const secondaryAccounts = accounts.filter(a => a.clientId !== null);
+
+  const handleToggleActive = (id: number, currentActive: boolean) => {
+    updateMutation.mutate({ id, isActive: !currentActive });
   };
 
   const formatDate = (dateString?: string) => {
@@ -33,6 +48,14 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
       minute: '2-digit',
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -63,7 +86,7 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                   </div>
                   <div>
                     <h4 className="font-semibold text-text-primary">
-                      {primaryAccount.accountName}
+                      {primaryAccount.accountName || `${CARRIER_LABELS[carrier]} Primary Account`}
                     </h4>
                     <p className="text-sm text-text-muted">
                       Used when no client-specific account is configured
@@ -76,12 +99,12 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                     <span className="text-text-primary font-mono">{primaryAccount.accountNumber}</span>
                   </div>
                   <div>
-                    <span className="text-text-muted block text-xs mb-0.5">Authentication</span>
-                    <span className="text-text-primary capitalize">{primaryAccount.authType.replace('_', ' ')}</span>
+                    <span className="text-text-muted block text-xs mb-0.5">Meter Number</span>
+                    <span className="text-text-primary">{primaryAccount.meterNumber || 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="text-text-muted block text-xs mb-0.5">Last Sync</span>
-                    <span className="text-text-primary">{formatDate(primaryAccount.lastSync)}</span>
+                    <span className="text-text-muted block text-xs mb-0.5">Last Updated</span>
+                    <span className="text-text-primary">{formatDate(primaryAccount.updatedAt)}</span>
                   </div>
                 </div>
               </div>
@@ -89,7 +112,7 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
               <div className="flex items-center gap-4">
                 <Toggle
                   checked={primaryAccount.isActive}
-                  onChange={() => handleToggleActive(primaryAccount.id)}
+                  onChange={() => handleToggleActive(primaryAccount.id, primaryAccount.isActive)}
                   label={primaryAccount.isActive ? 'Active' : 'Inactive'}
                 />
                 <button className="p-2 text-text-muted hover:text-text-primary hover:bg-gray-100 rounded-lg transition-colors">
@@ -157,7 +180,7 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                     Account Number
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">
-                    Last Sync
+                    Last Updated
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">
                     Status
@@ -180,10 +203,10 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                     <td className="px-4 py-3">
                       <div>
                         <div className="font-medium text-text-primary">
-                          {account.clientName || 'Unknown Client'}
+                          {account.clientName || `Client #${account.clientId}`}
                         </div>
                         <div className="text-xs text-text-muted">
-                          {account.accountName}
+                          {account.accountName || account.carrierType}
                         </div>
                       </div>
                     </td>
@@ -193,12 +216,12 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-text-secondary">
-                      {formatDate(account.lastSync)}
+                      {formatDate(account.updatedAt)}
                     </td>
                     <td className="px-4 py-3">
                       <Toggle
                         checked={account.isActive}
-                        onChange={() => handleToggleActive(account.id)}
+                        onChange={() => handleToggleActive(account.id, account.isActive)}
                         label={account.isActive ? 'Active' : 'Inactive'}
                       />
                     </td>
