@@ -19,8 +19,8 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
     queryFn: () => carrierServiceMappingsApi.getCarrierTypes(),
   });
 
-  // Use sample data if API fails
-  const useSampleCarrierTypes = !!carrierTypesError || !apiCarrierTypes || apiCarrierTypes.length === 0;
+  // Use sample data if API fails or returns non-array
+  const useSampleCarrierTypes = !!carrierTypesError || !Array.isArray(apiCarrierTypes) || apiCarrierTypes.length === 0;
   const carrierTypes = useSampleCarrierTypes ? sampleCarrierTypes : apiCarrierTypes;
 
   const carrierTypeId = carrierTypes.find(ct => ct.code === carrierCode)?.id;
@@ -32,11 +32,11 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
     enabled: !!carrierTypeId,
   });
 
-  // Use sample data if API fails or returns empty
-  const useSampleData = !!mappingsError || (!isLoading && (!apiMappings || apiMappings.length === 0));
+  // Use sample data if API fails or returns empty/non-array
+  const useSampleData = !!mappingsError || (!isLoading && (!Array.isArray(apiMappings) || apiMappings.length === 0));
   const mappings = useSampleData
     ? sampleServiceMappings.filter(m => m.carrierIntegrationTypeId === carrierTypeId)
-    : (apiMappings || []);
+    : (apiMappings ?? []);
 
   // Mutation for updating mapping status
   const updateMutation = useMutation({

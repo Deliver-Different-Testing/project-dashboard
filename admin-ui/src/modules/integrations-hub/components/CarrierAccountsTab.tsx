@@ -20,12 +20,11 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
     queryFn: () => carrierAccountsApi.getAll({ carrierTypeCode: carrierCode }),
   });
 
-  // Use sample data if API fails or returns empty
-  const useSampleData = !!error || (!isLoading && (!apiAccounts || apiAccounts.length === 0));
-  const allAccounts = useSampleData
+  // Use sample data if API fails or returns empty/non-array
+  const useSampleData = !!error || (!isLoading && (!Array.isArray(apiAccounts) || apiAccounts.length === 0));
+  const accounts = useSampleData
     ? sampleCarrierAccounts.filter(a => a.carrierType === carrierCode)
-    : (apiAccounts || []);
-  const accounts = allAccounts;
+    : (apiAccounts ?? []);
 
   // Mutation for updating account status
   const updateMutation = useMutation({

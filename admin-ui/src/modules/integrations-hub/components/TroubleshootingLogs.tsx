@@ -118,9 +118,9 @@ export function TroubleshootingLogs() {
       }),
   });
 
-  // Use sample data if API fails or returns empty
-  const useSampleData = !!error || (!isLoading && (!data?.logs || data.logs.length === 0));
-  const logs = useSampleData ? sampleIntegrationLogs.logs : (data?.logs || []);
+  // Use sample data if API fails or returns empty/non-array
+  const useSampleData = !!error || (!isLoading && (!Array.isArray(data?.logs) || data.logs.length === 0));
+  const logs = useSampleData ? sampleIntegrationLogs.logs : (data?.logs ?? []);
 
   // Filter logs based on filter selection
   const filteredLogs = logs.filter((log) => {
