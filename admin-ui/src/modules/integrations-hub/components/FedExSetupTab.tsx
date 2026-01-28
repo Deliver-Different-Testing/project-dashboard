@@ -4,7 +4,7 @@ import { fedExSetupSteps } from '../data/sampleData';
 import type { FedExSetupStep } from '../types';
 
 export function FedExSetupTab() {
-  const [steps, setSteps] = useState<FedExSetupStep[]>(fedExSetupSteps);
+  const [steps] = useState<FedExSetupStep[]>(fedExSetupSteps);
 
   const completedSteps = steps.filter(s => s.status === 'completed').length;
   const totalSteps = steps.length;
