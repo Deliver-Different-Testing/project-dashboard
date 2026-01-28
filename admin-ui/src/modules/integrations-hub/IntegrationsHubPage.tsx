@@ -11,6 +11,7 @@ import { FuelSurchargesTab } from './components/FuelSurchargesTab';
 import { ZoneMappingsTab } from './components/ZoneMappingsTab';
 import { ContractTiersTab } from './components/ContractTiersTab';
 import { RateCalculatorTab } from './components/RateCalculatorTab';
+import { TrackingMappingsTab } from './components/TrackingMappingsTab';
 import type { CarrierType } from './types';
 
 interface Integration {
@@ -139,6 +140,7 @@ export function IntegrationsHubPage() {
   const tabs = [
     { id: 'accounts', label: 'Accounts' },
     { id: 'service-mappings', label: 'Service Mappings' },
+    { id: 'tracking-mappings', label: 'Tracking Mappings' },
     { id: 'fuel-surcharges', label: 'Fuel Surcharges' },
     { id: 'zone-mappings', label: 'Zone Mappings' },
     { id: 'contract-tiers', label: 'Contract Tiers' },
@@ -182,6 +184,7 @@ export function IntegrationsHubPage() {
             <div className="p-4">
               {activeTab === 'accounts' && <CarrierAccountsTab carrier={selectedIntegration} />}
               {activeTab === 'service-mappings' && <ServiceMappingsTab carrier={selectedIntegration} />}
+              {activeTab === 'tracking-mappings' && <TrackingMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'fuel-surcharges' && <FuelSurchargesTab carrier={selectedIntegration} />}
               {activeTab === 'zone-mappings' && <ZoneMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'contract-tiers' && <ContractTiersTab carrier={selectedIntegration} />}
