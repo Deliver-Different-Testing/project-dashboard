@@ -47,8 +47,6 @@ const sampleTrackingMappings: Record<CarrierType, TrackingMapping[]> = {
   ],
 };
 
-const internalStatuses = ['In Transit', 'Out for Delivery', 'Delivered', 'Exception', 'Cancelled', 'Returned'];
-
 export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
   const [mappings, setMappings] = useState<TrackingMapping[]>(sampleTrackingMappings[carrier] || []);
 
