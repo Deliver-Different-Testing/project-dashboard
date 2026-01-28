@@ -1,5 +1,9 @@
 // Sample data for development - shows UI when backend is unavailable
 
+import type { CarrierAccount } from './carrierAccounts';
+import type { CarrierServiceMapping, CarrierType } from './carrierServiceMappings';
+import type { TrackingStatusMapping } from './trackingMappings';
+
 export const sampleIntegrationLogs = {
   logs: [
     {
@@ -134,7 +138,7 @@ export const sampleLogDetails: Record<number, { requestBody: string; responseBod
   },
 };
 
-export const sampleCarrierAccounts = [
+export const sampleCarrierAccounts: CarrierAccount[] = [
   {
     id: 1,
     clientId: null, // Primary account (tenant default)
@@ -164,7 +168,6 @@ export const sampleCarrierAccounts = [
     carrierType: 'UPS',
     accountNumber: '987654321',
     accountName: 'UPS Primary Account',
-    meterNumber: undefined,
     isActive: true,
     createdAt: '2024-01-10T00:00:00Z',
     updatedAt: '2024-01-18T09:15:00Z',
@@ -175,14 +178,12 @@ export const sampleCarrierAccounts = [
     carrierType: 'USPS',
     accountNumber: 'USPS-001',
     accountName: 'USPS Primary Account',
-    meterNumber: undefined,
     isActive: false,
     createdAt: '2024-03-01T00:00:00Z',
-    updatedAt: undefined,
   },
 ];
 
-export const sampleServiceMappings = [
+export const sampleServiceMappings: CarrierServiceMapping[] = [
   {
     id: 1,
     jobTypeId: 1,
@@ -233,7 +234,7 @@ export const sampleServiceMappings = [
   },
 ];
 
-export const sampleTrackingMappings = [
+export const sampleTrackingMappings: TrackingStatusMapping[] = [
   {
     id: 1,
     carrierIntegrationTypeId: 1,
@@ -244,6 +245,7 @@ export const sampleTrackingMappings = [
     internalStatus: 'In Transit',
     triggerNotification: true,
     isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 2,
@@ -255,6 +257,7 @@ export const sampleTrackingMappings = [
     internalStatus: 'In Transit',
     triggerNotification: false,
     isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 3,
@@ -266,6 +269,7 @@ export const sampleTrackingMappings = [
     internalStatus: 'Out for Delivery',
     triggerNotification: true,
     isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 4,
@@ -277,6 +281,7 @@ export const sampleTrackingMappings = [
     internalStatus: 'Delivered',
     triggerNotification: true,
     isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
   },
   {
     id: 5,
@@ -288,10 +293,11 @@ export const sampleTrackingMappings = [
     internalStatus: 'Exception',
     triggerNotification: true,
     isActive: true,
+    createdAt: '2024-01-01T00:00:00Z',
   },
 ];
 
-export const sampleCarrierTypes = [
+export const sampleCarrierTypes: CarrierType[] = [
   { id: 1, name: 'FedEx', code: 'FEDEX', isActive: true },
   { id: 2, name: 'UPS', code: 'UPS', isActive: true },
   { id: 3, name: 'USPS', code: 'USPS', isActive: true },
