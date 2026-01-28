@@ -179,6 +179,42 @@ export function TrackingMappingsTab({ carrier }: TrackingMappingsTabProps) {
           <p className="text-text-secondary mb-4">Configure tracking status mappings for {CARRIER_LABELS[carrier]}</p>
         </div>
       )}
+
+      {/* Other Mappings Placeholder */}
+      <div className="mt-8 pt-6 border-t border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide">
+            Other Mappings
+          </h3>
+          <span className="text-xs px-2 py-1 rounded-full bg-brand-cyan/10 text-brand-cyan font-medium">
+            Coming Soon
+          </span>
+        </div>
+        <div className="p-6 rounded-xl border border-dashed border-border bg-gray-50">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-secondary-purple/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-secondary-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 3v18M3 12h18" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-medium text-text-primary mb-1">Custom Field Mappings</h4>
+              <p className="text-sm text-text-muted mb-3">
+                Configure additional field mappings beyond service types and tracking statuses.
+                Map carrier-specific fields to your internal system for package types, payment terms,
+                and other custom data.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs px-2 py-1 rounded bg-gray-200 text-text-secondary">Package Types</span>
+                <span className="text-xs px-2 py-1 rounded bg-gray-200 text-text-secondary">Payment Terms</span>
+                <span className="text-xs px-2 py-1 rounded bg-gray-200 text-text-secondary">Accessorial Codes</span>
+                <span className="text-xs px-2 py-1 rounded bg-gray-200 text-text-secondary">Custom Fields</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

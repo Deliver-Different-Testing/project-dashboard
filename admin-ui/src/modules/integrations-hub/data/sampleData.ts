@@ -1,6 +1,7 @@
 import type { CarrierAccount, ServiceMapping, FedExSetupStep } from '../types';
 
 export const sampleCarrierAccounts: CarrierAccount[] = [
+  // FedEx - Primary (tenant default)
   {
     id: '1',
     carrier: 'fedex',
@@ -10,7 +11,34 @@ export const sampleCarrierAccounts: CarrierAccount[] = [
     authType: 'oauth',
     lastSync: '2024-01-15T10:30:00Z',
     createdAt: '2023-06-01T00:00:00Z',
+    clientId: null, // Primary account
   },
+  // FedEx - Secondary (client-specific)
+  {
+    id: '1a',
+    carrier: 'fedex',
+    accountNumber: '555123456',
+    accountName: 'Acme Corp FedEx',
+    isActive: true,
+    authType: 'oauth',
+    lastSync: '2024-01-15T09:00:00Z',
+    createdAt: '2023-09-15T00:00:00Z',
+    clientId: 'client-001',
+    clientName: 'Acme Corporation',
+  },
+  {
+    id: '1b',
+    carrier: 'fedex',
+    accountNumber: '555789012',
+    accountName: 'Beta Industries FedEx',
+    isActive: true,
+    authType: 'oauth',
+    lastSync: '2024-01-14T14:20:00Z',
+    createdAt: '2023-11-01T00:00:00Z',
+    clientId: 'client-002',
+    clientName: 'Beta Industries',
+  },
+  // UPS - Primary (tenant default)
   {
     id: '2',
     carrier: 'ups',
@@ -20,7 +48,22 @@ export const sampleCarrierAccounts: CarrierAccount[] = [
     authType: 'api_key',
     lastSync: '2024-01-14T15:45:00Z',
     createdAt: '2023-08-15T00:00:00Z',
+    clientId: null, // Primary account
   },
+  // UPS - Secondary (client-specific)
+  {
+    id: '2a',
+    carrier: 'ups',
+    accountNumber: '111222333',
+    accountName: 'Acme Corp UPS',
+    isActive: false,
+    authType: 'api_key',
+    lastSync: '2024-01-10T11:00:00Z',
+    createdAt: '2023-10-20T00:00:00Z',
+    clientId: 'client-001',
+    clientName: 'Acme Corporation',
+  },
+  // USPS - Primary only
   {
     id: '3',
     carrier: 'usps',
@@ -29,6 +72,7 @@ export const sampleCarrierAccounts: CarrierAccount[] = [
     isActive: false,
     authType: 'credentials',
     createdAt: '2023-10-01T00:00:00Z',
+    clientId: null, // Primary account
   },
 ];
 

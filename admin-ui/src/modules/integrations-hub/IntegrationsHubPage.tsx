@@ -3,28 +3,28 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
 import { CarrierAccountsTab } from './components/CarrierAccountsTab';
 import { ServiceMappingsTab } from './components/ServiceMappingsTab';
 import { FedExSetupTab } from './components/FedExSetupTab';
-import { FuelSurchargesTab } from './components/FuelSurchargesTab';
 import { ZoneMappingsTab } from './components/ZoneMappingsTab';
-import { ContractTiersTab } from './components/ContractTiersTab';
 import { RateCalculatorTab } from './components/RateCalculatorTab';
 import { TrackingMappingsTab } from './components/TrackingMappingsTab';
-import type { CarrierType } from './types';
+import { TroubleshootingLogs } from './components/TroubleshootingLogs';
+import type { CarrierType, IntegrationCategory, IntegrationType } from './types';
 
 interface Integration {
-  id: CarrierType;
+  id: IntegrationType;
   name: string;
   description: string;
-  status: 'connected' | 'warning' | 'disconnected';
+  status: 'connected' | 'warning' | 'disconnected' | 'coming_soon';
   accountCount: number;
   activeMappings: number;
+  category: IntegrationCategory;
   logo: React.ReactNode;
 }
 
 const integrations: Integration[] = [
+  // Freight Integrations
   {
     id: 'fedex',
     name: 'FedEx',
@@ -32,6 +32,7 @@ const integrations: Integration[] = [
     status: 'connected',
     accountCount: 2,
     activeMappings: 3,
+    category: 'freight',
     logo: (
       <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
         <span className="text-purple-700 font-bold text-lg">FX</span>
@@ -45,6 +46,7 @@ const integrations: Integration[] = [
     status: 'connected',
     accountCount: 1,
     activeMappings: 1,
+    category: 'freight',
     logo: (
       <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
         <span className="text-amber-700 font-bold text-lg">UPS</span>
@@ -58,6 +60,7 @@ const integrations: Integration[] = [
     status: 'disconnected',
     accountCount: 0,
     activeMappings: 0,
+    category: 'freight',
     logo: (
       <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
         <span className="text-blue-700 font-bold text-lg">US</span>
@@ -71,19 +74,65 @@ const integrations: Integration[] = [
     status: 'warning',
     accountCount: 0,
     activeMappings: 0,
+    category: 'freight',
     logo: (
       <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
         <span className="text-red-700 font-bold text-lg">DHL</span>
       </div>
     ),
   },
+  // Financial Integrations
+  {
+    id: 'quickbooks',
+    name: 'QuickBooks',
+    description: 'Accounting and invoicing integration',
+    status: 'coming_soon',
+    accountCount: 0,
+    activeMappings: 0,
+    category: 'financial',
+    logo: (
+      <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+        <span className="text-green-700 font-bold text-lg">QB</span>
+      </div>
+    ),
+  },
+  {
+    id: 'xero',
+    name: 'Xero',
+    description: 'Cloud-based accounting platform',
+    status: 'coming_soon',
+    accountCount: 0,
+    activeMappings: 0,
+    category: 'financial',
+    logo: (
+      <div className="w-12 h-12 rounded-lg bg-sky-100 flex items-center justify-center">
+        <span className="text-sky-700 font-bold text-lg">XO</span>
+      </div>
+    ),
+  },
+  // Other Integrations
+  {
+    id: 'openforce',
+    name: 'Openforce',
+    description: 'Contractor management platform',
+    status: 'coming_soon',
+    accountCount: 0,
+    activeMappings: 0,
+    category: 'other',
+    logo: (
+      <div className="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center">
+        <span className="text-indigo-700 font-bold text-lg">OF</span>
+      </div>
+    ),
+  },
 ];
 
 // Calculate totals for dashboard
-const totalAccounts = integrations.reduce((sum, i) => sum + i.accountCount, 0);
-const activeAccounts = integrations.filter(i => i.status === 'connected').reduce((sum, i) => sum + i.accountCount, 0);
-const totalMappings = integrations.reduce((sum, i) => sum + i.activeMappings, 0);
-const connectedCarriers = integrations.filter(i => i.status === 'connected').length;
+const freightIntegrations = integrations.filter(i => i.category === 'freight');
+const totalAccounts = freightIntegrations.reduce((sum, i) => sum + i.accountCount, 0);
+const activeAccounts = freightIntegrations.filter(i => i.status === 'connected').reduce((sum, i) => sum + i.accountCount, 0);
+const totalMappings = freightIntegrations.reduce((sum, i) => sum + i.activeMappings, 0);
+const connectedCarriers = freightIntegrations.filter(i => i.status === 'connected').length;
 
 const getStatusBadge = (status: Integration['status']) => {
   switch (status) {
@@ -106,6 +155,13 @@ const getStatusBadge = (status: Integration['status']) => {
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-gray-400" />
           <span className="text-xs text-gray-600">Not Connected</span>
+        </div>
+      );
+    case 'coming_soon':
+      return (
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 rounded-full bg-brand-cyan" />
+          <span className="text-xs text-brand-cyan">Coming Soon</span>
         </div>
       );
   }
@@ -133,24 +189,84 @@ function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
   );
 }
 
-export function IntegrationsHubPage() {
-  const [selectedIntegration, setSelectedIntegration] = useState<CarrierType | null>(null);
-  const [activeTab, setActiveTab] = useState('accounts');
+const categoryTabs: { id: IntegrationCategory; label: string }[] = [
+  { id: 'freight', label: 'Freight' },
+  { id: 'financial', label: 'Financial' },
+  { id: 'other', label: 'Other' },
+];
 
-  const tabs = [
+export function IntegrationsHubPage() {
+  const [selectedIntegration, setSelectedIntegration] = useState<IntegrationType | null>(null);
+  const [activeTab, setActiveTab] = useState('setup');
+  const [activeCategory, setActiveCategory] = useState<IntegrationCategory>('freight');
+
+  // Tabs for carrier detail view - reordered with Setup Wizard first, removed Fuel Surcharges and Contract Tiers
+  const detailTabs = [
+    { id: 'setup', label: 'Setup Wizard' },
     { id: 'accounts', label: 'Accounts' },
     { id: 'service-mappings', label: 'Service Mappings' },
     { id: 'tracking-mappings', label: 'Tracking Mappings' },
-    { id: 'fuel-surcharges', label: 'Fuel Surcharges' },
     { id: 'zone-mappings', label: 'Zone Mappings' },
-    { id: 'contract-tiers', label: 'Contract Tiers' },
     { id: 'rate-calculator', label: 'Rate Calculator' },
-    { id: 'setup', label: 'Setup Wizard' },
   ];
+
+  const filteredIntegrations = integrations.filter(i => i.category === activeCategory);
+
+  // Check if selected integration is a freight carrier (has full functionality)
+  const isFreightIntegration = (id: IntegrationType): id is CarrierType => {
+    return ['fedex', 'ups', 'usps', 'dhl'].includes(id);
+  };
 
   // If an integration is selected, show its detail view
   if (selectedIntegration) {
     const integration = integrations.find(i => i.id === selectedIntegration);
+
+    // For non-freight integrations, show coming soon
+    if (!isFreightIntegration(selectedIntegration)) {
+      return (
+        <div className="min-h-screen bg-surface-light">
+          <div className="px-6 pt-6 pb-3">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => setSelectedIntegration(null)}
+                className="p-2 -ml-2 text-text-muted hover:text-text-primary hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div className="flex items-center gap-3">
+                {integration?.logo}
+                <div>
+                  <h1 className="text-2xl font-semibold text-text-primary">
+                    {integration?.name} Integration
+                  </h1>
+                  <p className="text-text-secondary">{integration?.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-6 pb-6">
+            <Card>
+              <div className="text-center py-16">
+                <div className="w-16 h-16 rounded-full bg-brand-cyan/10 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-brand-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Coming Soon</h2>
+                <p className="text-text-secondary max-w-md mx-auto">
+                  The {integration?.name} integration is currently under development.
+                  Check back soon for updates on availability.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="min-h-screen bg-surface-light">
@@ -180,16 +296,14 @@ export function IntegrationsHubPage() {
         {/* Tabs and Content */}
         <div className="px-6 pb-6">
           <Card padding="none">
-            <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+            <Tabs tabs={detailTabs} activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="p-4">
+              {activeTab === 'setup' && <FedExSetupTab carrier={selectedIntegration} />}
               {activeTab === 'accounts' && <CarrierAccountsTab carrier={selectedIntegration} />}
               {activeTab === 'service-mappings' && <ServiceMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'tracking-mappings' && <TrackingMappingsTab carrier={selectedIntegration} />}
-              {activeTab === 'fuel-surcharges' && <FuelSurchargesTab carrier={selectedIntegration} />}
               {activeTab === 'zone-mappings' && <ZoneMappingsTab carrier={selectedIntegration} />}
-              {activeTab === 'contract-tiers' && <ContractTiersTab carrier={selectedIntegration} />}
               {activeTab === 'rate-calculator' && <RateCalculatorTab carrier={selectedIntegration} />}
-              {activeTab === 'setup' && <FedExSetupTab carrier={selectedIntegration} />}
             </div>
           </Card>
         </div>
@@ -245,21 +359,20 @@ export function IntegrationsHubPage() {
             }
           />
           <StatCard
-            title="Fuel Surcharges"
-            value={5}
-            subtitle="Currently active"
+            title="Total Integrations"
+            value={integrations.length}
+            subtitle={`${integrations.filter(i => i.status === 'connected').length} connected`}
             color="bg-purple-500"
             icon={
               <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 22V12h4v10H3z" />
-                <path d="M10 22V8h4v14h-4z" />
-                <path d="M17 22V4h4v18h-4z" />
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
               </svg>
             }
           />
           <StatCard
             title="Connected Carriers"
-            value={`${connectedCarriers}/${integrations.length}`}
+            value={`${connectedCarriers}/${freightIntegrations.length}`}
             subtitle="FedEx, UPS active"
             color="bg-orange-500"
             icon={
@@ -274,85 +387,42 @@ export function IntegrationsHubPage() {
         </div>
       </div>
 
-      {/* Carrier Status & Getting Started */}
+      {/* Troubleshooting & Logs */}
       <div className="px-6 mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Carrier Status */}
-          <Card>
-            <h3 className="text-lg font-semibold text-text-primary mb-4">Carrier Status</h3>
-            <div className="space-y-3">
-              {integrations.map((integration) => (
-                <button
-                  key={integration.id}
-                  onClick={() => {
-                    setSelectedIntegration(integration.id);
-                    setActiveTab('accounts');
-                  }}
-                  className="w-full p-3 rounded-lg border border-border bg-gray-50 hover:bg-gray-100 hover:border-brand-cyan/30 transition-all flex items-center gap-3 text-left"
-                >
-                  {integration.logo}
-                  <div className="flex-1">
-                    <div className="font-medium text-text-primary">{integration.name}</div>
-                    <div className="text-xs text-text-muted">
-                      {integration.accountCount} account{integration.accountCount !== 1 ? 's' : ''} configured
-                    </div>
-                  </div>
-                  {getStatusBadge(integration.status)}
-                </button>
-              ))}
-            </div>
-          </Card>
+        <TroubleshootingLogs />
+      </div>
 
-          {/* Getting Started */}
-          <Card>
-            <h3 className="text-lg font-semibold text-text-primary mb-4">Getting Started</h3>
-            <div className="space-y-3">
-              {[
-                { title: 'Set up FedEx', description: 'Configure FedEx API credentials', progress: 60, carrier: 'fedex' as CarrierType },
-                { title: 'Set up UPS', description: 'Configure UPS API credentials', progress: 25, carrier: 'ups' as CarrierType },
-                { title: 'Configure Service Mappings', description: 'Link job types to carrier services', progress: 100, carrier: null },
-                { title: 'Configure Fuel Surcharges', description: 'Set up fuel surcharge rates', progress: 100, carrier: null },
-              ].map((item) => (
-                <button
-                  key={item.title}
-                  onClick={() => {
-                    if (item.carrier) {
-                      setSelectedIntegration(item.carrier);
-                      setActiveTab('setup');
-                    }
-                  }}
-                  className="w-full p-3 rounded-lg border border-border bg-gray-50 hover:bg-gray-100 transition-all text-left"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-text-primary">{item.title}</span>
-                    <Badge className={item.progress === 100 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
-                      {item.progress === 100 ? 'Complete' : 'In Progress'}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-text-muted mb-2">{item.description}</p>
-                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all ${item.progress === 100 ? 'bg-green-500' : 'bg-brand-cyan'}`}
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </Card>
+      {/* Integration Category Tabs */}
+      <div className="px-6 mb-4">
+        <div className="flex items-center gap-1 border-b border-border">
+          {categoryTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveCategory(tab.id)}
+              className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
+                activeCategory === tab.id
+                  ? 'text-brand-cyan'
+                  : 'text-text-muted hover:text-text-primary'
+              }`}
+            >
+              {tab.label}
+              {activeCategory === tab.id && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-cyan" />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Carrier Grid */}
+      {/* Integration Grid */}
       <div className="px-6 pb-6">
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Carrier Integrations</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {integrations.map((integration) => (
+          {filteredIntegrations.map((integration) => (
             <button
               key={integration.id}
               onClick={() => {
                 setSelectedIntegration(integration.id);
-                setActiveTab('accounts');
+                setActiveTab('setup');
               }}
               className="text-left p-5 rounded-xl border border-border bg-white hover:border-brand-cyan/50 hover:shadow-md transition-all group"
             >
@@ -368,10 +438,13 @@ export function IntegrationsHubPage() {
               <p className="text-sm text-text-secondary mb-3">{integration.description}</p>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-text-muted">
-                  {integration.accountCount} account{integration.accountCount !== 1 ? 's' : ''}
+                  {integration.status === 'coming_soon'
+                    ? 'Coming soon'
+                    : `${integration.accountCount} account${integration.accountCount !== 1 ? 's' : ''}`
+                  }
                 </span>
                 <span className="text-brand-cyan font-medium group-hover:underline">
-                  Configure →
+                  {integration.status === 'coming_soon' ? 'Learn More →' : 'Configure →'}
                 </span>
               </div>
             </button>
