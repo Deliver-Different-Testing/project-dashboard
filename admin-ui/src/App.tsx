@@ -5,6 +5,7 @@ import { NotificationsPage } from './modules/notifications';
 import { TasksPage } from './modules/tasks';
 import { AutomationsPage } from './modules/automations';
 import { SchedulesPage } from './modules/schedules';
+import { IntegrationsHubPage } from './modules/integrations-hub';
 import { SetupWizard } from './features/setup-wizard';
 
 // Import sample data for import/export functionality
@@ -19,8 +20,7 @@ type ModuleId = 'clients' | 'agents' | 'drivers' | 'vehicle-management' | 'holid
   'customer-contacts' | 'billing-types' | 'job-settings' | 'sources' | 'airports' |
   'staff-users' | 'client-users' |
   'tasks' | 'schedules' | 'notifications' | 'automations' | 'territory' | 'dashboards' | 'site-settings' |
-  'carrier-accounts' | 'service-mappings' | 'fedex-setup' |
-  'fuel-surcharges' | 'zone-mappings' | 'contract-tiers';
+  'integrations-hub';
 
 interface MenuItem {
   id: ModuleId;
@@ -92,43 +92,6 @@ const MENU_SECTIONS: MenuSection[] = [
     ],
   },
   {
-    id: 'integrations',
-    label: 'Integrations Hub',
-    icon: (
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="12" cy="12" r="3" />
-        <circle cx="12" cy="4" r="2" />
-        <circle cx="20" cy="12" r="2" />
-        <circle cx="12" cy="20" r="2" />
-        <circle cx="4" cy="12" r="2" />
-        <line x1="12" y1="6" x2="12" y2="9" />
-        <line x1="18" y1="12" x2="15" y2="12" />
-        <line x1="12" y1="15" x2="12" y2="18" />
-        <line x1="9" y1="12" x2="6" y2="12" />
-      </svg>
-    ),
-    items: [
-      { id: 'carrier-accounts', label: 'Carrier Accounts' },
-      { id: 'service-mappings', label: 'Service Mappings' },
-      { id: 'fedex-setup', label: 'FedEx Setup' },
-    ],
-  },
-  {
-    id: 'rate-management',
-    label: 'Rate Management',
-    icon: (
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <line x1="12" y1="1" x2="12" y2="23" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-    items: [
-      { id: 'fuel-surcharges', label: 'Fuel Surcharges' },
-      { id: 'zone-mappings', label: 'Zone Mappings' },
-      { id: 'contract-tiers', label: 'Contract Tiers' },
-    ],
-  },
-  {
     id: 'advanced',
     label: 'Advanced',
     icon: (
@@ -143,6 +106,7 @@ const MENU_SECTIONS: MenuSection[] = [
       { id: 'notifications', label: 'Notifications' },
       { id: 'automations', label: 'Automations' },
       { id: 'territory', label: 'Territory & Locations' },
+      { id: 'integrations-hub', label: 'Integrations Hub' },
       { id: 'dashboards', label: 'Dashboards' },
       { id: 'site-settings', label: 'Site Settings & Integrations' },
     ],
@@ -150,7 +114,7 @@ const MENU_SECTIONS: MenuSection[] = [
 ];
 
 // Modules that are implemented
-const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'schedules', 'automations'];
+const IMPLEMENTED_MODULES: ModuleId[] = ['clients', 'territory', 'notifications', 'tasks', 'schedules', 'automations', 'integrations-hub'];
 
 // Helper to find which section contains a module
 const findSectionForModule = (moduleId: ModuleId): string | null => {
@@ -239,6 +203,8 @@ function App() {
         return <SchedulesPage />;
       case 'automations':
         return <AutomationsPage />;
+      case 'integrations-hub':
+        return <IntegrationsHubPage />;
       default:
         return (
           <div className="min-h-screen bg-surface-light flex items-center justify-center">
