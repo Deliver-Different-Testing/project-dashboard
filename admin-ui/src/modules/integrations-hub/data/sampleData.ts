@@ -229,9 +229,10 @@ export const sampleCarrierConnections: Record<CarrierType, SampleConnectionData>
 
 /**
  * Sample connection data for carrier accounts.
+ * IDs match api/sampleData.ts: 1=FedEx Primary, 2=FedEx Secondary, 3=UPS Primary, 4=USPS Primary, 5=DHL Primary
  */
 export const sampleAccountConnections: Record<string, SampleConnectionData> = {
-  // FedEx Primary
+  // FedEx Primary (id: 1)
   '1': {
     connections: {
       customers: { hasConnections: true, count: 847, connectionPath: 'All customers (default)' },
@@ -248,8 +249,8 @@ export const sampleAccountConnections: Record<string, SampleConnectionData> = {
     connectedCount: 8,
     hasIssues: false,
   },
-  // FedEx Secondary - Acme
-  '1a': {
+  // FedEx Secondary - Acme (id: 2)
+  '2': {
     connections: {
       customers: { hasConnections: true, count: 1, connectionPath: 'Acme Corporation' },
       zoneGroups: { hasConnections: true, count: 2, connectionPath: 'via customer zones' },
@@ -265,25 +266,8 @@ export const sampleAccountConnections: Record<string, SampleConnectionData> = {
     connectedCount: 7,
     hasIssues: false,
   },
-  // FedEx Secondary - Beta
-  '1b': {
-    connections: {
-      customers: { hasConnections: true, count: 1, connectionPath: 'Beta Industries' },
-      zoneGroups: { hasConnections: true, count: 1 },
-      depots: { hasConnections: true, count: 1 },
-      rateCards: { hasConnections: true, count: 1 },
-      services: { hasConnections: true, count: 1 },
-      vehicles: { hasConnections: false, count: 0 },
-      notifications: { hasConnections: false, count: 0 },
-      airports: { hasConnections: false, count: 0 },
-      linehauls: { hasConnections: false, count: 0 },
-      regions: { hasConnections: true, count: 1 },
-    },
-    connectedCount: 6,
-    hasIssues: true, // No notifications configured
-  },
-  // UPS Primary
-  '2': {
+  // UPS Primary (id: 3)
+  '3': {
     connections: {
       customers: { hasConnections: true, count: 456, connectionPath: 'All customers (default)' },
       zoneGroups: { hasConnections: true, count: 3 },
@@ -299,25 +283,8 @@ export const sampleAccountConnections: Record<string, SampleConnectionData> = {
     connectedCount: 7,
     hasIssues: false,
   },
-  // UPS Secondary - Acme (inactive)
-  '2a': {
-    connections: {
-      customers: { hasConnections: true, count: 1, connectionPath: 'Acme Corporation' },
-      zoneGroups: { hasConnections: false, count: 0 },
-      depots: { hasConnections: false, count: 0 },
-      rateCards: { hasConnections: false, count: 0 },
-      services: { hasConnections: false, count: 0 },
-      vehicles: { hasConnections: false, count: 0 },
-      notifications: { hasConnections: false, count: 0 },
-      airports: { hasConnections: false, count: 0 },
-      linehauls: { hasConnections: false, count: 0 },
-      regions: { hasConnections: true, count: 1 },
-    },
-    connectedCount: 2,
-    hasIssues: true, // Inactive, minimal connections
-  },
-  // USPS Primary
-  '3': {
+  // USPS Primary (id: 4)
+  '4': {
     connections: {
       ...createEmptyConnections(),
       services: { hasConnections: true, count: 1, connectionPath: 'Economy' },
@@ -325,6 +292,15 @@ export const sampleAccountConnections: Record<string, SampleConnectionData> = {
     },
     connectedCount: 2,
     hasIssues: true, // Not fully configured
+  },
+  // DHL Primary (id: 5)
+  '5': {
+    connections: {
+      ...createEmptyConnections(),
+      regions: { hasConnections: true, count: 1, connectionPath: 'International' },
+    },
+    connectedCount: 1,
+    hasIssues: true, // Setup required
   },
 };
 
