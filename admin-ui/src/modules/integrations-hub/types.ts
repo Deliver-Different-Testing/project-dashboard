@@ -73,3 +73,19 @@ export const FINANCIAL_COLORS: Record<FinancialIntegrationType, string> = {
 export const OTHER_COLORS: Record<OtherIntegrationType, string> = {
   openforce: 'bg-indigo-100 text-indigo-700',
 };
+
+// ============================================
+// CONNECTION SYSTEM TYPES
+// See TAG-SYSTEM-SPEC.md for documentation
+// ============================================
+
+/**
+ * Source item types for Integration Hub entities
+ */
+export type IntegrationSourceType = 'carrier' | 'carrierAccount' | 'serviceMapping' | 'zoneMapping' | 'trackingMapping';
+
+/**
+ * Re-export connection types from territory module for consistency
+ */
+export type { EntityConnections, ConnectionInfo, SourceItem } from '../territory/types';
+export { createEmptyConnections, countConnectedCategories, TAG_CATEGORIES } from '../territory/types';

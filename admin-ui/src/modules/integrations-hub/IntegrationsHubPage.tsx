@@ -3,6 +3,7 @@ import { PageHeader } from '../../components/layout/PageHeader';
 import { Tabs } from '../../components/layout/Tabs';
 import { Card } from '../../components/layout/Card';
 import { Button } from '../../components/ui/Button';
+import { TagSidebar, ConnectionBadge } from '../../components/tags';
 import { CarrierAccountsTab } from './components/CarrierAccountsTab';
 import { ServiceMappingsTab } from './components/ServiceMappingsTab';
 import { FedExSetupTab } from './components/FedExSetupTab';
@@ -10,7 +11,9 @@ import { ZoneMappingsTab } from './components/ZoneMappingsTab';
 import { RateCalculatorTab } from './components/RateCalculatorTab';
 import { TrackingMappingsTab } from './components/TrackingMappingsTab';
 import { TroubleshootingLogs } from './components/TroubleshootingLogs';
-import type { CarrierType, IntegrationCategory, IntegrationType } from './types';
+import { sampleCarrierConnections } from './data/sampleData';
+import type { CarrierType, IntegrationCategory, IntegrationType, EntityConnections, SourceItem } from './types';
+import { createEmptyConnections } from './types';
 
 interface Integration {
   id: IntegrationType;
@@ -200,6 +203,28 @@ export function IntegrationsHubPage() {
   const [activeTab, setActiveTab] = useState('setup');
   const [activeCategory, setActiveCategory] = useState<IntegrationCategory>('freight');
 
+  // Tag Sidebar state
+  const [tagSidebarOpen, setTagSidebarOpen] = useState(false);
+  const [sidebarSourceItem, setSidebarSourceItem] = useState<SourceItem>({
+    type: 'service',
+    id: '',
+    name: '',
+  });
+  const [sidebarConnections, setSidebarConnections] = useState<EntityConnections>(createEmptyConnections());
+
+  // Handle opening the sidebar for a specific item
+  const handleConnectionsClick = (sourceItem: SourceItem, connections: EntityConnections) => {
+    setSidebarSourceItem(sourceItem);
+    setSidebarConnections(connections);
+    setTagSidebarOpen(true);
+  };
+
+  // Handle navigation from the sidebar
+  const handleNavigate = (targetRoute: string, searchQuery: string) => {
+    console.log(`Navigate to ${targetRoute}?tagSearch=${searchQuery}`);
+    // In a real app, this would use a router
+  };
+
   // Tabs for carrier detail view - reordered with Setup Wizard first, removed Fuel Surcharges and Contract Tiers
   const detailTabs = [
     { id: 'setup', label: 'Setup Wizard' },
@@ -299,14 +324,23 @@ export function IntegrationsHubPage() {
             <Tabs tabs={detailTabs} activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="p-4">
               {activeTab === 'setup' && <FedExSetupTab carrier={selectedIntegration} />}
-              {activeTab === 'accounts' && <CarrierAccountsTab carrier={selectedIntegration} />}
-              {activeTab === 'service-mappings' && <ServiceMappingsTab carrier={selectedIntegration} />}
+              {activeTab === 'accounts' && <CarrierAccountsTab carrier={selectedIntegration} onConnectionsClick={handleConnectionsClick} />}
+              {activeTab === 'service-mappings' && <ServiceMappingsTab carrier={selectedIntegration} onConnectionsClick={handleConnectionsClick} />}
               {activeTab === 'tracking-mappings' && <TrackingMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'zone-mappings' && <ZoneMappingsTab carrier={selectedIntegration} />}
               {activeTab === 'rate-calculator' && <RateCalculatorTab carrier={selectedIntegration} />}
             </div>
           </Card>
         </div>
+
+        {/* Tag Sidebar - Connection Navigator */}
+        <TagSidebar
+          isOpen={tagSidebarOpen}
+          onClose={() => setTagSidebarOpen(false)}
+          sourceItem={sidebarSourceItem}
+          connections={sidebarConnections}
+          onNavigate={handleNavigate}
+        />
       </div>
     );
   }
@@ -417,40 +451,71 @@ export function IntegrationsHubPage() {
       {/* Integration Grid */}
       <div className="px-6 pb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {filteredIntegrations.map((integration) => (
-            <button
-              key={integration.id}
-              onClick={() => {
-                setSelectedIntegration(integration.id);
-                setActiveTab('setup');
-              }}
-              className="text-left p-5 rounded-xl border border-border bg-white hover:border-brand-cyan/50 hover:shadow-md transition-all group"
-            >
-              <div className="flex items-start gap-3 mb-3">
-                {integration.logo}
-                <div className="flex-1">
-                  <h4 className="font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
-                    {integration.name}
-                  </h4>
-                  {getStatusBadge(integration.status)}
+          {filteredIntegrations.map((integration) => {
+            // Get connection data for freight carriers
+            const carrierConnections = isFreightIntegration(integration.id)
+              ? sampleCarrierConnections[integration.id]
+              : null;
+
+            return (
+              <button
+                key={integration.id}
+                onClick={() => {
+                  setSelectedIntegration(integration.id);
+                  setActiveTab('setup');
+                }}
+                className="text-left p-5 rounded-xl border border-border bg-white hover:border-brand-cyan/50 hover:shadow-md transition-all group"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  {integration.logo}
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-text-primary group-hover:text-brand-cyan transition-colors">
+                      {integration.name}
+                    </h4>
+                    {getStatusBadge(integration.status)}
+                  </div>
                 </div>
-              </div>
-              <p className="text-sm text-text-secondary mb-3">{integration.description}</p>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-text-muted">
-                  {integration.status === 'coming_soon'
-                    ? 'Coming soon'
-                    : `${integration.accountCount} account${integration.accountCount !== 1 ? 's' : ''}`
-                  }
-                </span>
-                <span className="text-brand-cyan font-medium group-hover:underline">
-                  {integration.status === 'coming_soon' ? 'Learn More →' : 'Configure →'}
-                </span>
-              </div>
-            </button>
-          ))}
+                <p className="text-sm text-text-secondary mb-3">{integration.description}</p>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-text-muted">
+                    {integration.status === 'coming_soon'
+                      ? 'Coming soon'
+                      : `${integration.accountCount} account${integration.accountCount !== 1 ? 's' : ''}`
+                    }
+                  </span>
+                  {/* Connection Badge for freight carriers */}
+                  {carrierConnections && integration.status !== 'coming_soon' ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <ConnectionBadge
+                        connectionCount={carrierConnections.connectedCount}
+                        hasIssues={carrierConnections.hasIssues}
+                        onClick={() => handleConnectionsClick(
+                          { type: 'service', id: integration.id, name: `${integration.name} Integration` },
+                          carrierConnections.connections
+                        )}
+                        size="sm"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-brand-cyan font-medium group-hover:underline">
+                      {integration.status === 'coming_soon' ? 'Learn More →' : 'Configure →'}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Tag Sidebar - Connection Navigator */}
+      <TagSidebar
+        isOpen={tagSidebarOpen}
+        onClose={() => setTagSidebarOpen(false)}
+        sourceItem={sidebarSourceItem}
+        connections={sidebarConnections}
+        onNavigate={handleNavigate}
+      />
     </div>
   );
 }

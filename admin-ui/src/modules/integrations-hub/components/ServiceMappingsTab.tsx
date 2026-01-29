@@ -1,15 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
+import { ConnectionBadge } from '../../../components/tags';
 import { carrierServiceMappingsApi } from '../../../api/carrierServiceMappings';
 import { sampleServiceMappings, sampleCarrierTypes } from '../../../api/sampleData';
-import { CARRIER_LABELS, CARRIER_CODES } from '../types';
-import type { CarrierType } from '../types';
+import { sampleServiceMappingConnections } from '../data/sampleData';
+import { CARRIER_LABELS, CARRIER_CODES, createEmptyConnections, countConnectedCategories } from '../types';
+import type { CarrierType, EntityConnections, SourceItem } from '../types';
 
 interface ServiceMappingsTabProps {
   carrier: CarrierType;
+  onConnectionsClick?: (sourceItem: SourceItem, connections: EntityConnections) => void;
 }
 
-export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
+export function ServiceMappingsTab({ carrier, onConnectionsClick }: ServiceMappingsTabProps) {
   const queryClient = useQueryClient();
   const carrierCode = CARRIER_CODES[carrier];
 
@@ -103,6 +106,9 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
                 <th className="px-4 py-3 text-center text-xs font-semibold text-text-muted uppercase tracking-wider">
                   Default
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  Connections
+                </th>
                 <th className="px-4 py-3 text-right text-xs font-semibold text-text-muted uppercase tracking-wider">
                   Status
                 </th>
@@ -136,6 +142,24 @@ export function ServiceMappingsTab({ carrier }: ServiceMappingsTabProps) {
                         Default
                       </span>
                     )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {onConnectionsClick && (() => {
+                      const connData = sampleServiceMappingConnections[String(mapping.id)];
+                      const connections = connData?.connections || createEmptyConnections();
+                      const connectedCount = connData?.connectedCount || countConnectedCategories(connections);
+                      return (
+                        <ConnectionBadge
+                          connectionCount={connectedCount}
+                          hasIssues={connData?.hasIssues || false}
+                          onClick={() => onConnectionsClick(
+                            { type: 'service', id: String(mapping.id), name: `${mapping.jobTypeName || 'Job Type'} → ${mapping.carrierServiceName}` },
+                            connections
+                          )}
+                          size="sm"
+                        />
+                      );
+                    })()}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Toggle

@@ -1,16 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Toggle } from '../../../components/ui/Toggle';
 import { Button } from '../../../components/ui/Button';
+import { ConnectionBadge } from '../../../components/tags';
 import { carrierAccountsApi } from '../../../api/carrierAccounts';
 import { sampleCarrierAccounts } from '../../../api/sampleData';
-import { CARRIER_LABELS, CARRIER_CODES } from '../types';
-import type { CarrierType } from '../types';
+import { sampleAccountConnections } from '../data/sampleData';
+import { CARRIER_LABELS, CARRIER_CODES, createEmptyConnections, countConnectedCategories } from '../types';
+import type { CarrierType, EntityConnections, SourceItem } from '../types';
 
 interface CarrierAccountsTabProps {
   carrier: CarrierType;
+  onConnectionsClick?: (sourceItem: SourceItem, connections: EntityConnections) => void;
 }
 
-export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
+export function CarrierAccountsTab({ carrier, onConnectionsClick }: CarrierAccountsTabProps) {
   const queryClient = useQueryClient();
   const carrierCode = CARRIER_CODES[carrier];
 
@@ -122,6 +125,24 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
               </div>
 
               <div className="flex items-center gap-4">
+                {/* Connection Badge */}
+                {onConnectionsClick && (() => {
+                  const accountId = String(primaryAccount.id);
+                  const connData = sampleAccountConnections[accountId];
+                  const connections = connData?.connections || createEmptyConnections();
+                  const connectedCount = connData?.connectedCount || countConnectedCategories(connections);
+                  return (
+                    <ConnectionBadge
+                      connectionCount={connectedCount}
+                      hasIssues={connData?.hasIssues || false}
+                      onClick={() => onConnectionsClick(
+                        { type: 'service', id: accountId, name: primaryAccount.accountName || `${CARRIER_LABELS[carrier]} Primary` },
+                        connections
+                      )}
+                      size="sm"
+                    />
+                  );
+                })()}
                 <Toggle
                   checked={primaryAccount.isActive}
                   onChange={() => handleToggleActive(primaryAccount.id, primaryAccount.isActive)}
@@ -195,6 +216,9 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                     Last Updated
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">
+                    Connections
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wide">
                     Status
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary uppercase tracking-wide">
@@ -229,6 +253,25 @@ export function CarrierAccountsTab({ carrier }: CarrierAccountsTabProps) {
                     </td>
                     <td className="px-4 py-3 text-sm text-text-secondary">
                       {formatDate(account.updatedAt)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {onConnectionsClick && (() => {
+                        const accountId = String(account.id);
+                        const connData = sampleAccountConnections[accountId];
+                        const connections = connData?.connections || createEmptyConnections();
+                        const connectedCount = connData?.connectedCount || countConnectedCategories(connections);
+                        return (
+                          <ConnectionBadge
+                            connectionCount={connectedCount}
+                            hasIssues={connData?.hasIssues || false}
+                            onClick={() => onConnectionsClick(
+                              { type: 'service', id: accountId, name: account.accountName || `${account.clientName} Account` },
+                              connections
+                            )}
+                            size="sm"
+                          />
+                        );
+                      })()}
                     </td>
                     <td className="px-4 py-3">
                       <Toggle
