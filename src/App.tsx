@@ -108,7 +108,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-light-grey">
       <header className="bg-primary text-white px-6 py-4 shadow-lg">
-        <h1 className="text-xl font-bold">⚡ DFRNT Project Dashboard</h1>
+        <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
       </header>
       <main className="max-w-5xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
