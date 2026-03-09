@@ -501,7 +501,7 @@ export function getScopeSummary(
   let customerText = 'All customers';
   let speedText = 'All speeds';
 
-  if (!scope.allCustomers && scope.customerIds.length > 0) {
+  if (!scope.allCustomers && scope.customerIds.length > 0 && customers.length > 0) {
     const names = scope.customerIds
       .map(id => customers.find(c => c.id === id)?.shortName ?? id)
       .slice(0, 3);
