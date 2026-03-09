@@ -9,12 +9,13 @@ interface Project {
   live?: string
   repo?: string
   docs?: string
+  extraLinks?: { label: string; emoji: string; url: string }[]
 }
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
   { name: 'Setup Dashboard', emoji: '🧩', slug: 'setup-dashboard', status: 'Complete', description: '10-step tenant onboarding wizard with smart CSV import, training arena', live: 'https://deliver-different-testing.github.io/setup-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/setup-dashboard', docs: 'https://github.com/Deliver-Different-Testing/setup-dashboard/blob/main/IMPLEMENTATION.md' },
-  { name: 'Agents & Partners', emoji: '🤝', slug: 'agents-partners', status: 'Active', description: 'Fleet management, marketplace, courier compliance & recruitment', live: 'https://deliver-different-testing.github.io/NP-Agent-Management/', repo: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management', docs: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management/blob/main/IMPLEMENTATION.md' },
+  { name: 'Agents & Partners', emoji: '🤝', slug: 'agents-partners', status: 'Active', description: 'Fleet management, marketplace, courier compliance & recruitment', live: 'https://deliver-different-testing.github.io/NP-Agent-Management/', repo: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management', docs: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management/blob/main/IMPLEMENTATION.md', extraLinks: [{ label: 'Applicant Portal', emoji: '📋', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/apply/dfrnt' }, { label: 'Courier Login', emoji: '🔑', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/login' }, { label: 'Courier Dashboard', emoji: '🚚', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/dashboard' }] },
   { name: 'Reports', emoji: '📊', slug: 'reports', status: 'Active', description: 'Rate schedule, invoice builder (ported to Accounts)', live: 'https://deliver-different-testing.github.io/reports/', repo: 'https://github.com/Deliver-Different-Testing/reports' },
   { name: 'Dev Dashboard', emoji: '⚡', slug: 'dev-dashboard', status: 'Active', description: 'Dev activity tracking, GitLab MR stats', live: 'https://deliver-different-testing.github.io/dev-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/dev-dashboard' },
   { name: 'Booking Redesign', emoji: '📦', slug: 'booking-redesign', status: 'Paused', description: 'Single-page booking with voice input, per-location accessorials', live: 'https://deliver-different-testing.github.io/booking-redesign/', repo: 'https://github.com/Deliver-Different-Testing/booking-redesign' },
@@ -71,6 +72,9 @@ function ProjectCard({ project }: { project: Project }) {
           {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">🌐 Live</a>}
           {project.repo && <a href={project.repo} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">📦 Repo</a>}
           {project.docs && <a href={project.docs} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition">📄 Docs</a>}
+          {project.extraLinks?.map(link => (
+            <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">{link.emoji} {link.label}</a>
+          ))}
           <button onClick={() => setOpen(!open)} className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition ${open ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
             📋 Runsheet {entries.length > 0 && <span className="bg-white/20 rounded-full px-1.5">{entries.length}</span>}
           </button>
