@@ -143,13 +143,7 @@ export function AutomationEditForm({
       newErrors.push('At least one action is required');
     }
 
-    if (!formData.scope.allCustomers && formData.scope.customerIds.length === 0) {
-      newErrors.push('Please select at least one customer or apply to all');
-    }
-
-    if (!formData.scope.allSpeeds && formData.scope.speedIds.length === 0) {
-      newErrors.push('Please select at least one speed or apply to all');
-    }
+    // No selection = applies to all (by design), so no validation errors needed for scope
 
     setErrors(newErrors);
     return newErrors.length === 0;

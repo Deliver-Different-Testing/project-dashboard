@@ -10,6 +10,78 @@ interface ScopeSelectorProps {
   onChange: (scope: AutomationScope) => void;
 }
 
+const PRIORITY_OPTIONS = [
+  { id: '1', name: 'Critical' },
+  { id: '2', name: 'High' },
+  { id: '3', name: 'Normal' },
+  { id: '4', name: 'Low' },
+];
+
+/** Reusable "Apply to All" toggle + multi-select pill section */
+function ScopeFilterSection({
+  id,
+  label,
+  allChecked,
+  selectedIds,
+  options,
+  onAllChange,
+  onToggle,
+}: {
+  id: string;
+  label: string;
+  allChecked: boolean;
+  selectedIds: string[];
+  options: { id: string; name?: string; shortName?: string }[];
+  onAllChange: (checked: boolean) => void;
+  onToggle: (optionId: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id={id}
+          checked={allChecked}
+          onChange={(e) => onAllChange(e.target.checked)}
+          className="w-4 h-4 rounded border-border text-brand-cyan focus:ring-brand-cyan"
+        />
+        <label htmlFor={id} className="text-sm font-medium text-text-primary">
+          Apply to all {label.toLowerCase()}
+        </label>
+      </div>
+      {!allChecked && (
+        <div className="ml-6 p-3 bg-white border border-border rounded-lg">
+          <p className="text-xs text-text-secondary mb-2">Select {label.toLowerCase()}:</p>
+          <div className="flex flex-wrap gap-2">
+            {options.map((opt) => {
+              const sel = selectedIds.includes(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => onToggle(opt.id)}
+                  className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                    sel
+                      ? 'border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium'
+                      : 'border-border bg-white text-text-secondary hover:border-gray-300'
+                  }`}
+                >
+                  {opt.shortName || opt.name}
+                </button>
+              );
+            })}
+          </div>
+          {selectedIds.length === 0 && (
+            <p className="text-xs text-text-muted mt-2">
+              No selection = applies to all {label.toLowerCase()}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ScopeSelector({
   scope,
   customers,
@@ -19,185 +91,169 @@ export function ScopeSelector({
   jobStatuses,
   onChange,
 }: ScopeSelectorProps) {
-  const handleAllCustomersChange = (checked: boolean) => {
-    onChange({ ...scope, allCustomers: checked, customerIds: checked ? [] : scope.customerIds });
+  // Generic helpers
+  const makeAllHandler = (allKey: keyof AutomationScope, idsKey: keyof AutomationScope) => (checked: boolean) => {
+    onChange({ ...scope, [allKey]: checked, [idsKey]: checked ? [] : (scope as any)[idsKey] });
   };
 
-  const handleAllSpeedsChange = (checked: boolean) => {
-    onChange({ ...scope, allSpeeds: checked, speedIds: checked ? [] : scope.speedIds });
+  const makeToggleHandler = (idsKey: keyof AutomationScope) => (optionId: string) => {
+    const current = (scope as any)[idsKey] as string[];
+    const newIds = current.includes(optionId)
+      ? current.filter((id: string) => id !== optionId)
+      : [...current, optionId];
+    onChange({ ...scope, [idsKey]: newIds });
   };
 
-  const toggleCustomer = (customerId: string) => {
-    const newIds = scope.customerIds.includes(customerId)
-      ? scope.customerIds.filter((id) => id !== customerId)
-      : [...scope.customerIds, customerId];
-    onChange({ ...scope, customerIds: newIds });
+  // Count active filters for summary
+  const filterSummaryParts: string[] = [];
+  const addSummary = (allFlag: boolean, ids: string[], label: string) => {
+    if (!allFlag && ids.length > 0) {
+      filterSummaryParts.push(`${ids.length} ${label}`);
+    }
   };
-
-  const toggleSpeed = (speedId: string) => {
-    const newIds = scope.speedIds.includes(speedId)
-      ? scope.speedIds.filter((id) => id !== speedId)
-      : [...scope.speedIds, speedId];
-    onChange({ ...scope, speedIds: newIds });
-  };
+  addSummary(scope.allCustomers, scope.customerIds, 'customer(s)');
+  addSummary(scope.allSpeeds, scope.speedIds, 'speed(s)');
+  addSummary(scope.allJobStatuses, scope.jobStatusIds, 'status(es)');
+  addSummary(scope.allPriorities, scope.priorityIds, 'priority(ies)');
+  addSummary(scope.allFromSites, scope.fromSiteIds, 'from site(s)');
+  addSummary(scope.allToSites, scope.toSiteIds, 'to site(s)');
+  addSummary(scope.allFromRegions, scope.fromRegionIds, 'from region(s)');
+  addSummary(scope.allToRegions, scope.toRegionIds, 'to region(s)');
 
   return (
     <div className="space-y-4">
       {/* Customers */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="all-customers" checked={scope.allCustomers}
-            onChange={(e) => handleAllCustomersChange(e.target.checked)}
-            className="w-4 h-4 rounded border-border text-brand-cyan focus:ring-brand-cyan" />
-          <label htmlFor="all-customers" className="text-sm font-medium text-text-primary">Apply to all customers</label>
-        </div>
-        {!scope.allCustomers && (
-          <div className="ml-6 p-3 bg-white border border-border rounded-lg">
-            <p className="text-xs text-text-secondary mb-2">Select customers:</p>
-            <div className="flex flex-wrap gap-2">
-              {customers.map((c) => {
-                const sel = scope.customerIds.includes(c.id);
-                return (
-                  <button key={c.id} type="button" onClick={() => toggleCustomer(c.id)}
-                    className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${sel ? 'border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium' : 'border-border bg-white text-text-secondary hover:border-gray-300'}`}>
-                    {c.shortName}
-                  </button>
-                );
-              })}
-            </div>
-            {scope.customerIds.length === 0 && <p className="text-xs text-text-muted mt-2">No selection = applies to all customers</p>}
-          </div>
-        )}
-      </div>
+      <ScopeFilterSection
+        id="all-customers"
+        label="Customers"
+        allChecked={scope.allCustomers}
+        selectedIds={scope.customerIds}
+        options={customers}
+        onAllChange={makeAllHandler('allCustomers', 'customerIds')}
+        onToggle={makeToggleHandler('customerIds')}
+      />
 
       {/* Speeds */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <input type="checkbox" id="all-speeds" checked={scope.allSpeeds}
-            onChange={(e) => handleAllSpeedsChange(e.target.checked)}
-            className="w-4 h-4 rounded border-border text-brand-cyan focus:ring-brand-cyan" />
-          <label htmlFor="all-speeds" className="text-sm font-medium text-text-primary">Apply to all speeds</label>
-        </div>
-        {!scope.allSpeeds && (
-          <div className="ml-6 p-3 bg-white border border-border rounded-lg">
-            <p className="text-xs text-text-secondary mb-2">Select speeds:</p>
-            <div className="flex flex-wrap gap-2">
-              {speeds.map((s) => {
-                const sel = scope.speedIds.includes(s.id);
-                return (
-                  <button key={s.id} type="button" onClick={() => toggleSpeed(s.id)}
-                    className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${sel ? 'border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium' : 'border-border bg-white text-text-secondary hover:border-gray-300'}`}>
-                    {s.name}
-                  </button>
-                );
-              })}
-            </div>
-            {scope.speedIds.length === 0 && <p className="text-xs text-text-muted mt-2">No selection = applies to all speeds</p>}
-          </div>
-        )}
-      </div>
+      <ScopeFilterSection
+        id="all-speeds"
+        label="Speeds"
+        allChecked={scope.allSpeeds}
+        selectedIds={scope.speedIds}
+        options={speeds}
+        onAllChange={makeAllHandler('allSpeeds', 'speedIds')}
+        onToggle={makeToggleHandler('speedIds')}
+      />
 
       {/* Additional Filters */}
       <div className="pt-3 border-t border-gray-100">
         <h4 className="text-sm font-medium text-text-primary mb-3">Additional Filters</h4>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Job Status Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">Job Status Filter</label>
-            <select value={scope.jobStatusFilter || ''}
-              onChange={(e) => onChange({ ...scope, jobStatusFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All statuses</option>
-              {jobStatuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs in this status. Leave empty for all.</p>
-          </div>
+        <div className="space-y-4">
+          {/* Job Status */}
+          <ScopeFilterSection
+            id="all-job-statuses"
+            label="Job Statuses"
+            allChecked={scope.allJobStatuses}
+            selectedIds={scope.jobStatusIds}
+            options={jobStatuses}
+            onAllChange={makeAllHandler('allJobStatuses', 'jobStatusIds')}
+            onToggle={makeToggleHandler('jobStatusIds')}
+          />
 
-          {/* Priority Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">Priority Filter</label>
-            <select value={scope.priorityFilter || ''}
-              onChange={(e) => onChange({ ...scope, priorityFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All priorities</option>
-              <option value="1">Critical</option>
-              <option value="2">High</option>
-              <option value="3">Normal</option>
-              <option value="4">Low</option>
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Filter by job priority.</p>
-          </div>
+          {/* Priority */}
+          <ScopeFilterSection
+            id="all-priorities"
+            label="Priorities"
+            allChecked={scope.allPriorities}
+            selectedIds={scope.priorityIds}
+            options={PRIORITY_OPTIONS}
+            onAllChange={makeAllHandler('allPriorities', 'priorityIds')}
+            onToggle={makeToggleHandler('priorityIds')}
+          />
 
           {/* From Site */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">From Site Filter</label>
-            <select value={scope.fromSiteFilter || ''}
-              onChange={(e) => onChange({ ...scope, fromSiteFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All origin sites</option>
-              {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs from these sites.</p>
-          </div>
+          <ScopeFilterSection
+            id="all-from-sites"
+            label="Origin Sites"
+            allChecked={scope.allFromSites}
+            selectedIds={scope.fromSiteIds}
+            options={sites}
+            onAllChange={makeAllHandler('allFromSites', 'fromSiteIds')}
+            onToggle={makeToggleHandler('fromSiteIds')}
+          />
 
           {/* To Site */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">To Site Filter</label>
-            <select value={scope.toSiteFilter || ''}
-              onChange={(e) => onChange({ ...scope, toSiteFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All destination sites</option>
-              {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs going to these sites.</p>
-          </div>
+          <ScopeFilterSection
+            id="all-to-sites"
+            label="Destination Sites"
+            allChecked={scope.allToSites}
+            selectedIds={scope.toSiteIds}
+            options={sites}
+            onAllChange={makeAllHandler('allToSites', 'toSiteIds')}
+            onToggle={makeToggleHandler('toSiteIds')}
+          />
 
           {/* From Region */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">From Region Filter</label>
-            <select value={scope.fromRegionFilter || ''}
-              onChange={(e) => onChange({ ...scope, fromRegionFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All origin regions</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs from these regions.</p>
-          </div>
+          <ScopeFilterSection
+            id="all-from-regions"
+            label="Origin Regions"
+            allChecked={scope.allFromRegions}
+            selectedIds={scope.fromRegionIds}
+            options={regions}
+            onAllChange={makeAllHandler('allFromRegions', 'fromRegionIds')}
+            onToggle={makeToggleHandler('fromRegionIds')}
+          />
 
           {/* To Region */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">To Region Filter</label>
-            <select value={scope.toRegionFilter || ''}
-              onChange={(e) => onChange({ ...scope, toRegionFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan">
-              <option value="">All destination regions</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs going to these regions.</p>
-          </div>
+          <ScopeFilterSection
+            id="all-to-regions"
+            label="Destination Regions"
+            allChecked={scope.allToRegions}
+            selectedIds={scope.toRegionIds}
+            options={regions}
+            onAllChange={makeAllHandler('allToRegions', 'toRegionIds')}
+            onToggle={makeToggleHandler('toRegionIds')}
+          />
 
-          {/* Time Threshold */}
+          {/* Time Threshold — stays as number input */}
           <div>
             <label className="text-xs text-text-secondary font-medium">Time Threshold (minutes)</label>
-            <input type="number" value={scope.timeThreshold ?? ''}
-              onChange={(e) => onChange({ ...scope, timeThreshold: e.target.value ? parseInt(e.target.value, 10) : undefined })}
+            <input
+              type="number"
+              value={scope.timeThreshold ?? ''}
+              onChange={(e) =>
+                onChange({ ...scope, timeThreshold: e.target.value ? parseInt(e.target.value, 10) : undefined })
+              }
               placeholder="e.g. 15"
               className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-              min={0} />
-            <p className="text-[10px] text-text-muted mt-0.5">Job must be in state for at least X minutes before rule fires.</p>
+              min={0}
+            />
+            <p className="text-[10px] text-text-muted mt-0.5">
+              Job must be in state for at least X minutes before rule fires.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Scope Summary */}
       <div className="p-2 bg-surface-cream rounded text-xs text-text-secondary">
-        <strong>Scope:</strong> This automation applies to{' '}
-        {scope.allCustomers || scope.customerIds.length === 0 ? 'all customers' : (
-          <span className="font-medium text-text-primary">{scope.customerIds.length} customer{scope.customerIds.length !== 1 ? 's' : ''}</span>
-        )}{' '}and{' '}
-        {scope.allSpeeds || scope.speedIds.length === 0 ? 'all speeds' : (
-          <span className="font-medium text-text-primary">{scope.speedIds.length} speed{scope.speedIds.length !== 1 ? 's' : ''}</span>
-        )}.
+        <strong>Scope:</strong>{' '}
+        {filterSummaryParts.length === 0 ? (
+          'This automation applies to all jobs.'
+        ) : (
+          <>
+            Filtered to{' '}
+            {filterSummaryParts.map((part, i) => (
+              <span key={i}>
+                {i > 0 && ', '}
+                <span className="font-medium text-text-primary">{part}</span>
+              </span>
+            ))}
+            . Everything else applies to all.
+          </>
+        )}
+        {scope.timeThreshold != null && scope.timeThreshold > 0 && (
+          <> Time threshold: <span className="font-medium text-text-primary">{scope.timeThreshold} min</span>.</>
+        )}
       </div>
     </div>
   );

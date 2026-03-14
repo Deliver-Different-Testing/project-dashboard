@@ -31,13 +31,19 @@ export interface AutomationScope {
   customerIds: string[];
   allSpeeds: boolean;
   speedIds: string[];
-  // Advanced scope filters
-  priorityFilter?: string;
-  fromSiteFilter?: string;
-  toSiteFilter?: string;
-  fromRegionFilter?: string;
-  toRegionFilter?: string;
-  jobStatusFilter?: string;
+  // Advanced scope filters — all use "apply to all" + multi-select pattern
+  allJobStatuses: boolean;
+  jobStatusIds: string[];
+  allPriorities: boolean;
+  priorityIds: string[];
+  allFromSites: boolean;
+  fromSiteIds: string[];
+  allToSites: boolean;
+  toSiteIds: string[];
+  allFromRegions: boolean;
+  fromRegionIds: string[];
+  allToRegions: boolean;
+  toRegionIds: string[];
   timeThreshold?: number;
 }
 
@@ -615,6 +621,18 @@ export function createEmptyAutomation(): Omit<AutomationRule, 'id' | 'createdAt'
       customerIds: [],
       allSpeeds: true,
       speedIds: [],
+      allJobStatuses: true,
+      jobStatusIds: [],
+      allPriorities: true,
+      priorityIds: [],
+      allFromSites: true,
+      fromSiteIds: [],
+      allToSites: true,
+      toSiteIds: [],
+      allFromRegions: true,
+      fromRegionIds: [],
+      allToRegions: true,
+      toRegionIds: [],
     },
     conditionMatchMode: 'all',
     conditions: [],
