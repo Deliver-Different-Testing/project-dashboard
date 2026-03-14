@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { AutomationScope, CustomerOption, SpeedOption, SiteOption, RegionOption, JobStatus } from '../types';
 
 interface ScopeSelectorProps {
@@ -17,7 +19,7 @@ const PRIORITY_OPTIONS = [
   { id: '4', name: 'Low' },
 ];
 
-/** Reusable "Apply to All" toggle + multi-select pill section */
+/** Reusable collapsible "Apply to All" toggle + multi-select pill section */
 function ScopeFilterSection({
   id,
   label,
@@ -37,6 +39,17 @@ function ScopeFilterSection({
   onToggle: (optionId: string) => void;
   onClearAll: () => void;
 }) {
+  // When unchecked with selections made, default to collapsed so user can shrink it
+  const [expanded, setExpanded] = useState(true);
+
+  // Summary of selected items for collapsed view
+  const selectedNames = selectedIds
+    .map((sid) => {
+      const opt = options.find((o) => o.id === sid);
+      return opt ? (opt.shortName || opt.name) : null;
+    })
+    .filter(Boolean);
+
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
@@ -50,8 +63,63 @@ function ScopeFilterSection({
         <label htmlFor={id} className="text-sm font-medium text-text-primary">
           Apply to all {label.toLowerCase()}
         </label>
+
+        {/* Collapse/expand toggle — only show when unchecked */}
+        {!allChecked && (
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="ml-auto flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
+          >
+            {expanded ? (
+              <>Collapse <ChevronUp className="w-3.5 h-3.5" /></>
+            ) : (
+              <>Expand <ChevronDown className="w-3.5 h-3.5" /></>
+            )}
+          </button>
+        )}
       </div>
-      {!allChecked && (
+
+      {/* Collapsed summary — show selected pills inline */}
+      {!allChecked && !expanded && selectedIds.length > 0 && (
+        <div className="ml-6 flex flex-wrap gap-1.5 items-center">
+          {selectedNames.map((name, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full border border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium"
+            >
+              {name}
+              <button
+                type="button"
+                onClick={() => onToggle(selectedIds[i])}
+                className="w-3.5 h-3.5 inline-flex items-center justify-center rounded-full hover:bg-brand-cyan/20 transition-colors text-brand-cyan text-[10px]"
+              >
+                ✕
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="text-xs text-brand-cyan hover:underline"
+          >
+            + Edit
+          </button>
+        </div>
+      )}
+
+      {/* Collapsed with no selections */}
+      {!allChecked && !expanded && selectedIds.length === 0 && (
+        <p className="ml-6 text-xs text-text-muted">
+          No {label.toLowerCase()} selected — applies to all.{' '}
+          <button type="button" onClick={() => setExpanded(true)} className="text-brand-cyan hover:underline">
+            Select
+          </button>
+        </p>
+      )}
+
+      {/* Expanded picker */}
+      {!allChecked && expanded && (
         <div className="ml-6 p-3 bg-white border border-border rounded-lg">
           {/* Selected items shown as removable tags */}
           {selectedIds.length > 0 && (
@@ -151,7 +219,7 @@ export function ScopeSelector({
     onChange({ ...scope, [idsKey]: [] });
   };
 
-  // Count active filters for summary
+  // Build summary — only mention filters that have actual selections
   const filterSummaryParts: string[] = [];
   const addSummary = (allFlag: boolean, ids: string[], label: string) => {
     if (!allFlag && ids.length > 0) {
@@ -197,7 +265,6 @@ export function ScopeSelector({
       <div className="pt-3 border-t border-gray-100">
         <h4 className="text-sm font-medium text-text-primary mb-3">Additional Filters</h4>
         <div className="space-y-4">
-          {/* Job Status */}
           <ScopeFilterSection
             id="all-job-statuses"
             label="Job Statuses"
@@ -209,7 +276,6 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('jobStatusIds')}
           />
 
-          {/* Priority */}
           <ScopeFilterSection
             id="all-priorities"
             label="Priorities"
@@ -221,7 +287,6 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('priorityIds')}
           />
 
-          {/* From Site */}
           <ScopeFilterSection
             id="all-from-sites"
             label="Origin Sites"
@@ -233,7 +298,6 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('fromSiteIds')}
           />
 
-          {/* To Site */}
           <ScopeFilterSection
             id="all-to-sites"
             label="Destination Sites"
@@ -245,7 +309,6 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('toSiteIds')}
           />
 
-          {/* From Region */}
           <ScopeFilterSection
             id="all-from-regions"
             label="Origin Regions"
@@ -257,7 +320,6 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('fromRegionIds')}
           />
 
-          {/* To Region */}
           <ScopeFilterSection
             id="all-to-regions"
             label="Destination Regions"
@@ -269,7 +331,7 @@ export function ScopeSelector({
             onClearAll={makeClearHandler('toRegionIds')}
           />
 
-          {/* Time Threshold — stays as number input */}
+          {/* Time Threshold */}
           <div>
             <label className="text-xs text-text-secondary font-medium">Time Threshold (minutes)</label>
             <input
@@ -303,7 +365,7 @@ export function ScopeSelector({
                 <span className="font-medium text-text-primary">{part}</span>
               </span>
             ))}
-            . Everything else applies to all.
+            .
           </>
         )}
         {scope.timeThreshold != null && scope.timeThreshold > 0 && (
