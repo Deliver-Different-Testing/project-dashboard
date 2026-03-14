@@ -15,6 +15,8 @@ export {
   sampleAutomations,
   sampleCustomers,
   sampleSpeeds,
+  sampleSites,
+  sampleRegions,
   sampleJobStatuses,
   sampleTaskTemplates,
   sampleNotificationTemplates,

@@ -140,6 +140,20 @@ export const CONDITION_TYPE_OPTIONS: { value: ConditionType; label: string; icon
   { value: 'scan', label: 'Scan event', icon: '📷' },
 ];
 
+// ============================================
+// SITE & REGION TYPES
+// ============================================
+
+export interface SiteOption {
+  id: string;
+  name: string;
+}
+
+export interface RegionOption {
+  id: string;
+  name: string;
+}
+
 /**
  * Base condition with common fields.
  */
@@ -147,6 +161,14 @@ interface BaseCondition {
   id: string;
   type: ConditionType;
   jobTypeFilter: JobTypeFilter;
+  // Advanced filters (inline, not hidden)
+  priorityFilter?: string;          // 'ALL' or comma-separated priority IDs
+  fromSiteFilter?: string;          // comma-separated site IDs
+  toSiteFilter?: string;            // comma-separated site IDs
+  fromRegionFilter?: string;        // comma-separated region IDs
+  toRegionFilter?: string;          // comma-separated region IDs
+  timeThreshold?: number;           // minutes job must be in state
+  jobStatusFilter?: string;         // comma-separated status IDs
 }
 
 /**

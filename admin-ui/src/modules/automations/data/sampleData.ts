@@ -3,6 +3,8 @@
 import type {
   AutomationRule,
   CustomerOption,
+  SiteOption,
+  RegionOption,
   SpeedOption,
   JobStatus,
   TaskTemplate,
@@ -31,6 +33,23 @@ export const sampleSpeeds: SpeedOption[] = [
   { id: 'speed-4', name: 'Overnight', code: 'ON' },
   { id: 'speed-5', name: 'Priority', code: 'PRI' },
   { id: 'speed-6', name: 'Economy', code: 'ECO' },
+];
+
+export const sampleSites: SiteOption[] = [
+  { id: '1', name: 'Auckland Central' },
+  { id: '2', name: 'Manukau' },
+  { id: '3', name: 'North Shore' },
+  { id: '4', name: 'Hamilton' },
+  { id: '5', name: 'Wellington' },
+  { id: '6', name: 'Christchurch' },
+];
+
+export const sampleRegions: RegionOption[] = [
+  { id: '1', name: 'Auckland Metro' },
+  { id: '2', name: 'Waikato' },
+  { id: '3', name: 'Bay of Plenty' },
+  { id: '4', name: 'Wellington Region' },
+  { id: '5', name: 'Canterbury' },
 ];
 
 export const sampleJobStatuses: JobStatus[] = [
