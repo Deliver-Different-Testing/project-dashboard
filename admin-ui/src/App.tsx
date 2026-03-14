@@ -152,7 +152,7 @@ const INITIAL_DATA: Record<string, Record<string, unknown>[]> = {
 initializeDataStore(INITIAL_DATA);
 
 function App() {
-  const [activeModule, setActiveModule] = useState<ModuleId>('territory');
+  const [activeModule, setActiveModule] = useState<ModuleId>('automations');
   // Start with only the active module's section expanded
   const [expandedSections, setExpandedSections] = useState<string[]>(() => {
     const section = findSectionForModule('territory');
