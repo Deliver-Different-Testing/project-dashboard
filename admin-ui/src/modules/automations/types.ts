@@ -31,6 +31,14 @@ export interface AutomationScope {
   customerIds: string[];
   allSpeeds: boolean;
   speedIds: string[];
+  // Advanced scope filters
+  priorityFilter?: string;
+  fromSiteFilter?: string;
+  toSiteFilter?: string;
+  fromRegionFilter?: string;
+  toRegionFilter?: string;
+  jobStatusFilter?: string;
+  timeThreshold?: number;
 }
 
 // ============================================
@@ -161,14 +169,6 @@ interface BaseCondition {
   id: string;
   type: ConditionType;
   jobTypeFilter: JobTypeFilter;
-  // Advanced filters (inline, not hidden)
-  priorityFilter?: string;          // 'ALL' or comma-separated priority IDs
-  fromSiteFilter?: string;          // comma-separated site IDs
-  toSiteFilter?: string;            // comma-separated site IDs
-  fromRegionFilter?: string;        // comma-separated region IDs
-  toRegionFilter?: string;          // comma-separated region IDs
-  timeThreshold?: number;           // minutes job must be in state
-  jobStatusFilter?: string;         // comma-separated status IDs
 }
 
 /**

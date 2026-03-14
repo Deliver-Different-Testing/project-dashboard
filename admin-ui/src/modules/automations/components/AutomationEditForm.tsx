@@ -231,6 +231,9 @@ export function AutomationEditForm({
           scope={formData.scope}
           customers={customers}
           speeds={speeds}
+          sites={sites}
+          regions={regions}
+          jobStatuses={jobStatuses}
           onChange={(scope) => updateField('scope', scope)}
         />
       </div>
@@ -301,8 +304,6 @@ export function AutomationEditForm({
                 key={condition.id}
                 condition={condition}
                 jobStatuses={jobStatuses}
-                sites={sites}
-                regions={regions}
                 onChange={(c) => updateCondition(index, c)}
                 onRemove={() => removeCondition(index)}
               />

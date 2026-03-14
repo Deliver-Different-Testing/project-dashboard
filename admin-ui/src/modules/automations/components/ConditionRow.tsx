@@ -7,8 +7,6 @@ import type {
   TimeUnit,
   StatusConditionMode,
   ScanType,
-  SiteOption,
-  RegionOption,
 } from '../types';
 import {
   CONDITION_TYPE_OPTIONS,
@@ -24,8 +22,6 @@ import type { JobStatus } from '../types';
 interface ConditionRowProps {
   condition: Condition;
   jobStatuses: JobStatus[];
-  sites: SiteOption[];
-  regions: RegionOption[];
   onChange: (condition: Condition) => void;
   onRemove: () => void;
 }
@@ -33,8 +29,6 @@ interface ConditionRowProps {
 export function ConditionRow({
   condition,
   jobStatuses,
-  sites,
-  regions,
   onChange,
   onRemove,
 }: ConditionRowProps) {
@@ -262,114 +256,6 @@ export function ConditionRow({
       >
         <X className="w-4 h-4" />
       </button>
-      </div>
-
-      {/* Inline Filters — always visible below the condition */}
-      <div className="col-span-full mt-3 pt-3 border-t border-gray-100">
-        <div className="grid grid-cols-2 gap-3">
-          {/* Job Status Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">Job Status Filter</label>
-            <select
-              value={condition.jobStatusFilter || ''}
-              onChange={(e) => onChange({ ...condition, jobStatusFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">All statuses</option>
-              {jobStatuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs in this status. Leave empty for all.</p>
-          </div>
-
-          {/* Priority Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">Priority Filter</label>
-            <select
-              value={condition.priorityFilter || 'ALL'}
-              onChange={(e) => onChange({ ...condition, priorityFilter: e.target.value === 'ALL' ? undefined : e.target.value })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="ALL">All priorities</option>
-              <option value="1">Critical</option>
-              <option value="2">High</option>
-              <option value="3">Normal</option>
-              <option value="4">Low</option>
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Filter by job priority.</p>
-          </div>
-
-          {/* From Site Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">From Site Filter</label>
-            <select
-              value={condition.fromSiteFilter || ''}
-              onChange={(e) => onChange({ ...condition, fromSiteFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">All origin sites</option>
-              {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs from these sites.</p>
-          </div>
-
-          {/* To Site Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">To Site Filter</label>
-            <select
-              value={condition.toSiteFilter || ''}
-              onChange={(e) => onChange({ ...condition, toSiteFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">All destination sites</option>
-              {sites.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs going to these sites.</p>
-          </div>
-
-          {/* From Region Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">From Region Filter</label>
-            <select
-              value={condition.fromRegionFilter || ''}
-              onChange={(e) => onChange({ ...condition, fromRegionFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">All origin regions</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs from these regions.</p>
-          </div>
-
-          {/* To Region Filter */}
-          <div>
-            <label className="text-xs text-text-secondary font-medium">To Region Filter</label>
-            <select
-              value={condition.toRegionFilter || ''}
-              onChange={(e) => onChange({ ...condition, toRegionFilter: e.target.value || undefined })}
-              className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">All destination regions</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-            <p className="text-[10px] text-text-muted mt-0.5">Only apply to jobs going to these regions.</p>
-          </div>
-
-          {/* Time Threshold */}
-          {(condition.type === 'job_unassigned' || condition.type === 'job_assigned') && (
-            <div>
-              <label className="text-xs text-text-secondary font-medium">Time Threshold (minutes)</label>
-              <input
-                type="number"
-                value={condition.timeThreshold ?? ''}
-                onChange={(e) => onChange({ ...condition, timeThreshold: e.target.value ? parseInt(e.target.value, 10) : undefined })}
-                placeholder="e.g. 15"
-                className="w-full mt-1 px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-                min={0}
-              />
-              <p className="text-[10px] text-text-muted mt-0.5">Job must be in this state for at least X minutes.</p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
