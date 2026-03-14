@@ -26,6 +26,7 @@ function ScopeFilterSection({
   options,
   onAllChange,
   onToggle,
+  onClearAll,
 }: {
   id: string;
   label: string;
@@ -34,6 +35,7 @@ function ScopeFilterSection({
   options: { id: string; name?: string; shortName?: string }[];
   onAllChange: (checked: boolean) => void;
   onToggle: (optionId: string) => void;
+  onClearAll: () => void;
 }) {
   return (
     <div className="space-y-2">
@@ -51,25 +53,66 @@ function ScopeFilterSection({
       </div>
       {!allChecked && (
         <div className="ml-6 p-3 bg-white border border-border rounded-lg">
-          <p className="text-xs text-text-secondary mb-2">Select {label.toLowerCase()}:</p>
+          {/* Selected items shown as removable tags */}
+          {selectedIds.length > 0 && (
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-text-secondary font-medium">
+                  Selected ({selectedIds.length}):
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onClearAll()}
+                  className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedIds.map((selId) => {
+                  const opt = options.find((o) => o.id === selId);
+                  if (!opt) return null;
+                  return (
+                    <span
+                      key={selId}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-sm rounded-full border border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium"
+                    >
+                      {opt.shortName || opt.name}
+                      <button
+                        type="button"
+                        onClick={() => onToggle(selId)}
+                        className="ml-0.5 w-4 h-4 inline-flex items-center justify-center rounded-full hover:bg-brand-cyan/20 transition-colors text-brand-cyan"
+                        title={`Remove ${opt.shortName || opt.name}`}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Available items to add */}
+          <p className="text-xs text-text-secondary mb-1.5">
+            {selectedIds.length > 0 ? 'Add more:' : `Select ${label.toLowerCase()}:`}
+          </p>
           <div className="flex flex-wrap gap-2">
-            {options.map((opt) => {
-              const sel = selectedIds.includes(opt.id);
-              return (
+            {options
+              .filter((opt) => !selectedIds.includes(opt.id))
+              .map((opt) => (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => onToggle(opt.id)}
-                  className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                    sel
-                      ? 'border-brand-cyan bg-brand-cyan/10 text-brand-cyan font-medium'
-                      : 'border-border bg-white text-text-secondary hover:border-gray-300'
-                  }`}
+                  className="px-3 py-1.5 text-sm rounded-full border border-border bg-white text-text-secondary hover:border-brand-cyan hover:text-brand-cyan transition-colors"
                 >
-                  {opt.shortName || opt.name}
+                  + {opt.shortName || opt.name}
                 </button>
-              );
-            })}
+              ))}
+            {options.filter((opt) => !selectedIds.includes(opt.id)).length === 0 && (
+              <p className="text-xs text-text-muted italic">All {label.toLowerCase()} selected</p>
+            )}
           </div>
           {selectedIds.length === 0 && (
             <p className="text-xs text-text-muted mt-2">
@@ -104,6 +147,10 @@ export function ScopeSelector({
     onChange({ ...scope, [idsKey]: newIds });
   };
 
+  const makeClearHandler = (idsKey: keyof AutomationScope) => () => {
+    onChange({ ...scope, [idsKey]: [] });
+  };
+
   // Count active filters for summary
   const filterSummaryParts: string[] = [];
   const addSummary = (allFlag: boolean, ids: string[], label: string) => {
@@ -131,6 +178,7 @@ export function ScopeSelector({
         options={customers}
         onAllChange={makeAllHandler('allCustomers', 'customerIds')}
         onToggle={makeToggleHandler('customerIds')}
+        onClearAll={makeClearHandler('customerIds')}
       />
 
       {/* Speeds */}
@@ -142,6 +190,7 @@ export function ScopeSelector({
         options={speeds}
         onAllChange={makeAllHandler('allSpeeds', 'speedIds')}
         onToggle={makeToggleHandler('speedIds')}
+        onClearAll={makeClearHandler('speedIds')}
       />
 
       {/* Additional Filters */}
@@ -157,6 +206,7 @@ export function ScopeSelector({
             options={jobStatuses}
             onAllChange={makeAllHandler('allJobStatuses', 'jobStatusIds')}
             onToggle={makeToggleHandler('jobStatusIds')}
+            onClearAll={makeClearHandler('jobStatusIds')}
           />
 
           {/* Priority */}
@@ -168,6 +218,7 @@ export function ScopeSelector({
             options={PRIORITY_OPTIONS}
             onAllChange={makeAllHandler('allPriorities', 'priorityIds')}
             onToggle={makeToggleHandler('priorityIds')}
+            onClearAll={makeClearHandler('priorityIds')}
           />
 
           {/* From Site */}
@@ -179,6 +230,7 @@ export function ScopeSelector({
             options={sites}
             onAllChange={makeAllHandler('allFromSites', 'fromSiteIds')}
             onToggle={makeToggleHandler('fromSiteIds')}
+            onClearAll={makeClearHandler('fromSiteIds')}
           />
 
           {/* To Site */}
@@ -190,6 +242,7 @@ export function ScopeSelector({
             options={sites}
             onAllChange={makeAllHandler('allToSites', 'toSiteIds')}
             onToggle={makeToggleHandler('toSiteIds')}
+            onClearAll={makeClearHandler('toSiteIds')}
           />
 
           {/* From Region */}
@@ -201,6 +254,7 @@ export function ScopeSelector({
             options={regions}
             onAllChange={makeAllHandler('allFromRegions', 'fromRegionIds')}
             onToggle={makeToggleHandler('fromRegionIds')}
+            onClearAll={makeClearHandler('fromRegionIds')}
           />
 
           {/* To Region */}
@@ -212,6 +266,7 @@ export function ScopeSelector({
             options={regions}
             onAllChange={makeAllHandler('allToRegions', 'toRegionIds')}
             onToggle={makeToggleHandler('toRegionIds')}
+            onClearAll={makeClearHandler('toRegionIds')}
           />
 
           {/* Time Threshold — stays as number input */}
