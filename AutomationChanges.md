@@ -222,11 +222,32 @@ IF COL_LENGTH('tucAutomationRule', 'TimeThreshold') IS NULL
 
 ---
 
+## Future: Condition-Level Filter Overrides
+
+Condition-level filters aren't inherently wrong — there are legitimate use cases. For example:
+
+- Condition 1: "Unassigned for 15 mins" filtered to **Express** jobs only
+- Condition 2: "Status changes to Delayed" filtered to **all** jobs
+- Match mode: **ANY** (either condition triggers the actions)
+
+That's perfectly valid. The problem is only when match mode is **ALL** and two conditions have mutually exclusive filters — no job can satisfy both, so the rule silently does nothing.
+
+**Plan:** Keep scope-level filters as the default (simple, covers 95% of use cases). In a future iteration, add optional condition-level filter overrides with **conflict detection guardrails**:
+
+- If match mode is ALL and two conditions filter to mutually exclusive sites → show warning: *"These conditions can never match together"*
+- If match mode is ALL and conditions filter to different priorities → show warning
+- Visual indicator (amber/red) on conflicting condition rows
+- Optionally block save with conflicts, or allow with explicit "I understand" acknowledgement
+
+**Important:** Do NOT drop the condition-level filter columns from the database. They'll be needed when condition-level overrides are reintroduced with guardrails. The columns also maintain backward compatibility with the SP during shadow mode.
+
+---
+
 ## SP Compatibility Note
 
 The existing `sp_AutomationEngine` reads filter values from the condition rows. During the transition period where both engines run in parallel (shadow mode), the SP will continue reading from condition-level columns. That's fine — the old columns stay on the table until the SP is fully retired.
 
-Once the SP is disabled and the .NET engine is confirmed stable, the old condition-level filter columns can be dropped in a cleanup migration.
+Once the SP is disabled and the .NET engine is confirmed stable, **do not drop the condition-level filter columns**. They will be reused when condition-level filter overrides are reintroduced with conflict detection guardrails (see section above).
 
 ---
 
