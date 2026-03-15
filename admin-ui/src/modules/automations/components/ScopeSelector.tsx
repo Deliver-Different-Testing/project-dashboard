@@ -39,8 +39,8 @@ function ScopeFilterSection({
   onToggle: (optionId: string) => void;
   onClearAll: () => void;
 }) {
-  // When unchecked with selections made, default to collapsed so user can shrink it
-  const [expanded, setExpanded] = useState(true);
+  // Default collapsed when not "apply to all" — user expands to pick items
+  const [expanded, setExpanded] = useState(allChecked);
 
   // Summary of selected items for collapsed view
   const selectedNames = selectedIds
