@@ -51,7 +51,7 @@ export function ActionRow({
                     statusId: e.target.value,
                   })
                 }
-                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+                className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
               >
                 <option value="">Select status...</option>
                 {jobStatuses.map((status) => (
@@ -71,7 +71,7 @@ export function ActionRow({
                     fromStatusId: e.target.value || undefined,
                   })
                 }
-                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+                className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
               >
                 <option value="">(any status — no guard)</option>
                 {jobStatuses.map((status) => (
@@ -98,7 +98,7 @@ export function ActionRow({
                     taskTemplateId: e.target.value,
                   })
                 }
-                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+                className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
               >
                 <option value="">Select task template...</option>
                 {taskTemplates.map((task) => (
@@ -141,7 +141,7 @@ export function ActionRow({
                   taskTemplateId: e.target.value,
                 })
               }
-              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               <option value="">Select task template...</option>
               {taskTemplates.map((task) => (
@@ -165,7 +165,7 @@ export function ActionRow({
                   notificationTemplateId: e.target.value,
                 })
               }
-              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               <option value="">Select notification...</option>
               {notificationTemplates.map((notif) => (
@@ -194,7 +194,7 @@ export function ActionRow({
                         : undefined,
                   })
                 }
-                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+                className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
               >
                 {SMS_RECIPIENT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -250,7 +250,7 @@ export function ActionRow({
         <select
           value={action.type}
           onChange={(e) => handleTypeChange(e.target.value as ActionType)}
-          className="px-3 py-1.5 text-sm border border-border rounded bg-white text-text-primary font-medium focus:outline-none focus:border-brand-cyan"
+          className="px-3 pr-8 py-1.5 text-sm border border-border rounded bg-white text-text-primary font-medium focus:outline-none focus:border-brand-cyan"
         >
           {ACTION_TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>

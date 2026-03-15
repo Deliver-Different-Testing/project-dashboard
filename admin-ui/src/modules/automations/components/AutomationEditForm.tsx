@@ -216,9 +216,9 @@ export function AutomationEditForm({
       {/* Section 2: Scope */}
       <div className="border-t border-border pt-4 space-y-3">
         <div>
-          <h4 className="text-sm font-semibold text-text-primary">Scope</h4>
+          <h4 className="text-sm font-semibold text-text-primary">Scope & Filters</h4>
           <p className="text-xs text-text-muted mt-0.5">
-            Define which customers and speeds this automation applies to
+            Define which jobs this automation applies to
           </p>
         </div>
 
@@ -271,37 +271,47 @@ export function AutomationEditForm({
           </div>
         </div>
 
-        {/* Match Mode */}
-        {formData.conditions.length > 1 && (
-          <div className="flex items-center gap-2 p-2 bg-white border border-border rounded">
-            <span className="text-sm text-text-secondary">Match mode:</span>
-            <select
-              value={formData.conditionMatchMode}
-              onChange={(e) =>
-                updateField('conditionMatchMode', e.target.value as ConditionMatchMode)
-              }
-              className="px-2 py-1 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              {CONDITION_MATCH_MODE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Condition List */}
+        {/* Condition List with inline AND/OR between conditions */}
         {formData.conditions.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-0">
             {formData.conditions.map((condition, index) => (
-              <ConditionRow
-                key={condition.id}
-                condition={condition}
-                jobStatuses={jobStatuses}
-                onChange={(c) => updateCondition(index, c)}
-                onRemove={() => removeCondition(index)}
-              />
+              <div key={condition.id}>
+                <ConditionRow
+                  condition={condition}
+                  jobStatuses={jobStatuses}
+                  onChange={(c) => updateCondition(index, c)}
+                  onRemove={() => removeCondition(index)}
+                />
+                {/* Inline AND/OR pill between conditions */}
+                {index < formData.conditions.length - 1 && (
+                  <div className="flex items-center justify-center py-1.5">
+                    <div className="flex items-center bg-white border border-border rounded-full shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => updateField('conditionMatchMode', 'all')}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                          formData.conditionMatchMode === 'all'
+                            ? 'bg-brand-cyan text-white'
+                            : 'text-text-muted hover:text-text-secondary'
+                        }`}
+                      >
+                        AND
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateField('conditionMatchMode', 'any')}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                          formData.conditionMatchMode === 'any'
+                            ? 'bg-brand-cyan text-white'
+                            : 'text-text-muted hover:text-text-secondary'
+                        }`}
+                      >
+                        OR
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         ) : (

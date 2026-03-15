@@ -111,7 +111,7 @@ function ScopeFilterSection({
       {/* Collapsed with no selections */}
       {!allChecked && !expanded && selectedIds.length === 0 && (
         <p className="ml-6 text-xs text-text-muted">
-          No {label.toLowerCase()} selected — applies to all.{' '}
+          No {label.toLowerCase()} selected.{' '}
           <button type="button" onClick={() => setExpanded(true)} className="text-brand-cyan hover:underline">
             Select
           </button>
@@ -184,7 +184,7 @@ function ScopeFilterSection({
           </div>
           {selectedIds.length === 0 && (
             <p className="text-xs text-text-muted mt-2">
-              No selection = applies to all {label.toLowerCase()}
+              Select specific {label.toLowerCase()} to restrict this automation, or check "Apply to all" above.
             </p>
           )}
         </div>
@@ -261,10 +261,8 @@ export function ScopeSelector({
         onClearAll={makeClearHandler('speedIds')}
       />
 
-      {/* Additional Filters */}
-      <div className="pt-3 border-t border-gray-100">
-        <h4 className="text-sm font-medium text-text-primary mb-3">Additional Filters</h4>
-        <div className="space-y-4">
+      {/* Job Statuses, Priorities, Sites, Regions */}
+      <div className="space-y-4">
           <ScopeFilterSection
             id="all-job-statuses"
             label="Job Statuses"
@@ -348,7 +346,6 @@ export function ScopeSelector({
               Job must be in state for at least X minutes before rule fires.
             </p>
           </div>
-        </div>
       </div>
 
       {/* Scope Summary */}
