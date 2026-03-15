@@ -40,25 +40,48 @@ export function ActionRow({
     switch (action.type) {
       case 'update_job_status':
         return (
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-text-secondary">Set status to:</label>
-            <select
-              value={action.statusId}
-              onChange={(e) =>
-                onChange({
-                  ...action,
-                  statusId: e.target.value,
-                })
-              }
-              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">Select status...</option>
-              {jobStatuses.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-sm text-text-secondary">Set status to:</label>
+              <select
+                value={action.statusId}
+                onChange={(e) =>
+                  onChange({
+                    ...action,
+                    statusId: e.target.value,
+                  })
+                }
+                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+              >
+                <option value="">Select status...</option>
+                {jobStatuses.map((status) => (
+                  <option key={status.id} value={status.id}>
+                    {status.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-sm text-text-muted">Only if currently:</label>
+              <select
+                value={action.fromStatusId || ''}
+                onChange={(e) =>
+                  onChange({
+                    ...action,
+                    fromStatusId: e.target.value || undefined,
+                  })
+                }
+                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
+              >
+                <option value="">(any status — no guard)</option>
+                {jobStatuses.map((status) => (
+                  <option key={status.id} value={status.id}>
+                    {status.name}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs text-text-muted">Optional — restricts when the status change applies</span>
+            </div>
           </div>
         );
 
@@ -212,49 +235,6 @@ export function ActionRow({
                 className="w-full px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-cyan resize-y"
               />
             </div>
-          </div>
-        );
-
-      case 'change_status':
-        return (
-          <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-sm text-text-secondary">From:</label>
-            <select
-              value={action.fromStatusId || ''}
-              onChange={(e) =>
-                onChange({
-                  ...action,
-                  fromStatusId: e.target.value || undefined,
-                })
-              }
-              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">(any status)</option>
-              {jobStatuses.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
-            <span className="text-sm text-text-secondary">→</span>
-            <label className="text-sm text-text-secondary">To:</label>
-            <select
-              value={action.toStatusId}
-              onChange={(e) =>
-                onChange({
-                  ...action,
-                  toStatusId: e.target.value,
-                })
-              }
-              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
-            >
-              <option value="">Select status...</option>
-              {jobStatuses.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.name}
-                </option>
-              ))}
-            </select>
           </div>
         );
 

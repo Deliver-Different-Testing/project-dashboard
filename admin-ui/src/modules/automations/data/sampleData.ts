@@ -281,9 +281,9 @@ export const sampleAutomations: AutomationRule[] = [
     actions: [
       {
         id: 'action-4-1',
-        type: 'change_status',
+        type: 'update_job_status',
         fromStatusId: 'status-1',
-        toStatusId: 'status-2',
+        statusId: 'status-2',
       },
     ],
     isActive: true,

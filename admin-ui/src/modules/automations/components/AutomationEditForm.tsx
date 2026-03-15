@@ -27,6 +27,7 @@ import {
   CONDITION_MATCH_MODE_OPTIONS,
   createEmptyCondition,
   createEmptyAction,
+  getNaturalLanguageSummary,
 } from '../types';
 
 interface AutomationEditFormProps {
@@ -376,7 +377,25 @@ export function AutomationEditForm({
         )}
       </div>
 
-      {/* Section 5: Status & Actions */}
+      {/* Section 5: Plain English Summary */}
+      {(formData.conditions.length > 0 || formData.actions.length > 0) && (
+        <div className="bg-brand-cyan/5 border border-brand-cyan/20 rounded-lg p-4">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">💡</span>
+            <div>
+              <div className="text-xs font-semibold text-brand-cyan mb-1 uppercase tracking-wide">Plain English</div>
+              <p className="text-sm text-text-primary leading-relaxed">
+                {getNaturalLanguageSummary(
+                  { conditions: formData.conditions, conditionMatchMode: formData.conditionMatchMode, actions: formData.actions, scope: formData.scope },
+                  { jobStatuses, taskTemplates, notificationTemplates, customers, speeds }
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Section 6: Status & Actions */}
       <div className="border-t border-border pt-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Toggle

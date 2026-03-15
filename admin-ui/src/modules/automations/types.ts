@@ -270,8 +270,7 @@ export type ActionType =
   | 'create_task'
   | 'complete_task'
   | 'trigger_notification'
-  | 'send_sms'
-  | 'change_status';
+  | 'send_sms';
 
 export const ACTION_TYPE_OPTIONS: { value: ActionType; label: string; icon: string }[] = [
   { value: 'update_job_status', label: 'Update job status', icon: '📊' },
@@ -279,7 +278,6 @@ export const ACTION_TYPE_OPTIONS: { value: ActionType; label: string; icon: stri
   { value: 'complete_task', label: 'Complete task', icon: '✅' },
   { value: 'trigger_notification', label: 'Trigger notification', icon: '🔔' },
   { value: 'send_sms', label: 'Send text message (SMS)', icon: '💬' },
-  { value: 'change_status', label: 'Change status from one to another', icon: '🔄' },
 ];
 
 /**
@@ -303,9 +301,11 @@ interface BaseAction {
 
 /**
  * Update job status action.
+ * Optional fromStatusId acts as a guard — only changes status if job is currently in that status.
  */
 export interface UpdateJobStatusAction extends BaseAction {
   type: 'update_job_status';
+  fromStatusId?: string;
   statusId: string;
 }
 
@@ -350,15 +350,6 @@ export interface SendSmsAction extends BaseAction {
 }
 
 /**
- * Change status from one to another action.
- */
-export interface ChangeStatusAction extends BaseAction {
-  type: 'change_status';
-  fromStatusId?: string; // Optional - if blank, behaves like normal status update
-  toStatusId: string;
-}
-
-/**
  * Union of all action types.
  */
 export type Action =
@@ -366,8 +357,7 @@ export type Action =
   | CreateTaskAction
   | CompleteTaskAction
   | TriggerNotificationAction
-  | SendSmsAction
-  | ChangeStatusAction;
+  | SendSmsAction;
 
 // ============================================
 // AUTOMATION RULE
@@ -445,7 +435,6 @@ export function getAutomationIcons(rule: AutomationRule): string {
   for (const action of rule.actions) {
     switch (action.type) {
       case 'update_job_status':
-      case 'change_status':
         if (!icons.includes('📊')) icons.push('📊');
         break;
       case 'create_task':
@@ -602,11 +591,98 @@ export function createEmptyAction(type: ActionType): Action {
       return { ...base, type: 'trigger_notification', notificationTemplateId: '' };
     case 'send_sms':
       return { ...base, type: 'send_sms', recipientType: 'customer_contact', messageContent: '' };
-    case 'change_status':
-      return { ...base, type: 'change_status', toStatusId: '' };
     default:
       return { ...base, type: 'update_job_status', statusId: '' };
   }
+}
+
+/**
+ * Generate a natural language summary of what an automation rule does.
+ * E.g. "When a job is assigned and then 15 minutes pass, an SMS will be sent
+ * to the driver saying 'check your package notes'"
+ */
+export function getNaturalLanguageSummary(
+  rule: Pick<AutomationRule, 'conditions' | 'conditionMatchMode' | 'actions' | 'scope'>,
+  lookups: {
+    jobStatuses: JobStatus[];
+    taskTemplates: TaskTemplate[];
+    notificationTemplates: NotificationTemplate[];
+    customers: CustomerOption[];
+    speeds: SpeedOption[];
+  }
+): string {
+  if (rule.conditions.length === 0 && rule.actions.length === 0) {
+    return 'No conditions or actions configured yet.';
+  }
+
+  const statusName = (id?: string) => {
+    if (!id) return '(any)';
+    return lookups.jobStatuses.find(s => s.id === id)?.name ?? 'unknown status';
+  };
+  const taskName = (id: string) => lookups.taskTemplates.find(t => t.id === id)?.name ?? 'a task';
+  const notifName = (id: string) => lookups.notificationTemplates.find(n => n.id === id)?.name ?? 'a notification';
+
+  // Build condition phrases
+  const condPhrases = rule.conditions.map(c => {
+    switch (c.type) {
+      case 'job_unassigned': return 'a job is unassigned';
+      case 'job_assigned': return 'a job is assigned';
+      case 'before_scheduled_time': return `${c.offsetValue} ${c.offsetUnit} before the ${c.scheduledTimeField} time`;
+      case 'after_scheduled_time': return `${c.offsetValue} ${c.offsetUnit} after the ${c.scheduledTimeField} time`;
+      case 'at_scheduled_time': return `at the scheduled ${c.scheduledTimeField} time`;
+      case 'status': {
+        if (c.mode === 'any_change') return 'the job status changes';
+        if (c.mode === 'changes_to') return `the job status changes to "${statusName(c.statusId)}"`;
+        if (c.mode === 'leaves') return `the job leaves "${statusName(c.statusId)}" status`;
+        if (c.mode === 'is_not') return `the job is not in "${statusName(c.statusId)}" status`;
+        return 'a status change occurs';
+      }
+      case 'scan': {
+        const types = c.scanTypes.map(t => SCAN_TYPE_OPTIONS.find(o => o.value === t)?.label ?? t);
+        return types.length === 1 ? `a ${types[0]} occurs` : `a scan event occurs (${types.join(', ')})`;
+      }
+      default: return 'an unknown condition is met';
+    }
+  });
+
+  // Build action phrases
+  const actionPhrases = rule.actions.map(a => {
+    switch (a.type) {
+      case 'update_job_status': {
+        if (a.fromStatusId) {
+          return `change the job status from "${statusName(a.fromStatusId)}" to "${statusName(a.statusId)}"`;
+        }
+        return `set the job status to "${statusName(a.statusId)}"`;
+      }
+      case 'create_task': return `create a "${taskName(a.taskTemplateId)}" task`;
+      case 'complete_task': return `complete the "${taskName(a.taskTemplateId)}" task`;
+      case 'trigger_notification': return `send a "${notifName(a.notificationTemplateId)}" notification`;
+      case 'send_sms': {
+        const recipient = a.recipientType === 'driver' ? 'the driver'
+          : a.recipientType === 'customer_contact' ? 'the customer contact'
+          : `${a.fixedPhoneNumber || 'a fixed number'}`;
+        const msg = a.messageContent ? ` saying "${a.messageContent.slice(0, 60)}${a.messageContent.length > 60 ? '...' : ''}"` : '';
+        return `send an SMS to ${recipient}${msg}`;
+      }
+      default: return 'perform an unknown action';
+    }
+  });
+
+  // Assemble
+  let sentence = 'Based on your configuration: ';
+
+  if (condPhrases.length > 0) {
+    const joiner = rule.conditionMatchMode === 'all' ? ' and ' : ' or ';
+    sentence += `when ${condPhrases.join(joiner)}, `;
+  }
+
+  if (actionPhrases.length > 0) {
+    sentence += actionPhrases.join(', and ') + '.';
+  } else {
+    sentence += 'no actions will be taken (add at least one action).';
+  }
+
+  return sentence;
 }
 
 /**
