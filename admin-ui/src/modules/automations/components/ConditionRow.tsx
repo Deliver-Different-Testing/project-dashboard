@@ -77,7 +77,7 @@ export function ConditionRow({
                   offsetUnit: e.target.value as TimeUnit,
                 })
               }
-              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               {TIME_UNIT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -96,7 +96,7 @@ export function ConditionRow({
                   scheduledTimeField: e.target.value as ScheduledTimeField,
                 })
               }
-              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               {SCHEDULED_TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -119,7 +119,7 @@ export function ConditionRow({
                   scheduledTimeField: e.target.value as ScheduledTimeField,
                 })
               }
-              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               {SCHEDULED_TIME_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -142,7 +142,7 @@ export function ConditionRow({
                   statusId: e.target.value === 'any_change' ? undefined : condition.statusId,
                 })
               }
-              className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+              className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
             >
               {STATUS_CONDITION_MODES.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -159,7 +159,7 @@ export function ConditionRow({
                     statusId: e.target.value,
                   })
                 }
-                className="px-2 pr-7 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 6px center" }}
+                className="px-2 py-1.5 text-sm border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan"
               >
                 <option value="">Select status...</option>
                 {jobStatuses.map((status) => (
@@ -216,8 +216,7 @@ export function ConditionRow({
         <select
           value={condition.type}
           onChange={(e) => handleTypeChange(e.target.value as ConditionType)}
-          className="px-3 pr-8 py-1.5 text-sm border border-border rounded bg-white text-text-primary font-medium focus:outline-none focus:border-brand-cyan appearance-none"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+          className="px-3 pr-8 py-1.5 text-sm border border-border rounded bg-white text-text-primary font-medium focus:outline-none focus:border-brand-cyan "
         >
           {CONDITION_TYPE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -235,8 +234,7 @@ export function ConditionRow({
           <select
             value={condition.jobTypeFilter}
             onChange={(e) => handleJobTypeChange(e.target.value as JobTypeFilter)}
-            className="px-2 pr-6 py-1 text-xs border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan appearance-none"
-            style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center' }}
+            className="px-2 pr-6 py-1 text-xs border border-border rounded bg-white text-text-primary focus:outline-none focus:border-brand-cyan "
           >
             {JOB_TYPE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
