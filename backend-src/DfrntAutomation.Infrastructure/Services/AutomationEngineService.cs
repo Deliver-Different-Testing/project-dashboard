@@ -416,17 +416,17 @@ public class AutomationEngineService : IAutomationEngineService
             case ActionType.UpdateJobStatus:
                 if (action.ToStatusId.HasValue && evt.JobId.HasValue)
                 {
-                    await _db.Database.ExecuteSqlInterpolatedAsync(
-                        $"UPDATE tucJob SET StatusId = {action.ToStatusId.Value} WHERE JobId = {evt.JobId.Value}", ct);
-                }
-                break;
-
-            case ActionType.ChangeStatus:
-                if (action.FromStatusId.HasValue && action.ToStatusId.HasValue && evt.JobId.HasValue)
-                {
-                    // Only change if current status matches FromStatusId
-                    await _db.Database.ExecuteSqlInterpolatedAsync(
-                        $"UPDATE tucJob SET StatusId = {action.ToStatusId.Value} WHERE JobId = {evt.JobId.Value} AND StatusId = {action.FromStatusId.Value}", ct);
+                    if (action.FromStatusId.HasValue)
+                    {
+                        // Guard: only change if current status matches FromStatusId
+                        await _db.Database.ExecuteSqlInterpolatedAsync(
+                            $"UPDATE tucJob SET StatusId = {action.ToStatusId.Value} WHERE JobId = {evt.JobId.Value} AND StatusId = {action.FromStatusId.Value}", ct);
+                    }
+                    else
+                    {
+                        await _db.Database.ExecuteSqlInterpolatedAsync(
+                            $"UPDATE tucJob SET StatusId = {action.ToStatusId.Value} WHERE JobId = {evt.JobId.Value}", ct);
+                    }
                 }
                 break;
 

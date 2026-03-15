@@ -18,8 +18,5 @@ public enum ActionType
     TriggerNotification,
 
     /// <summary>Send SMS to customer_contact/driver/fixed_number with placeholder support.</summary>
-    SendSms,
-
-    /// <summary>Conditional from→to status change.</summary>
-    ChangeStatus
+    SendSms
 }

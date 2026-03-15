@@ -275,3 +275,136 @@ You've already started building from the original `HANDOVER-GARRY.md` and I don'
 3. **Hybrid approach** — keep the condition-level columns in the DB for SP compatibility, but have the .NET engine read them from the rule level. The frontend already sends them at scope level.
 
 Whatever works best for where you're at. The key thing is that **the frontend now sends all filters at scope level in the `Scope` object**, not on individual conditions. The backend needs to match that contract before the UI goes live.
+
+---
+
+# Update 2 — UI Polish + Action Consolidation (15 March 2026)
+
+## Summary
+
+Mike (VP Implementations) reviewed the Automation Engine UI and gave feedback. All items are now resolved. Plus: action type consolidation and natural language summaries.
+
+---
+
+## Mike's Feedback — All Fixed
+
+### 1. Scope & Filters merged into one section
+Removed the "Additional Filters" divider. Scope and filter controls now live in a single "Scope & Filters" section header.
+
+**File changed:** `ScopeSelector.tsx`, `AutomationEditForm.tsx`
+
+### 2. Unified "Apply to All" language
+Removed ambiguous "No selection = applies to all" text. Now uses clear guidance: check "Apply to all" or select specific items.
+
+**File changed:** `ScopeSelector.tsx`
+
+### 3. Inline AND/OR toggle pills
+Replaced top-level match mode dropdown with inline AND/OR toggle pills rendered between each condition row. Active mode gets `bg-brand-cyan text-white`. Still backed by a single `conditionMatchMode` field on the rule (not per-condition operators).
+
+**File changed:** `AutomationEditForm.tsx`
+
+### 4. Fixed double dropdown chevrons
+All `<select>` elements had double arrows (browser native + @tailwindcss/forms plugin). Fixed with global CSS: `appearance: none` + single SVG chevron via `!important`.
+
+**File changed:** `index.css`, `ConditionRow.tsx`
+
+### 5. Time condition fields inline
+"30 minutes before Pickup time" controls now sit on the same row as the condition type and job type filter, instead of wrapping to a second line.
+
+**File changed:** `ConditionRow.tsx`
+
+---
+
+## Action Consolidation: `update_job_status` + `change_status` Merged
+
+`ChangeStatus` action type has been removed. `UpdateJobStatus` now has an **optional `FromStatusId` guard field**.
+
+### What changed
+
+| Before | After |
+|--------|-------|
+| `update_job_status` — set status unconditionally | `update_job_status` — set status, with optional "only if currently" guard |
+| `change_status` — from/to status change | **Removed** — use `update_job_status` with `FromStatusId` instead |
+
+### Frontend
+- `ActionType` union: 5 types (was 6)
+- `ACTION_TYPE_OPTIONS`: 5 entries (was 6)
+- `UpdateJobStatusAction` has optional `fromStatusId`
+- Edit form shows "Only if currently" dropdown with "(any status — no guard)" default
+
+**Files changed:** `types.ts`, `ActionRow.tsx`
+
+### Backend
+- `ActionType` enum: removed `ChangeStatus` member
+- `AutomationEngineService.ExecuteActionAsync`: merged `ChangeStatus` case into `UpdateJobStatus` — uses `FromStatusId` as optional WHERE guard
+- `AutomationAction` entity: `FromStatusId` already existed as nullable int, no schema change needed
+
+**Files changed:** `ActionType.cs`, `AutomationEngineService.cs`
+
+### Migration
+No DB migration needed — `FromStatusId` column already exists on `AutomationAction`. The `ChangeStatus` enum value is no longer referenced in code.
+
+---
+
+## Natural Language Summary
+
+Added a live-updating "Plain English" summary box to the edit form that describes the rule in natural language.
+
+**Example output:**
+> When **Job assigned** (All job types) happens, AND **Before scheduled time** (30 minutes before Pickup time, All job types) is met → **Update job status** to Dispatched (only if currently Pending), **Send SMS** to customer contact
+
+The summary recalculates as the user changes conditions/actions. It sits between the Actions and Status sections.
+
+**Files changed:** `types.ts` (new `getNaturalLanguageSummary()` export), `AutomationEditForm.tsx`
+
+---
+
+## Database Migration
+
+### Migration 007: Remove ChangeStatus from ActionType check constraint (if exists)
+
+```sql
+-- ============================================================================
+-- 007-remove-change-status-action-type.sql
+-- If you have a CHECK constraint on ActionType that includes 'ChangeStatus',
+-- update it to remove that value. 'UpdateJobStatus' now handles both cases.
+-- Safe to skip if no CHECK constraint exists.
+-- ============================================================================
+
+-- Update any existing ChangeStatus actions to UpdateJobStatus
+UPDATE [dbo].[AutomationAction]
+SET ActionType = 'UpdateJobStatus'
+WHERE ActionType = 'ChangeStatus';
+GO
+
+-- If there's a check constraint, recreate without ChangeStatus
+-- (Garry: adjust constraint name to match your actual constraint)
+-- ALTER TABLE [dbo].[AutomationAction] DROP CONSTRAINT [CK_AutomationAction_ActionType];
+-- ALTER TABLE [dbo].[AutomationAction] ADD CONSTRAINT [CK_AutomationAction_ActionType]
+--     CHECK (ActionType IN ('UpdateJobStatus', 'CreateTask', 'CompleteTask', 'TriggerNotification', 'SendSms'));
+-- GO
+```
+
+---
+
+## Updated Files Summary
+
+| File | Change |
+|------|--------|
+| `admin-ui/src/index.css` | Global select chevron fix (appearance-none + SVG) |
+| `admin-ui/src/modules/automations/types.ts` | Removed `change_status` from ActionType, added `getNaturalLanguageSummary()`, `fromStatusId` on UpdateJobStatusAction |
+| `admin-ui/src/modules/automations/components/ConditionRow.tsx` | Fixed double chevrons, inline time fields |
+| `admin-ui/src/modules/automations/components/AutomationEditForm.tsx` | Inline AND/OR pills, scope header rename, natural language summary box |
+| `admin-ui/src/modules/automations/components/ScopeSelector.tsx` | Merged scope+filters section, unified "Apply to All" text |
+| `admin-ui/src/modules/automations/components/ActionRow.tsx` | Merged update_job_status + change_status, "Only if currently" dropdown |
+| `backend-src/DfrntAutomation.Core/Enums/ActionType.cs` | Removed `ChangeStatus` enum member |
+| `backend-src/DfrntAutomation.Infrastructure/Services/AutomationEngineService.cs` | Merged ChangeStatus into UpdateJobStatus with optional FromStatusId guard |
+
+---
+
+## Checklist for Garry (Update 2)
+
+- [ ] Run migration 007 if any `ChangeStatus` actions exist in DB
+- [ ] Verify `ActionType.cs` no longer has `ChangeStatus` member
+- [ ] Verify `AutomationEngineService.cs` has merged UpdateJobStatus logic with FromStatusId guard
+- [ ] Frontend is deployed to GH Pages — test at https://deliver-different-testing.github.io/Adminmanagerupdate/
