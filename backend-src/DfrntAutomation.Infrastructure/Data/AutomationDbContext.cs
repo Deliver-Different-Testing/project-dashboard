@@ -33,6 +33,13 @@ public class AutomationDbContext : DbContext
                 .HasDefaultValue(Core.Enums.ConditionMatchMode.All);
             e.Property(r => r.CustomerIds).HasMaxLength(2000);
             e.Property(r => r.SpeedIds).HasMaxLength(2000);
+            // Scope-level filters (moved from condition to rule to prevent conflicting filters)
+            e.Property(r => r.JobStatusIds).HasMaxLength(2000);
+            e.Property(r => r.PriorityIds).HasMaxLength(2000);
+            e.Property(r => r.FromSiteIds).HasMaxLength(2000);
+            e.Property(r => r.ToSiteIds).HasMaxLength(2000);
+            e.Property(r => r.FromRegionIds).HasMaxLength(2000);
+            e.Property(r => r.ToRegionIds).HasMaxLength(2000);
             e.HasQueryFilter(r => !r.IsDeleted);
         });
 
@@ -47,12 +54,6 @@ public class AutomationDbContext : DbContext
             e.Property(c => c.ScheduledTimeField).HasConversion<string>().HasMaxLength(10);
             e.Property(c => c.OffsetUnit).HasMaxLength(10);
             e.Property(c => c.ScanTypes).HasMaxLength(500);
-            e.Property(c => c.PriorityFilter).HasMaxLength(50).HasDefaultValue("ALL");
-            e.Property(c => c.FromSiteFilter).HasMaxLength(2000);
-            e.Property(c => c.ToSiteFilter).HasMaxLength(2000);
-            e.Property(c => c.FromRegionFilter).HasMaxLength(2000);
-            e.Property(c => c.ToRegionFilter).HasMaxLength(2000);
-            e.Property(c => c.TimeThreshold);
             e.HasOne(c => c.Rule).WithMany(r => r.Conditions).HasForeignKey(c => c.RuleId).OnDelete(DeleteBehavior.Cascade);
         });
 

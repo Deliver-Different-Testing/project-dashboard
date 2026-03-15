@@ -72,7 +72,7 @@ public class AutomationEngineService : IAutomationEngineService
             try
             {
                 // Check scope
-                if (!IsInScope(rule, automationEvent.CustomerId, automationEvent.SpeedId))
+                if (!IsInScope(rule, automationEvent))
                 {
                     log.ConditionsMet = false;
                     sw.Stop();
@@ -224,21 +224,79 @@ public class AutomationEngineService : IAutomationEngineService
     #region Private Methods
 
     /// <summary>
-    /// Check if the job's customer/speed falls within the rule's scope.
+    /// Check if the job falls within the rule's scope. ALL filters live here (not on conditions)
+    /// to prevent conflicting condition-level filters that silently match nothing.
     /// </summary>
-    private static bool IsInScope(AutomationRule rule, int? customerId, int? speedId)
+    private static bool IsInScope(AutomationRule rule, AutomationEvent evt)
     {
-        if (!rule.AllCustomers && customerId.HasValue)
+        // Customers
+        if (!rule.AllCustomers && evt.CustomerId.HasValue)
         {
-            var customerIds = ParseIds(rule.CustomerIds);
-            if (!customerIds.Contains(customerId.Value))
+            var ids = ParseIds(rule.CustomerIds);
+            if (ids.Count > 0 && !ids.Contains(evt.CustomerId.Value))
                 return false;
         }
 
-        if (!rule.AllSpeeds && speedId.HasValue)
+        // Speeds
+        if (!rule.AllSpeeds && evt.SpeedId.HasValue)
         {
-            var speedIds = ParseIds(rule.SpeedIds);
-            if (!speedIds.Contains(speedId.Value))
+            var ids = ParseIds(rule.SpeedIds);
+            if (ids.Count > 0 && !ids.Contains(evt.SpeedId.Value))
+                return false;
+        }
+
+        // Job Statuses
+        if (!rule.AllJobStatuses && evt.NewStatusId.HasValue)
+        {
+            var ids = ParseIds(rule.JobStatusIds);
+            if (ids.Count > 0 && !ids.Contains(evt.NewStatusId.Value))
+                return false;
+        }
+
+        // Priorities
+        if (!rule.AllPriorities && evt.PriorityId.HasValue)
+        {
+            var ids = ParseIds(rule.PriorityIds);
+            if (ids.Count > 0 && !ids.Contains(evt.PriorityId.Value))
+                return false;
+        }
+
+        // From Site
+        if (!rule.AllFromSites && evt.FromSiteId.HasValue)
+        {
+            var ids = ParseIds(rule.FromSiteIds);
+            if (ids.Count > 0 && !ids.Contains(evt.FromSiteId.Value))
+                return false;
+        }
+
+        // To Site
+        if (!rule.AllToSites && evt.ToSiteId.HasValue)
+        {
+            var ids = ParseIds(rule.ToSiteIds);
+            if (ids.Count > 0 && !ids.Contains(evt.ToSiteId.Value))
+                return false;
+        }
+
+        // From Region
+        if (!rule.AllFromRegions && evt.FromRegionId.HasValue)
+        {
+            var ids = ParseIds(rule.FromRegionIds);
+            if (ids.Count > 0 && !ids.Contains(evt.FromRegionId.Value))
+                return false;
+        }
+
+        // To Region
+        if (!rule.AllToRegions && evt.ToRegionId.HasValue)
+        {
+            var ids = ParseIds(rule.ToRegionIds);
+            if (ids.Count > 0 && !ids.Contains(evt.ToRegionId.Value))
+                return false;
+        }
+
+        // Time Threshold
+        if (rule.TimeThreshold.HasValue && rule.TimeThreshold.Value > 0)
+        {
+            if (!evt.MinutesInState.HasValue || evt.MinutesInState.Value < rule.TimeThreshold.Value)
                 return false;
         }
 
@@ -265,10 +323,7 @@ public class AutomationEngineService : IAutomationEngineService
     /// </summary>
     private static bool EvaluateCondition(AutomationCondition condition, AutomationEvent evt)
     {
-        // First check the advanced filters — if any filter fails, the condition fails
-        if (!PassesAdvancedFilters(condition, evt))
-            return false;
-
+        // Advanced filters now live at scope/rule level (checked in IsInScope)
         return condition.ConditionType switch
         {
             ConditionType.Status => EvaluateStatusCondition(condition, evt),
@@ -281,60 +336,6 @@ public class AutomationEngineService : IAutomationEngineService
             ConditionType.AtScheduledTime => true, // Already filtered by SQL
             _ => false
         };
-    }
-
-    /// <summary>
-    /// Evaluate the 6 advanced filter fields on a condition. Uses the same CHARINDEX-style
-    /// comma-separated matching as the stored procedure sp_AutomationEngine.
-    /// Returns true if the event passes ALL filters (empty/null filter = passes all).
-    /// </summary>
-    private static bool PassesAdvancedFilters(AutomationCondition condition, AutomationEvent evt)
-    {
-        // Priority filter: "ALL" or comma-separated speed IDs
-        if (!string.IsNullOrEmpty(condition.PriorityFilter)
-            && !condition.PriorityFilter.Equals("ALL", StringComparison.OrdinalIgnoreCase)
-            && evt.PriorityId.HasValue)
-        {
-            if (!CsvContains(condition.PriorityFilter, evt.PriorityId.Value.ToString()))
-                return false;
-        }
-
-        // From site filter: comma-separated site IDs
-        if (!string.IsNullOrEmpty(condition.FromSiteFilter) && evt.FromSiteId.HasValue)
-        {
-            if (!CsvContains(condition.FromSiteFilter, evt.FromSiteId.Value.ToString()))
-                return false;
-        }
-
-        // To site filter: comma-separated site IDs
-        if (!string.IsNullOrEmpty(condition.ToSiteFilter) && evt.ToSiteId.HasValue)
-        {
-            if (!CsvContains(condition.ToSiteFilter, evt.ToSiteId.Value.ToString()))
-                return false;
-        }
-
-        // From region filter: comma-separated region IDs
-        if (!string.IsNullOrEmpty(condition.FromRegionFilter) && evt.FromRegionId.HasValue)
-        {
-            if (!CsvContains(condition.FromRegionFilter, evt.FromRegionId.Value.ToString()))
-                return false;
-        }
-
-        // To region filter: comma-separated region IDs
-        if (!string.IsNullOrEmpty(condition.ToRegionFilter) && evt.ToRegionId.HasValue)
-        {
-            if (!CsvContains(condition.ToRegionFilter, evt.ToRegionId.Value.ToString()))
-                return false;
-        }
-
-        // Time threshold: job must be in state for at least N minutes
-        if (condition.TimeThreshold.HasValue && condition.TimeThreshold.Value > 0)
-        {
-            if (!evt.MinutesInState.HasValue || evt.MinutesInState.Value < condition.TimeThreshold.Value)
-                return false;
-        }
-
-        return true;
     }
 
     /// <summary>
@@ -547,11 +548,23 @@ public class AutomationEngineService : IAutomationEngineService
 
             if (sql is not null)
             {
-                // Apply scope filter
+                // Apply all scope filters to SQL
                 if (!rule.AllCustomers && !string.IsNullOrEmpty(rule.CustomerIds))
                     sql += $" AND j.CustomerId IN ({rule.CustomerIds})";
                 if (!rule.AllSpeeds && !string.IsNullOrEmpty(rule.SpeedIds))
                     sql += $" AND j.SpeedId IN ({rule.SpeedIds})";
+                if (!rule.AllJobStatuses && !string.IsNullOrEmpty(rule.JobStatusIds))
+                    sql += $" AND j.StatusId IN ({rule.JobStatusIds})";
+                if (!rule.AllPriorities && !string.IsNullOrEmpty(rule.PriorityIds))
+                    sql += $" AND j.PriorityId IN ({rule.PriorityIds})";
+                if (!rule.AllFromSites && !string.IsNullOrEmpty(rule.FromSiteIds))
+                    sql += $" AND j.PickupSiteId IN ({rule.FromSiteIds})";
+                if (!rule.AllToSites && !string.IsNullOrEmpty(rule.ToSiteIds))
+                    sql += $" AND j.DeliverySiteId IN ({rule.ToSiteIds})";
+                if (!rule.AllFromRegions && !string.IsNullOrEmpty(rule.FromRegionIds))
+                    sql += $" AND j.PickupRegionId IN ({rule.FromRegionIds})";
+                if (!rule.AllToRegions && !string.IsNullOrEmpty(rule.ToRegionIds))
+                    sql += $" AND j.DeliveryRegionId IN ({rule.ToRegionIds})";
 
                 var ids = await _db.Database.SqlQueryRaw<int>(sql).ToListAsync(ct);
                 jobIds.AddRange(ids);

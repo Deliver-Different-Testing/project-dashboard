@@ -1,5 +1,9 @@
 namespace DfrntAutomation.Core.DTOs;
 
+/// <summary>
+/// Condition DTO — filter fields (priority, site, region, threshold) have been
+/// moved to AutomationScopeDto (rule level) to prevent conflicting filters.
+/// </summary>
 public class AutomationConditionDto
 {
     public int? Id { get; set; }
@@ -12,10 +16,4 @@ public class AutomationConditionDto
     public int? OffsetValue { get; set; }
     public string? OffsetUnit { get; set; }
     public List<string>? ScanTypes { get; set; }
-    public string PriorityFilter { get; set; } = "ALL";
-    public string? FromSiteFilter { get; set; }
-    public string? ToSiteFilter { get; set; }
-    public string? FromRegionFilter { get; set; }
-    public string? ToRegionFilter { get; set; }
-    public int? TimeThreshold { get; set; }
 }

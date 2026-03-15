@@ -58,6 +58,19 @@ public class AutomationController : ControllerBase
             CustomerIds = request.Scope.CustomerIds.Any() ? string.Join(",", request.Scope.CustomerIds) : null,
             AllSpeeds = request.Scope.AllSpeeds,
             SpeedIds = request.Scope.SpeedIds.Any() ? string.Join(",", request.Scope.SpeedIds) : null,
+            AllJobStatuses = request.Scope.AllJobStatuses,
+            JobStatusIds = request.Scope.JobStatusIds.Any() ? string.Join(",", request.Scope.JobStatusIds) : null,
+            AllPriorities = request.Scope.AllPriorities,
+            PriorityIds = request.Scope.PriorityIds.Any() ? string.Join(",", request.Scope.PriorityIds) : null,
+            AllFromSites = request.Scope.AllFromSites,
+            FromSiteIds = request.Scope.FromSiteIds.Any() ? string.Join(",", request.Scope.FromSiteIds) : null,
+            AllToSites = request.Scope.AllToSites,
+            ToSiteIds = request.Scope.ToSiteIds.Any() ? string.Join(",", request.Scope.ToSiteIds) : null,
+            AllFromRegions = request.Scope.AllFromRegions,
+            FromRegionIds = request.Scope.FromRegionIds.Any() ? string.Join(",", request.Scope.FromRegionIds) : null,
+            AllToRegions = request.Scope.AllToRegions,
+            ToRegionIds = request.Scope.ToRegionIds.Any() ? string.Join(",", request.Scope.ToRegionIds) : null,
+            TimeThreshold = request.Scope.TimeThreshold,
             Conditions = request.Conditions.Select((c, i) => new AutomationCondition
             {
                 ConditionType = Enum.Parse<ConditionType>(c.ConditionType, true),
@@ -69,12 +82,6 @@ public class AutomationController : ControllerBase
                 OffsetValue = c.OffsetValue,
                 OffsetUnit = c.OffsetUnit,
                 ScanTypes = c.ScanTypes is not null ? string.Join(",", c.ScanTypes) : null,
-                PriorityFilter = c.PriorityFilter ?? "ALL",
-                FromSiteFilter = c.FromSiteFilter,
-                ToSiteFilter = c.ToSiteFilter,
-                FromRegionFilter = c.FromRegionFilter,
-                ToRegionFilter = c.ToRegionFilter,
-                TimeThreshold = c.TimeThreshold
             }).ToList(),
             Actions = request.Actions.Select((a, i) => new AutomationAction
             {
@@ -112,6 +119,19 @@ public class AutomationController : ControllerBase
         rule.CustomerIds = request.Scope.CustomerIds.Any() ? string.Join(",", request.Scope.CustomerIds) : null;
         rule.AllSpeeds = request.Scope.AllSpeeds;
         rule.SpeedIds = request.Scope.SpeedIds.Any() ? string.Join(",", request.Scope.SpeedIds) : null;
+        rule.AllJobStatuses = request.Scope.AllJobStatuses;
+        rule.JobStatusIds = request.Scope.JobStatusIds.Any() ? string.Join(",", request.Scope.JobStatusIds) : null;
+        rule.AllPriorities = request.Scope.AllPriorities;
+        rule.PriorityIds = request.Scope.PriorityIds.Any() ? string.Join(",", request.Scope.PriorityIds) : null;
+        rule.AllFromSites = request.Scope.AllFromSites;
+        rule.FromSiteIds = request.Scope.FromSiteIds.Any() ? string.Join(",", request.Scope.FromSiteIds) : null;
+        rule.AllToSites = request.Scope.AllToSites;
+        rule.ToSiteIds = request.Scope.ToSiteIds.Any() ? string.Join(",", request.Scope.ToSiteIds) : null;
+        rule.AllFromRegions = request.Scope.AllFromRegions;
+        rule.FromRegionIds = request.Scope.FromRegionIds.Any() ? string.Join(",", request.Scope.FromRegionIds) : null;
+        rule.AllToRegions = request.Scope.AllToRegions;
+        rule.ToRegionIds = request.Scope.ToRegionIds.Any() ? string.Join(",", request.Scope.ToRegionIds) : null;
+        rule.TimeThreshold = request.Scope.TimeThreshold;
 
         // Replace conditions and actions
         rule.Conditions.Clear();
@@ -127,12 +147,6 @@ public class AutomationController : ControllerBase
             OffsetValue = c.OffsetValue,
             OffsetUnit = c.OffsetUnit,
             ScanTypes = c.ScanTypes is not null ? string.Join(",", c.ScanTypes) : null,
-            PriorityFilter = c.PriorityFilter ?? "ALL",
-            FromSiteFilter = c.FromSiteFilter,
-            ToSiteFilter = c.ToSiteFilter,
-            FromRegionFilter = c.FromRegionFilter,
-            ToRegionFilter = c.ToRegionFilter,
-            TimeThreshold = c.TimeThreshold
         }));
 
         rule.Actions.Clear();
@@ -201,7 +215,20 @@ public class AutomationController : ControllerBase
             AllCustomers = rule.AllCustomers,
             CustomerIds = ParseIntList(rule.CustomerIds),
             AllSpeeds = rule.AllSpeeds,
-            SpeedIds = ParseIntList(rule.SpeedIds)
+            SpeedIds = ParseIntList(rule.SpeedIds),
+            AllJobStatuses = rule.AllJobStatuses,
+            JobStatusIds = ParseIntList(rule.JobStatusIds),
+            AllPriorities = rule.AllPriorities,
+            PriorityIds = ParseIntList(rule.PriorityIds),
+            AllFromSites = rule.AllFromSites,
+            FromSiteIds = ParseIntList(rule.FromSiteIds),
+            AllToSites = rule.AllToSites,
+            ToSiteIds = ParseIntList(rule.ToSiteIds),
+            AllFromRegions = rule.AllFromRegions,
+            FromRegionIds = ParseIntList(rule.FromRegionIds),
+            AllToRegions = rule.AllToRegions,
+            ToRegionIds = ParseIntList(rule.ToRegionIds),
+            TimeThreshold = rule.TimeThreshold,
         },
         Conditions = rule.Conditions.Select(c => new AutomationConditionDto
         {
@@ -214,13 +241,7 @@ public class AutomationController : ControllerBase
             ScheduledTimeField = c.ScheduledTimeField?.ToString(),
             OffsetValue = c.OffsetValue,
             OffsetUnit = c.OffsetUnit,
-            ScanTypes = c.ScanTypes?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
-            PriorityFilter = c.PriorityFilter ?? "ALL",
-            FromSiteFilter = c.FromSiteFilter,
-            ToSiteFilter = c.ToSiteFilter,
-            FromRegionFilter = c.FromRegionFilter,
-            ToRegionFilter = c.ToRegionFilter,
-            TimeThreshold = c.TimeThreshold
+            ScanTypes = c.ScanTypes?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
         }).ToList(),
         Actions = rule.Actions.Select(a => new AutomationActionDto
         {

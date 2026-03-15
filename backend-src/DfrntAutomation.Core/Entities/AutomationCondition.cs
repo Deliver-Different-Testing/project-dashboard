@@ -4,6 +4,8 @@ namespace DfrntAutomation.Core.Entities;
 
 /// <summary>
 /// A condition attached to an automation rule. Maps to the AutomationCondition table.
+/// Advanced filters (priority, site, region, time threshold) have been moved to
+/// AutomationRule (scope level) to prevent conflicting condition-level filters.
 /// </summary>
 public class AutomationCondition
 {
@@ -26,25 +28,6 @@ public class AutomationCondition
 
     // Scan condition fields
     public string? ScanTypes { get; set; }
-
-    // Advanced filters
-    /// <summary>Priority filter — 'ALL' or specific speed ID. Maps to AutomationConditions.PriorityFilter.</summary>
-    public string PriorityFilter { get; set; } = "ALL";
-
-    /// <summary>Comma-separated site IDs for origin filter. Maps to AutomationConditions.FromSiteFilter.</summary>
-    public string? FromSiteFilter { get; set; }
-
-    /// <summary>Comma-separated site IDs for destination filter. Maps to AutomationConditions.ToSiteFilter.</summary>
-    public string? ToSiteFilter { get; set; }
-
-    /// <summary>Comma-separated region IDs for origin filter. Maps to AutomationConditions.FromRegionFilter.</summary>
-    public string? FromRegionFilter { get; set; }
-
-    /// <summary>Comma-separated region IDs for destination filter. Maps to AutomationConditions.ToRegionFilter.</summary>
-    public string? ToRegionFilter { get; set; }
-
-    /// <summary>Time threshold in minutes — job must be in state for at least this long. Used by UNASSIGNED/ASSIGNED conditions.</summary>
-    public int? TimeThreshold { get; set; }
 
     // Navigation
     public AutomationRule Rule { get; set; } = null!;
