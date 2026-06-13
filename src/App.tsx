@@ -51,7 +51,7 @@ const devs: Dev[] = [
   {
     name: 'Kevin',
     emoji: '🚚',
-    focus: 'despatchweb + runviewer',
+    focus: 'runviewer',
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KEVIN.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KEVIN.md',
   },
@@ -64,8 +64,8 @@ const devs: Dev[] = [
   },
   {
     name: 'Jacob',
-    emoji: '⚙️',
-    focus: 'Backend / DFRNT stack',
+    emoji: '💬',
+    focus: 'despatchweb + Integration Manager → DFRNT CSP app',
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-JACOB.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-JACOB.md',
   },
