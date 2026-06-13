@@ -32,6 +32,45 @@ const projects: Project[] = [
 
 interface RunsheetEntry { ts: number; text: string }
 
+interface Dev {
+  name: string
+  emoji: string
+  focus: string
+  currentWorkUrl: string
+  forwardWorkUrl: string
+}
+
+const devs: Dev[] = [
+  {
+    name: 'Garry',
+    emoji: '🛠️',
+    focus: 'Drive Configurator + MAUI mobile app',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-GARRY.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-GARRY.md',
+  },
+  {
+    name: 'Kevin',
+    emoji: '🚚',
+    focus: 'despatchweb + runviewer',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KEVIN.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KEVIN.md',
+  },
+  {
+    name: 'Kerran',
+    emoji: '🧾',
+    focus: 'Accounts (invoice builder + sub-contractor amounts)',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KERRAN.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KERRAN.md',
+  },
+  {
+    name: 'Loc',
+    emoji: '⚙️',
+    focus: 'Backend / handover-ready specs',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-LOC.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-LOC.md',
+  },
+]
+
 const statusColors: Record<string, string> = {
   Active: 'bg-green-500',
   Complete: 'bg-blue-500',
@@ -115,16 +154,65 @@ function ProjectCard({ project }: { project: Project }) {
   )
 }
 
+type Tab = 'projects' | 'dev-work'
+
+function DevCard({ dev }: { dev: Dev }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="text-lg font-semibold text-primary">
+          <span className="mr-2">{dev.emoji}</span>{dev.name}
+        </h3>
+      </div>
+      <p className="text-gray-600 text-sm mb-4">{dev.focus}</p>
+      <div className="flex flex-wrap gap-2">
+        <a href={dev.currentWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">
+          📌 Current work
+        </a>
+        <a href={dev.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
+          🛣️ Forward work
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
+  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem('dash-tab') as Tab) || 'projects')
+
+  const switchTab = (t: Tab) => { setTab(t); localStorage.setItem('dash-tab', t) }
+
   return (
     <div className="min-h-screen bg-light-grey">
       <header className="bg-primary text-white px-6 py-4 shadow-lg">
         <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
       </header>
-      <main className="max-w-5xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {projects.map(p => <ProjectCard key={p.slug} project={p} />)}
+      <nav className="bg-white border-b border-gray-200 px-6">
+        <div className="max-w-5xl mx-auto flex gap-1">
+          <button
+            onClick={() => switchTab('projects')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${tab === 'projects' ? 'border-cyan text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            📦 Projects
+          </button>
+          <button
+            onClick={() => switchTab('dev-work')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${tab === 'dev-work' ? 'border-cyan text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            👥 Current Dev Work
+          </button>
         </div>
+      </nav>
+      <main className="max-w-5xl mx-auto p-6">
+        {tab === 'projects' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {projects.map(p => <ProjectCard key={p.slug} project={p} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {devs.map(d => <DevCard key={d.name} dev={d} />)}
+          </div>
+        )}
       </main>
     </div>
   )
