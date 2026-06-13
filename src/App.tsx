@@ -51,7 +51,7 @@ const devs: Dev[] = [
   {
     name: 'Kevin',
     emoji: '🚚',
-    focus: 'runviewer',
+    focus: 'despatchweb (recurring bookings) + runviewer',
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KEVIN.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KEVIN.md',
   },
