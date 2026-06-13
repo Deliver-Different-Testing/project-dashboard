@@ -45,7 +45,7 @@ const devs: Dev[] = [
     name: 'Garry',
     emoji: '🛠️',
     focus: 'Drive Configurator + MAUI mobile app',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-GARRY.md',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/STEVE-COMPLIANCE-BUNDLE-2026-06-13.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-GARRY.md',
   },
   {
@@ -59,15 +59,15 @@ const devs: Dev[] = [
     name: 'Kerran',
     emoji: '🧾',
     focus: 'Accounts (invoice builder + sub-contractor amounts)',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KERRAN.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KERRAN.md',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/KERRAN-OUTSTANDING-WORK-2026-06-13.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/FORWARD-KERRAN.md',
   },
   {
-    name: 'Loc',
+    name: 'Jacob',
     emoji: '⚙️',
-    focus: 'Backend / handover-ready specs',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-LOC.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-LOC.md',
+    focus: 'Backend / DFRNT stack',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-JACOB.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-JACOB.md',
   },
 ]
 
