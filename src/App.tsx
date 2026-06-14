@@ -28,6 +28,7 @@ const projects: Project[] = [
   { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
   { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
   { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
+  { name: 'RunBuilder v2', emoji: '🛣️', slug: 'runbuilder', status: 'Active', description: 'React 19 + .NET 10 rebuild of RunBuilder, parallel with legacy (Kevin)', repo: 'https://github.com/Deliver-Different-Testing/runbuilder', docs: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md' },
 ]
 
 interface RunsheetEntry { ts: number; text: string }
@@ -51,8 +52,8 @@ const devs: Dev[] = [
   {
     name: 'Kevin',
     emoji: '🚚',
-    focus: 'despatchweb (recurring bookings) + runviewer',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-KEVIN.md',
+    focus: 'despatchweb (recurring bookings) + runviewer + RunBuilder v2',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KEVIN.md',
   },
   {
