@@ -165,7 +165,7 @@ const devs: Dev[] = [
       {
         key: 'first-up-runviewer-recurring-fixes',
         title: 'First-up RunViewer + recurring fixes',
-        summary: 'Fix missing recurring price breakdowns on Friday-created jobs, preserve booking time on Manual push-to-live, and make RunViewer + Linehaul job details editable like recurring jobs / despatchweb. Item 4 intentionally pending Steve.',
+        summary: 'Stop recurring-route setup from creating bulk-job data, preserve booking time on Manual push-to-live, close out price-breakdown behaviour for recurring-route-created jobs, and make RunViewer + Linehaul job details editable like recurring jobs / despatchweb.',
         date: '2026-06-20',
         url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-FIRST-UP-FIXES-RUNVIEWER-RECURRING-2026-06-20.md',
       },
