@@ -31,7 +31,7 @@ const projects: Project[] = [
   { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', owner: 'strategy', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
   { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', owner: 'strategy', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
   { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', owner: 'strategy', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
-  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'Stage 1 focus: get existing Runbuilder capability working in the new React UI first; defer broader RouteBuilder modules until parity is operational.', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md', extraLinks: [{ label: 'Background doc', emoji: '📚', url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
+  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'Stage 1 focus: get existing Runbuilder capability working in the new React UI first; defer broader RouteBuilder modules until parity is operational.', live: 'https://deliver-different-testing.github.io/runbuilder/#/routes', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md', extraLinks: [{ label: 'Background doc', emoji: '📚', url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md' }, { label: 'New UI', emoji: '🖥️', url: 'https://deliver-different-testing.github.io/runbuilder/#/routes' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
 interface RunsheetEntry { ts: number; text: string }
@@ -56,7 +56,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-20-2222'
+const BUILD_ID = '2026-06-20-2233'
 
 const devs: Dev[] = [
   {
