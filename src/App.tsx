@@ -31,7 +31,7 @@ const projects: Project[] = [
   { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', owner: 'strategy', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
   { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', owner: 'strategy', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
   { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', owner: 'strategy', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
-  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'React 19 + .NET 9 rebuild of RunBuilder — parallel with legacy, app-layer over SPs, surfaces tucJob + tucJobBooking (Kevin)', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/runbuilder', docs: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md', extraLinks: [{ label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
+  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'React 19 + .NET 9 rebuild of RunBuilder — parallel with legacy, app-layer over SPs, surfaces tucJob + tucJobBooking (Kevin)', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md', extraLinks: [{ label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
 interface RunsheetEntry { ts: number; text: string }
@@ -56,7 +56,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-20-2048'
+const BUILD_ID = '2026-06-20-2202'
 
 const devs: Dev[] = [
   {
@@ -157,7 +157,7 @@ const devs: Dev[] = [
     name: 'Kevin',
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
     forwardWorkUrl: CONFIG_DOC('FORWARD-KEVIN.md'),
     forwardWorkItems: [
       {
@@ -165,7 +165,7 @@ const devs: Dev[] = [
         title: 'RouteBuilder rebuild',
         summary: 'Staff-facing recurring-route management on the existing recurring-route schema. Reuses Hub auth. Phase 2 brief = SP-by-SP lift into v2 app layer (13 SPs → EF services + controllers + React pages).',
         date: '2026-06-14',
-        url: CONFIG_DOC('HANDOVER-KEVIN-ROUTEBUILDER-REBUILD-2026-06-14.md'),
+        url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
       },
       {
         key: 'recurring-resilience',
