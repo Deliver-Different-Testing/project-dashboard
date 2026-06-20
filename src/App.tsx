@@ -31,7 +31,7 @@ const projects: Project[] = [
   { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', owner: 'strategy', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
   { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', owner: 'strategy', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
   { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', owner: 'strategy', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
-  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'React 19 + .NET 9 rebuild of RunBuilder — parallel with legacy, app-layer over SPs, surfaces tucJob + tucJobBooking (Kevin)', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md', extraLinks: [{ label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
+  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'Stage 1 focus: get existing Runbuilder capability working in the new React UI first; defer broader RouteBuilder modules until parity is operational.', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md', extraLinks: [{ label: 'Background doc', emoji: '📚', url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
 interface RunsheetEntry { ts: number; text: string }
@@ -56,7 +56,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-20-2210'
+const BUILD_ID = '2026-06-20-2222'
 
 const devs: Dev[] = [
   {
@@ -157,15 +157,15 @@ const devs: Dev[] = [
     name: 'Kevin',
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
+    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
     forwardWorkItems: [
       {
         key: 'routebuilder-rebuild',
         title: 'RouteBuilder rebuild',
-        summary: 'Staff-facing recurring-route management on the existing recurring-route schema. Reuses Hub auth. Phase 2 brief = SP-by-SP lift into v2 app layer (13 SPs → EF services + controllers + React pages).',
-        date: '2026-06-14',
-        url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
+        summary: 'Stage 1 brief: make the existing Runbuilder job→run→route→live workflow work in the new React UI first, before expanding Quoting, Scheduled Routes, or Polygon Builder.',
+        date: '2026-06-20',
+        url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
       },
       {
         key: 'recurring-resilience',
