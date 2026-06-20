@@ -55,6 +55,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
+const BUILD_ID = '2026-06-20-2048'
 
 const devs: Dev[] = [
   {
@@ -687,7 +688,7 @@ export default function App() {
   const tabProjects = projects.filter(p => p.owner === tab)
 
   return (
-    <div className="min-h-screen bg-light-grey">
+    <div className="min-h-screen bg-light-grey" data-build={BUILD_ID}>
       <header className="bg-primary text-white px-6 py-4 shadow-lg">
         <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
       </header>
