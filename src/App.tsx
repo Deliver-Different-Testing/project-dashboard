@@ -394,27 +394,34 @@ function saveDevOrder(devKey: string, order: string[]) {
 }
 
 function ForwardWorkTable({ dev }: { dev: Dev }) {
-  const devKey = dev.name.toLowerCase()
+  const devKey = dev.key
   const [state, setState] = useState<Record<string, RowState>>(() => loadDevState(devKey))
   const [order, setOrder] = useState<string[]>(() => loadDevOrder(devKey, dev.forwardWorkItems))
+
+  useEffect(() => {
+    setState(loadDevState(devKey))
+    setOrder(loadDevOrder(devKey, dev.forwardWorkItems))
+  }, [devKey, dev.forwardWorkItems])
+
+  useEffect(() => {
+    saveDevState(devKey, state)
+  }, [devKey, state])
 
   useEffect(() => {
     setOrder(prev => {
       const known = new Set(dev.forwardWorkItems.map(item => item.key))
       const cleaned = prev.filter(key => known.has(key))
       const missing = dev.forwardWorkItems.map(item => item.key).filter(key => !cleaned.includes(key))
-      const next = [...cleaned, ...missing]
-      saveDevOrder(devKey, next)
-      return next
+      return [...cleaned, ...missing]
     })
-  }, [dev.forwardWorkItems, devKey])
+  }, [dev.forwardWorkItems])
+
+  useEffect(() => {
+    saveDevOrder(devKey, order)
+  }, [devKey, order])
 
   const updateRow = (key: string, patch: Partial<RowState>) => {
-    setState(prev => {
-      const next = { ...prev, [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now() } }
-      saveDevState(devKey, next)
-      return next
-    })
+    setState(prev => ({ ...prev, [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now() } }))
   }
 
   const orderedItems = useMemo(() => {
