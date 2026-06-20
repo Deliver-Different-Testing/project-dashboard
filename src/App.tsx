@@ -332,6 +332,13 @@ const devs: Dev[] = [
         date: '2026-06-13',
         url: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md',
       },
+      {
+        key: 'pdf-overlay-tool',
+        title: 'PDF Overlay Tool',
+        summary: 'Standalone R&D workstream for customer PDF template stamping: renderer library, microservice, and admin field-mapper UI.',
+        date: '2026-06-19',
+        url: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/plan.md',
+      },
     ],
   },
 ]
