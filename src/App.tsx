@@ -184,9 +184,16 @@ const devs: Dev[] = [
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
       {
+        key: 'bcti-kerran-handover',
+        title: 'BCTI consolidated handover',
+        summary: 'Primary Kerran entry point for contractor BCTI + agent/inter-tenant BCTI, process schedules, deductions, and extra payments.',
+        date: '2026-06-03',
+        url: ACCOUNTS_DOC('BCTI_KERRAN_HANDOVER.md'),
+      },
+      {
         key: 'self-billing-bcti',
         title: 'Self-billing / BCTI platform spec',
-        summary: 'Original upstream BCTI spec now explicitly in Kerran’s lane. Use for agent / inter-tenant edge cases, dispute flow, compliance wording, and accounting-sync expectations behind the consolidated handover.',
+        summary: 'Original upstream BCTI spec sitting behind the consolidated handover. Use for edge cases, dispute flow, compliance wording, and accounting-sync expectations.',
         date: '2026-04-20',
         url: ACCOUNTS_DOC('self-billing-bcti-spec.md'),
       },
