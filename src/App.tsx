@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
 
+type DevKey = 'garry' | 'kevin' | 'kerran' | 'jacob' | 'strategy'
+
 interface Project {
   name: string
   emoji: string
   slug: string
   status: 'Active' | 'Complete' | 'Paused'
   description: string
+  owner: DevKey
   live?: string
   repo?: string
   docs?: string
@@ -13,22 +16,22 @@ interface Project {
 }
 
 const projects: Project[] = [
-  { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
-  { name: 'Setup Dashboard', emoji: '🧩', slug: 'setup-dashboard', status: 'Complete', description: '10-step tenant onboarding wizard with smart CSV import, training arena', live: 'https://deliver-different-testing.github.io/setup-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/setup-dashboard', docs: 'https://github.com/Deliver-Different-Testing/setup-dashboard/blob/main/IMPLEMENTATION.md' },
-  { name: 'Agents & Partners', emoji: '🤝', slug: 'agents-partners', status: 'Active', description: 'Fleet management, marketplace, courier compliance & recruitment', live: 'https://deliver-different-testing.github.io/NP-Agent-Management/', repo: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management', docs: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management/blob/main/IMPLEMENTATION.md', extraLinks: [{ label: 'Applicant Portal', emoji: '📋', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/apply/dfrnt' }, { label: 'Courier Login', emoji: '🔑', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/login' }, { label: 'Courier Dashboard', emoji: '🚚', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/dashboard' }] },
-  { name: 'Reports', emoji: '📊', slug: 'reports', status: 'Active', description: 'Rate schedule, invoice builder (ported to Accounts)', live: 'https://deliver-different-testing.github.io/reports/', repo: 'https://github.com/Deliver-Different-Testing/reports' },
-  { name: 'Dev Dashboard', emoji: '⚡', slug: 'dev-dashboard', status: 'Active', description: 'Dev activity tracking, GitLab MR stats', live: 'https://deliver-different-testing.github.io/dev-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/dev-dashboard' },
-  { name: 'Booking Redesign', emoji: '📦', slug: 'booking-redesign', status: 'Paused', description: 'Single-page booking with voice input, per-location accessorials', live: 'https://deliver-different-testing.github.io/booking-redesign/', repo: 'https://github.com/Deliver-Different-Testing/booking-redesign' },
-  { name: 'Auto Dispatch', emoji: '🚀', slug: 'auto-dispatch', status: 'Active', description: 'AI-powered dispatch with HERE Maps, ECA Dallas MVP deadline', repo: 'https://github.com/Deliver-Different-Testing/auto-dispatch' },
-  { name: 'ECA Dallas', emoji: '🏢', slug: 'eca-dallas', status: 'Active', description: 'Battlecard v2.0, 17-slide branded presentation, onboarding strategy' },
-  { name: 'Kiwibank Cash Flow', emoji: '🏦', slug: 'kiwibank-cashflow', status: 'Active', description: 'Interactive 5-tab cash flow model — P&L per entity, OPEX sliders, Cool exit scenarios, CSV export', live: 'https://deliver-different-testing.github.io/kiwibank-cashflow/', repo: 'https://github.com/Deliver-Different-Testing/kiwibank-cashflow' },
-  { name: 'Accounts (Invoice Builder)', emoji: '🧾', slug: 'accounts', status: 'Active', description: 'Invoice template builder, calc editor, field width control, void spec', live: 'https://deliver-different-testing.github.io/Accounts/', repo: 'https://github.com/Deliver-Different-Testing/Accounts', docs: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/invoice-void-howto.md' },
-  { name: 'Automation Engine', emoji: '⚡', slug: 'automation-engine', status: 'Active', description: 'Admin Manager with Automation Engine — conditions, actions, scope filters, backend C# services', live: 'https://deliver-different-testing.github.io/Adminmanagerupdate/', repo: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate', docs: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate/blob/main/HANDOVER-GARRY.md' },
-  { name: 'Drive Configurator', emoji: '📱', slug: 'drive-configurator', status: 'Active', description: 'DFRNT Drive app config — workflows, supports, feature flags (Garry)', live: 'https://deliver-different-testing.github.io/dfrntdrive-configurator/', repo: 'https://github.com/Deliver-Different-Testing/dfrntdrive-configurator' },
-  { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
-  { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
-  { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
-  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', description: 'React 19 + .NET 9 rebuild of RunBuilder — parallel with legacy, app-layer over SPs, surfaces tucJob + tucJobBooking (Kevin)', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/runbuilder', docs: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md', extraLinks: [{ label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
+  { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
+  { name: 'Setup Dashboard', emoji: '🧩', slug: 'setup-dashboard', status: 'Complete', owner: 'garry', description: '10-step tenant onboarding wizard with smart CSV import, training arena', live: 'https://deliver-different-testing.github.io/setup-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/setup-dashboard', docs: 'https://github.com/Deliver-Different-Testing/setup-dashboard/blob/main/IMPLEMENTATION.md' },
+  { name: 'Agents & Partners', emoji: '🤝', slug: 'agents-partners', status: 'Active', owner: 'garry', description: 'Fleet management, marketplace, courier compliance & recruitment', live: 'https://deliver-different-testing.github.io/NP-Agent-Management/', repo: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management', docs: 'https://github.com/Deliver-Different-Testing/NP-Agent-Management/blob/main/IMPLEMENTATION.md', extraLinks: [{ label: 'Applicant Portal', emoji: '📋', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/apply/dfrnt' }, { label: 'Courier Login', emoji: '🔑', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/login' }, { label: 'Courier Dashboard', emoji: '🚚', url: 'https://deliver-different-testing.github.io/NP-Agent-Management/portal/#/courier/dfrnt/dashboard' }] },
+  { name: 'Reports', emoji: '📊', slug: 'reports', status: 'Active', owner: 'kerran', description: 'Rate schedule, invoice builder (ported to Accounts)', live: 'https://deliver-different-testing.github.io/reports/', repo: 'https://github.com/Deliver-Different-Testing/reports' },
+  { name: 'Dev Dashboard', emoji: '⚡', slug: 'dev-dashboard', status: 'Active', owner: 'strategy', description: 'Dev activity tracking, GitLab MR stats', live: 'https://deliver-different-testing.github.io/dev-dashboard/', repo: 'https://github.com/Deliver-Different-Testing/dev-dashboard' },
+  { name: 'Booking Redesign', emoji: '📦', slug: 'booking-redesign', status: 'Paused', owner: 'strategy', description: 'Single-page booking with voice input, per-location accessorials', live: 'https://deliver-different-testing.github.io/booking-redesign/', repo: 'https://github.com/Deliver-Different-Testing/booking-redesign' },
+  { name: 'Auto Dispatch', emoji: '🚀', slug: 'auto-dispatch', status: 'Active', owner: 'strategy', description: 'AI-powered dispatch with HERE Maps, ECA Dallas MVP deadline', repo: 'https://github.com/Deliver-Different-Testing/auto-dispatch' },
+  { name: 'ECA Dallas', emoji: '🏢', slug: 'eca-dallas', status: 'Active', owner: 'strategy', description: 'Battlecard v2.0, 17-slide branded presentation, onboarding strategy' },
+  { name: 'Kiwibank Cash Flow', emoji: '🏦', slug: 'kiwibank-cashflow', status: 'Active', owner: 'strategy', description: 'Interactive 5-tab cash flow model — P&L per entity, OPEX sliders, Cool exit scenarios, CSV export', live: 'https://deliver-different-testing.github.io/kiwibank-cashflow/', repo: 'https://github.com/Deliver-Different-Testing/kiwibank-cashflow' },
+  { name: 'Accounts (Invoice Builder)', emoji: '🧾', slug: 'accounts', status: 'Active', owner: 'kerran', description: 'Invoice template builder, calc editor, field width control, void spec', live: 'https://deliver-different-testing.github.io/Accounts/', repo: 'https://github.com/Deliver-Different-Testing/Accounts', docs: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/invoice-void-howto.md' },
+  { name: 'Automation Engine', emoji: '⚡', slug: 'automation-engine', status: 'Active', owner: 'garry', description: 'Admin Manager with Automation Engine — conditions, actions, scope filters, backend C# services', live: 'https://deliver-different-testing.github.io/Adminmanagerupdate/', repo: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate', docs: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate/blob/main/HANDOVER-GARRY.md' },
+  { name: 'Drive Configurator', emoji: '📱', slug: 'drive-configurator', status: 'Active', owner: 'garry', description: 'DFRNT Drive app config — workflows, supports, feature flags (Garry)', live: 'https://deliver-different-testing.github.io/dfrntdrive-configurator/', repo: 'https://github.com/Deliver-Different-Testing/dfrntdrive-configurator' },
+  { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', owner: 'strategy', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
+  { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', owner: 'strategy', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
+  { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', owner: 'strategy', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
+  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'React 19 + .NET 9 rebuild of RunBuilder — parallel with legacy, app-layer over SPs, surfaces tucJob + tucJobBooking (Kevin)', live: 'https://deliver-different-testing.github.io/runbuilder/', repo: 'https://github.com/Deliver-Different-Testing/runbuilder', docs: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md', extraLinks: [{ label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
 interface RunsheetEntry { ts: number; text: string }
@@ -42,6 +45,7 @@ interface ForwardWorkItem {
 }
 
 interface Dev {
+  key: DevKey
   name: string
   emoji: string
   focus: string
@@ -55,6 +59,7 @@ const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testin
 
 const devs: Dev[] = [
   {
+    key: 'garry',
     name: 'Garry',
     emoji: '🛠️',
     focus: 'Drive Configurator + MAUI mobile app',
@@ -147,6 +152,7 @@ const devs: Dev[] = [
     ],
   },
   {
+    key: 'kevin',
     name: 'Kevin',
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
@@ -170,6 +176,7 @@ const devs: Dev[] = [
     ],
   },
   {
+    key: 'kerran',
     name: 'Kerran',
     emoji: '🧾',
     focus: 'Accounts (invoice builder + sub-contractor amounts)',
@@ -186,6 +193,7 @@ const devs: Dev[] = [
     ],
   },
   {
+    key: 'jacob',
     name: 'Jacob',
     emoji: '💬',
     focus: 'despatchweb + Integration Manager → DFRNT CSP app',
@@ -406,75 +414,104 @@ function ProjectCard({ project }: { project: Project }) {
   )
 }
 
-type Tab = 'projects' | 'dev-work'
+type Tab = DevKey
 
-function DevCard({ dev }: { dev: Dev }) {
-  const [open, setOpen] = useState(false)
+const tabs: { key: Tab; label: string; emoji: string }[] = [
+  { key: 'garry', label: 'Garry', emoji: '🛠️' },
+  { key: 'kevin', label: 'Kevin', emoji: '🚚' },
+  { key: 'kerran', label: 'Kerran', emoji: '🧾' },
+  { key: 'jacob', label: 'Jacob', emoji: '💬' },
+  { key: 'strategy', label: 'Strategy', emoji: '🧭' },
+]
+
+function DevHeader({ dev }: { dev: Dev }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-lg font-semibold text-primary">
-            <span className="mr-2">{dev.emoji}</span>{dev.name}
-          </h3>
-          <span className="text-xs font-medium text-gray-500">{dev.forwardWorkItems.length} queued</span>
-        </div>
-        <p className="text-gray-600 text-sm mb-4">{dev.focus}</p>
-        <div className="flex flex-wrap gap-2">
-          <a href={dev.currentWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">
-            📌 Current work
-          </a>
-          <a href={dev.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
-            🛣️ Forward work doc
-          </a>
-          <button
-            onClick={() => setOpen(!open)}
-            className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition ${open ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-          >
-            🗂️ Forward work table
-          </button>
-        </div>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="text-lg font-semibold text-primary">
+          <span className="mr-2">{dev.emoji}</span>{dev.name}
+        </h3>
+        <span className="text-xs font-medium text-gray-500">{dev.forwardWorkItems.length} queued</span>
       </div>
-      {open && <ForwardWorkTable dev={dev} />}
+      <p className="text-gray-600 text-sm mb-4">{dev.focus}</p>
+      <div className="flex flex-wrap gap-2">
+        <a href={dev.currentWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">
+          📌 Current work
+        </a>
+        <a href={dev.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
+          🛣️ Forward work doc
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function SectionHeading({ icon, title, count }: { icon: string; title: string; count?: number }) {
+  return (
+    <div className="flex items-center gap-2 mb-3 mt-2">
+      <span className="text-base">{icon}</span>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{title}</h2>
+      {count !== undefined && <span className="text-xs text-gray-400">({count})</span>}
     </div>
   )
 }
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem('dash-tab') as Tab) || 'projects')
+  const [tab, setTab] = useState<Tab>(() => (localStorage.getItem('dash-tab') as Tab) || 'garry')
 
   const switchTab = (t: Tab) => { setTab(t); localStorage.setItem('dash-tab', t) }
+
+  const activeDev = devs.find(d => d.key === tab)
+  const tabProjects = projects.filter(p => p.owner === tab)
 
   return (
     <div className="min-h-screen bg-light-grey">
       <header className="bg-primary text-white px-6 py-4 shadow-lg">
         <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
       </header>
-      <nav className="bg-white border-b border-gray-200 px-6">
-        <div className="max-w-5xl mx-auto flex gap-1">
-          <button
-            onClick={() => switchTab('projects')}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${tab === 'projects' ? 'border-cyan text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            📦 Projects
-          </button>
-          <button
-            onClick={() => switchTab('dev-work')}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${tab === 'dev-work' ? 'border-cyan text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          >
-            👥 Current Dev Work
-          </button>
+      <nav className="bg-white border-b border-gray-200 px-6 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto flex gap-1 overflow-x-auto">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => switchTab(t.key)}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${tab === t.key ? 'border-cyan text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              <span className="mr-1.5">{t.emoji}</span>{t.label}
+            </button>
+          ))}
         </div>
       </nav>
-      <main className={`mx-auto p-6 ${tab === 'projects' ? 'max-w-5xl' : 'max-w-6xl'}`}>
-        {tab === 'projects' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {projects.map(p => <ProjectCard key={p.slug} project={p} />)}
-          </div>
+      <main className="max-w-6xl mx-auto p-6 space-y-6">
+        {activeDev ? (
+          <>
+            <DevHeader dev={activeDev} />
+            <section>
+              <SectionHeading icon="🗂️" title="Forward work" count={activeDev.forwardWorkItems.length} />
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <ForwardWorkTable dev={activeDev} />
+              </div>
+            </section>
+            <section>
+              <SectionHeading icon="📦" title="Projects" count={tabProjects.length} />
+              {tabProjects.length === 0 ? (
+                <div className="bg-white rounded-xl border border-gray-200 p-5 text-sm text-gray-500">
+                  No projects attributed to {activeDev.name} yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {tabProjects.map(p => <ProjectCard key={p.slug} project={p} />)}
+                </div>
+              )}
+            </section>
+          </>
         ) : (
-          <div className="grid grid-cols-1 gap-5">
-            {devs.map(d => <DevCard key={d.name} dev={d} />)}
-          </div>
+          <section>
+            <SectionHeading icon="🧭" title="Strategy & analysis projects" count={tabProjects.length} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {tabProjects.map(p => <ProjectCard key={p.slug} project={p} />)}
+            </div>
+          </section>
         )}
       </main>
     </div>
