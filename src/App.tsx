@@ -56,7 +56,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-20-2202'
+const BUILD_ID = '2026-06-20-2210'
 
 const devs: Dev[] = [
   {
@@ -158,7 +158,7 @@ const devs: Dev[] = [
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
-    forwardWorkUrl: CONFIG_DOC('FORWARD-KEVIN.md'),
+    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md',
     forwardWorkItems: [
       {
         key: 'routebuilder-rebuild',
