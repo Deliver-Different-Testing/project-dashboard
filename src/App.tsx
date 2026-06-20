@@ -184,6 +184,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
       {
+        key: 'self-billing-bcti',
+        title: 'Self-billing / BCTI platform spec',
+        summary: 'Original upstream BCTI spec now explicitly in Kerran’s lane. Use for agent / inter-tenant edge cases, dispute flow, compliance wording, and accounting-sync expectations behind the consolidated handover.',
+        date: '2026-04-20',
+        url: ACCOUNTS_DOC('self-billing-bcti-spec.md'),
+      },
+      {
         key: 'ar-pack',
         title: 'AR / Accounts Receivable feature pack',
         summary: 'Wire /clients/ar from mock to real QBO/Xero API. Backend AR snapshot/refresh/send flow. Land tblAccountsSettings, tblEmailTemplate, tblArReminderCadenceStep, tblArReminderLog. Migrate invoice-email send off tblSetting.Statement* to InvoiceDefault template.',
