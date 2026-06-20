@@ -33,44 +33,295 @@ const projects: Project[] = [
 
 interface RunsheetEntry { ts: number; text: string }
 
+interface ForwardWorkItem {
+  key: string
+  title: string
+  summary: string
+  date: string | null
+  url?: string
+}
+
 interface Dev {
   name: string
   emoji: string
   focus: string
   currentWorkUrl: string
   forwardWorkUrl: string
+  forwardWorkItems: ForwardWorkItem[]
 }
+
+const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
+const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 
 const devs: Dev[] = [
   {
     name: 'Garry',
     emoji: '🛠️',
     focus: 'Drive Configurator + MAUI mobile app',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/STEVE-COMPLIANCE-BUNDLE-2026-06-13.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-GARRY.md',
+    currentWorkUrl: CONFIG_DOC('STEVE-COMPLIANCE-BUNDLE-2026-06-13.md'),
+    forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
+    forwardWorkItems: [
+      {
+        key: 'np-modal',
+        title: 'NP Modal redesign',
+        summary: 'Sticky directory header on /agents, popup NP modal mirroring courier shell (areas-covered map, tabs), narrow Edit Agent to promotion only.',
+        date: '2026-06-19',
+        url: CONFIG_DOC('STEVE-NP-MODAL-GARRY-2026-06-19.md'),
+      },
+      {
+        key: 'quiz-module',
+        title: 'Quiz module — pull commit d21ce47',
+        summary: 'Greenfield module shipped on GitHub. Pull to GitLab, apply migration 007, deploy + smoke test per §7.',
+        date: '2026-06-19',
+        url: CONFIG_DOC('STEVE-QUIZ-MODULE-IMPLEMENTATION-GARRY-2026-06-19.md'),
+      },
+      {
+        key: 'applicant-portal-doc-fields',
+        title: 'Applicant portal doc-fields amendment',
+        summary: 'Per-doc-type fields child table, MaxImages column, structured per-field AI verification in review modal.',
+        date: '2026-06-16',
+        url: CONFIG_DOC('STEVE-APPLICANT-PORTAL-DOC-FIELDS-AMENDMENT-2026-06-16.md'),
+      },
+      {
+        key: 'configurator-cleanup',
+        title: 'Configurator cleanup (rolling)',
+        summary: 'Recruitment sidebar fix, Applicant Portal page rebuild, Stages preview pane, DF Drive Config sidebar cleanup.',
+        date: '2026-06-13',
+        url: CONFIG_DOC('GARRY-CONFIGURATOR-CLEANUP.md'),
+      },
+      {
+        key: 'recurring-routes-combined-fixes',
+        title: 'Recurring Routes combined fixes (11 items)',
+        summary: 'Sidebar most-specific-wins, Mapped Stops from tucJobBooking, Flight mode, LinehaulRunId on job tables, Speed FK on linehaul runs.',
+        date: '2026-06-17',
+        url: CONFIG_DOC('STEVE-RECURRING-ROUTES-COMBINED-FIXES-2026-06-17.md'),
+      },
+      {
+        key: 'recurring-routes-combined',
+        title: 'Recurring Routes combined spec',
+        summary: 'Single combined spec covering all 6 pieces of Recurring Routes work (recommended entry point).',
+        date: '2026-06-16',
+        url: CONFIG_DOC('STEVE-RECURRING-ROUTES-COMBINED-2026-06-16.md'),
+      },
+      {
+        key: 'recurring-routes-index',
+        title: 'Recurring Routes 3-doc index',
+        summary: 'Original 3-doc index: Mapped Stops rename, sidebar fix, Route Type chip, Linehaul tab + Roster, Mapped Stops drill-down.',
+        date: '2026-06-16',
+        url: CONFIG_DOC('STEVE-RECURRING-ROUTES-2026-06-16.md'),
+      },
+      {
+        key: 'courier-portal-repo-state',
+        title: 'Courier portal repo-state audit',
+        summary: 'What is actually present today in dfrntdrive_configurator: live vs partial vs missing; source-of-truth route trees.',
+        date: '2026-06-17',
+        url: CONFIG_DOC('STEVE-COURIER-PORTAL-REPO-STATE-HANDOVER-GARRY-2026-06-17.md'),
+      },
+      {
+        key: 'courier-portal-and-modal',
+        title: 'Courier portal + Courier modal update',
+        summary: 'Mobile portal finish-line brief + modal redesign (§10–§17): shared nuggets, Communications, Driver Mgmt, Login & Access block + 2FA, flag investigation.',
+        date: '2026-06-17',
+        url: CONFIG_DOC('STEVE-COURIER-PORTAL-AND-COURIER-MODAL-UPDATE-GARRY-2026-06-17.md'),
+      },
+      {
+        key: 'courier-portal-full-build',
+        title: 'Courier portal full build brief',
+        summary: 'Upgrade legacy portal into configurator framework: auth, courier shell, runs, schedules, settings, contractor flows, AI docs.',
+        date: '2026-06-15',
+        url: CONFIG_DOC('STEVE-COURIER-PORTAL-GARRY-FULL-BUILD-2026-06-15.md'),
+      },
+      {
+        key: 'courier-portal-project',
+        title: 'Courier portal rebuild canonical brief',
+        summary: 'Phase 1: lightweight applicant/courier auth + themed shell. SMS 2FA moved to next auth-hardening phase.',
+        date: '2026-06-15',
+        url: CONFIG_DOC('STEVE-COURIER-PORTAL-GARRY-PROJECT-2026-06-15.md'),
+      },
+      {
+        key: 'courier-portal-phase-3',
+        title: 'Courier portal Phase 3',
+        summary: 'Compliance dashboard + My Documents.',
+        date: null,
+      },
+    ],
   },
   {
     name: 'Kevin',
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/STEVE-RUNBUILDER-V2-SCOPING-2026-06-13.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-KEVIN.md',
+    forwardWorkUrl: CONFIG_DOC('FORWARD-KEVIN.md'),
+    forwardWorkItems: [
+      {
+        key: 'routebuilder-rebuild',
+        title: 'RouteBuilder rebuild',
+        summary: 'Staff-facing recurring-route management on the existing recurring-route schema. Reuses Hub auth. Phase 2 brief = SP-by-SP lift into v2 app layer (13 SPs → EF services + controllers + React pages).',
+        date: '2026-06-14',
+        url: CONFIG_DOC('HANDOVER-KEVIN-ROUTEBUILDER-REBUILD-2026-06-14.md'),
+      },
+      {
+        key: 'recurring-resilience',
+        title: 'Recurring resilience — Phase 1',
+        summary: 'tucJobBookingProcessingError table, UTL_stpJobBooking_Monitor TRY/CATCH cursor wrap with XACT_ABORT OFF, end-of-run digest email. Unblocks 2026-06-15 outage class.',
+        date: '2026-06-17',
+        url: CONFIG_DOC('HANDOVER-KEVIN-RECURRING-RESILIENCE-2026-06-17.md'),
+      },
+    ],
   },
   {
     name: 'Kerran',
     emoji: '🧾',
     focus: 'Accounts (invoice builder + sub-contractor amounts)',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/KERRAN-OUTSTANDING-WORK-2026-06-13.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/FORWARD-KERRAN.md',
+    currentWorkUrl: ACCOUNTS_DOC('KERRAN-OUTSTANDING-WORK-2026-06-13.md'),
+    forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
+    forwardWorkItems: [
+      {
+        key: 'ar-pack',
+        title: 'AR / Accounts Receivable feature pack',
+        summary: 'Wire /clients/ar from mock to real QBO/Xero API. Backend AR snapshot/refresh/send flow. Land tblAccountsSettings, tblEmailTemplate, tblArReminderCadenceStep, tblArReminderLog. Migrate invoice-email send off tblSetting.Statement* to InvoiceDefault template.',
+        date: '2026-06-18',
+        url: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
+      },
+    ],
   },
   {
     name: 'Jacob',
     emoji: '💬',
     focus: 'despatchweb + Integration Manager → DFRNT CSP app',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/CURRENT-JACOB.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/FORWARD-JACOB.md',
+    currentWorkUrl: CONFIG_DOC('CURRENT-JACOB.md'),
+    forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
+    forwardWorkItems: [
+      {
+        key: 'dfrnt-csp',
+        title: 'DFRNT CSP app build',
+        summary: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant. Repo: Deliver-Different-Testing/DFRNT-CRM. Spec: DFRNT-CRM/IMPLEMENTATION.md.',
+        date: '2026-06-13',
+        url: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md',
+      },
+    ],
   },
 ]
+
+type ItemStatus = 'Not started' | 'In progress' | 'Blocked' | 'In review' | 'Done'
+
+const STATUS_OPTIONS: ItemStatus[] = ['Not started', 'In progress', 'Blocked', 'In review', 'Done']
+
+const statusPillClass: Record<ItemStatus, string> = {
+  'Not started': 'bg-gray-100 text-gray-700',
+  'In progress': 'bg-cyan/10 text-cyan',
+  'Blocked': 'bg-red-100 text-red-700',
+  'In review': 'bg-amber-100 text-amber-800',
+  'Done': 'bg-green-100 text-green-700',
+}
+
+interface RowState { status: ItemStatus; notes: string; updated: number | null }
+
+const blankRow: RowState = { status: 'Not started', notes: '', updated: null }
+
+function loadDevState(devKey: string): Record<string, RowState> {
+  try {
+    const raw = localStorage.getItem(`forward-work:${devKey}:v1`)
+    if (!raw) return {}
+    return JSON.parse(raw)
+  } catch {
+    return {}
+  }
+}
+
+function saveDevState(devKey: string, state: Record<string, RowState>) {
+  localStorage.setItem(`forward-work:${devKey}:v1`, JSON.stringify(state))
+}
+
+function ForwardWorkTable({ dev }: { dev: Dev }) {
+  const devKey = dev.name.toLowerCase()
+  const [state, setState] = useState<Record<string, RowState>>(() => loadDevState(devKey))
+
+  const updateRow = (key: string, patch: Partial<RowState>) => {
+    setState(prev => {
+      const next = { ...prev, [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now() } }
+      saveDevState(devKey, next)
+      return next
+    })
+  }
+
+  const counts = dev.forwardWorkItems.reduce<Record<ItemStatus, number>>((acc, item) => {
+    const s = state[item.key]?.status ?? 'Not started'
+    acc[s] = (acc[s] ?? 0) + 1
+    return acc
+  }, { 'Not started': 0, 'In progress': 0, 'Blocked': 0, 'In review': 0, 'Done': 0 })
+
+  return (
+    <div className="border-t border-gray-100 bg-gray-50 p-4">
+      <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
+        {STATUS_OPTIONS.map(s => (
+          <span key={s} className={`px-2 py-0.5 rounded-full font-medium ${statusPillClass[s]}`}>
+            {s}: {counts[s]}
+          </span>
+        ))}
+      </div>
+      {dev.forwardWorkItems.length === 0 ? (
+        <p className="text-sm text-gray-400 text-center py-4">No queued items</p>
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="text-left px-3 py-2 font-medium">Item</th>
+                <th className="text-left px-3 py-2 font-medium whitespace-nowrap">Created</th>
+                <th className="text-left px-3 py-2 font-medium">Status</th>
+                <th className="text-left px-3 py-2 font-medium w-72">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dev.forwardWorkItems.map(item => {
+                const row = state[item.key] ?? blankRow
+                return (
+                  <tr key={item.key} className="border-t border-gray-100 align-top">
+                    <td className="px-3 py-2">
+                      <div className="font-medium text-primary">
+                        {item.url ? (
+                          <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition">
+                            {item.title}
+                          </a>
+                        ) : item.title}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5 leading-snug">{item.summary}</div>
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">{item.date ?? '—'}</td>
+                    <td className="px-3 py-2">
+                      <select
+                        value={row.status}
+                        onChange={e => updateRow(item.key, { status: e.target.value as ItemStatus })}
+                        className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 focus:outline-none focus:ring-2 focus:ring-cyan/50 ${statusPillClass[row.status]}`}
+                      >
+                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      {row.updated && (
+                        <div className="text-[10px] text-gray-400 mt-1">
+                          {new Date(row.updated).toLocaleDateString()} {new Date(row.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <textarea
+                        value={row.notes}
+                        onChange={e => updateRow(item.key, { notes: e.target.value })}
+                        placeholder="Dev notes..."
+                        rows={2}
+                        className="w-full text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const statusColors: Record<string, string> = {
   Active: 'bg-green-500',
@@ -158,22 +409,33 @@ function ProjectCard({ project }: { project: Project }) {
 type Tab = 'projects' | 'dev-work'
 
 function DevCard({ dev }: { dev: Dev }) {
+  const [open, setOpen] = useState(false)
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="text-lg font-semibold text-primary">
-          <span className="mr-2">{dev.emoji}</span>{dev.name}
-        </h3>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="text-lg font-semibold text-primary">
+            <span className="mr-2">{dev.emoji}</span>{dev.name}
+          </h3>
+          <span className="text-xs font-medium text-gray-500">{dev.forwardWorkItems.length} queued</span>
+        </div>
+        <p className="text-gray-600 text-sm mb-4">{dev.focus}</p>
+        <div className="flex flex-wrap gap-2">
+          <a href={dev.currentWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">
+            📌 Current work
+          </a>
+          <a href={dev.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
+            🛣️ Forward work doc
+          </a>
+          <button
+            onClick={() => setOpen(!open)}
+            className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition ${open ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          >
+            🗂️ Forward work table
+          </button>
+        </div>
       </div>
-      <p className="text-gray-600 text-sm mb-4">{dev.focus}</p>
-      <div className="flex flex-wrap gap-2">
-        <a href={dev.currentWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-cyan/10 text-cyan hover:bg-cyan/20 transition">
-          📌 Current work
-        </a>
-        <a href={dev.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
-          🛣️ Forward work
-        </a>
-      </div>
+      {open && <ForwardWorkTable dev={dev} />}
     </div>
   )
 }
@@ -204,13 +466,13 @@ export default function App() {
           </button>
         </div>
       </nav>
-      <main className="max-w-5xl mx-auto p-6">
+      <main className={`mx-auto p-6 ${tab === 'projects' ? 'max-w-5xl' : 'max-w-6xl'}`}>
         {tab === 'projects' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {projects.map(p => <ProjectCard key={p.slug} project={p} />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-5">
             {devs.map(d => <DevCard key={d.name} dev={d} />)}
           </div>
         )}
