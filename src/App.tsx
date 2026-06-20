@@ -58,7 +58,7 @@ interface Dev {
 
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-20-2250'
+const BUILD_ID = '2026-06-20-2323'
 
 const devs: Dev[] = [
   {
@@ -162,6 +162,13 @@ const devs: Dev[] = [
     currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
     forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
     forwardWorkItems: [
+      {
+        key: 'first-up-runviewer-recurring-fixes',
+        title: 'First-up RunViewer + recurring fixes',
+        summary: 'Fix missing recurring price breakdowns on Friday-created jobs, preserve booking time on Manual push-to-live, and make RunViewer + Linehaul job details editable like recurring jobs / despatchweb. Item 4 intentionally pending Steve.',
+        date: '2026-06-20',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-FIRST-UP-FIXES-RUNVIEWER-RECURRING-2026-06-20.md',
+      },
       {
         key: 'routebuilder-rebuild',
         title: 'RouteBuilder rebuild',
