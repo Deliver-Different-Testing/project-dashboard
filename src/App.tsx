@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect, useMemo } from 'react'
 
 type DevKey = 'garry' | 'kevin' | 'kerran' | 'jacob' | 'strategy'
 
@@ -367,14 +367,73 @@ function saveDevState(devKey: string, state: Record<string, RowState>) {
   localStorage.setItem(`forward-work:${devKey}:v1`, JSON.stringify(state))
 }
 
+function loadDevOrder(devKey: string, items: ForwardWorkItem[]): string[] {
+  try {
+    const raw = localStorage.getItem(`forward-work-order:${devKey}:v1`)
+    const stored = raw ? JSON.parse(raw) : []
+    if (!Array.isArray(stored)) return items.map(item => item.key)
+    const known = new Set(items.map(item => item.key))
+    const cleaned = stored.filter((key): key is string => typeof key === 'string' && known.has(key))
+    const missing = items.map(item => item.key).filter(key => !cleaned.includes(key))
+    return [...cleaned, ...missing]
+  } catch {
+    return items.map(item => item.key)
+  }
+}
+
+function saveDevOrder(devKey: string, order: string[]) {
+  localStorage.setItem(`forward-work-order:${devKey}:v1`, JSON.stringify(order))
+}
+
 function ForwardWorkTable({ dev }: { dev: Dev }) {
   const devKey = dev.name.toLowerCase()
   const [state, setState] = useState<Record<string, RowState>>(() => loadDevState(devKey))
+  const [order, setOrder] = useState<string[]>(() => loadDevOrder(devKey, dev.forwardWorkItems))
+
+  useEffect(() => {
+    setOrder(prev => {
+      const known = new Set(dev.forwardWorkItems.map(item => item.key))
+      const cleaned = prev.filter(key => known.has(key))
+      const missing = dev.forwardWorkItems.map(item => item.key).filter(key => !cleaned.includes(key))
+      const next = [...cleaned, ...missing]
+      saveDevOrder(devKey, next)
+      return next
+    })
+  }, [dev.forwardWorkItems, devKey])
 
   const updateRow = (key: string, patch: Partial<RowState>) => {
     setState(prev => {
       const next = { ...prev, [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now() } }
       saveDevState(devKey, next)
+      return next
+    })
+  }
+
+  const orderedItems = useMemo(() => {
+    const orderIndex = new Map(order.map((key, index) => [key, index]))
+    const items = [...dev.forwardWorkItems].sort((a, b) => (orderIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER) - (orderIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER))
+    const open = items.filter(item => (state[item.key]?.status ?? 'Not started') !== 'Done')
+    const done = items.filter(item => (state[item.key]?.status ?? 'Not started') === 'Done')
+    return [...open, ...done]
+  }, [dev.forwardWorkItems, order, state])
+
+  const moveItem = (key: string, direction: -1 | 1) => {
+    const isDone = (state[key]?.status ?? 'Not started') === 'Done'
+    const bucket = orderedItems.filter(item => ((state[item.key]?.status ?? 'Not started') === 'Done') === isDone)
+    const currentIndex = bucket.findIndex(item => item.key === key)
+    const targetIndex = currentIndex + direction
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= bucket.length) return
+
+    const fromKey = bucket[currentIndex].key
+    const toKey = bucket[targetIndex].key
+
+    setOrder(prev => {
+      const next = [...prev]
+      const fromPos = next.indexOf(fromKey)
+      const toPos = next.indexOf(toKey)
+      if (fromPos < 0 || toPos < 0) return prev
+      ;[next[fromPos], next[toPos]] = [next[toPos], next[fromPos]]
+      saveDevOrder(devKey, next)
       return next
     })
   }
@@ -401,6 +460,7 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
+                <th className="text-left px-3 py-2 font-medium w-20">Order</th>
                 <th className="text-left px-3 py-2 font-medium">Item</th>
                 <th className="text-left px-3 py-2 font-medium whitespace-nowrap">Created</th>
                 <th className="text-left px-3 py-2 font-medium">Status</th>
@@ -408,45 +468,75 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
               </tr>
             </thead>
             <tbody>
-              {dev.forwardWorkItems.map(item => {
+              {orderedItems.map((item, visibleIndex) => {
                 const row = state[item.key] ?? blankRow
+                const isDone = row.status === 'Done'
+                const bucket = orderedItems.filter(candidate => ((state[candidate.key]?.status ?? 'Not started') === 'Done') === isDone)
+                const bucketIndex = bucket.findIndex(candidate => candidate.key === item.key)
+                const isFirst = bucketIndex === 0
+                const isLast = bucketIndex === bucket.length - 1
+                const previous = orderedItems[visibleIndex - 1]
+                const previousStatus = previous ? (state[previous.key]?.status ?? 'Not started') : null
+                const showDoneDivider = row.status === 'Done' && previousStatus !== 'Done'
+
                 return (
-                  <tr key={item.key} className="border-t border-gray-100 align-top">
-                    <td className="px-3 py-2">
-                      <div className="font-medium text-primary">
-                        {item.url ? (
-                          <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition">
-                            {item.title}
-                          </a>
-                        ) : item.title}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-0.5 leading-snug">{item.summary}</div>
-                    </td>
-                    <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">{item.date ?? '—'}</td>
-                    <td className="px-3 py-2">
-                      <select
-                        value={row.status}
-                        onChange={e => updateRow(item.key, { status: e.target.value as ItemStatus })}
-                        className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 focus:outline-none focus:ring-2 focus:ring-cyan/50 ${statusPillClass[row.status]}`}
-                      >
-                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      {row.updated && (
-                        <div className="text-[10px] text-gray-400 mt-1">
-                          {new Date(row.updated).toLocaleDateString()} {new Date(row.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <Fragment key={item.key}>
+                    {showDoneDivider && (
+                      <tr className="border-t-2 border-gray-200 bg-gray-50">
+                        <td colSpan={5} className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Done</td>
+                      </tr>
+                    )}
+                    <tr key={item.key} className="border-t border-gray-100 align-top">
+                      <td className="px-3 py-2">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => moveItem(item.key, -1)}
+                            disabled={isFirst}
+                            className={`px-2 py-1 rounded border text-xs ${isFirst ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                          >↑</button>
+                          <button
+                            onClick={() => moveItem(item.key, 1)}
+                            disabled={isLast}
+                            className={`px-2 py-1 rounded border text-xs ${isLast ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                          >↓</button>
                         </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      <textarea
-                        value={row.notes}
-                        onChange={e => updateRow(item.key, { notes: e.target.value })}
-                        placeholder="Dev notes..."
-                        rows={2}
-                        className="w-full text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
-                      />
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="font-medium text-primary">
+                          {item.url ? (
+                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:text-cyan transition">
+                              {item.title}
+                            </a>
+                          ) : item.title}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5 leading-snug">{item.summary}</div>
+                      </td>
+                      <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">{item.date ?? '—'}</td>
+                      <td className="px-3 py-2">
+                        <select
+                          value={row.status}
+                          onChange={e => updateRow(item.key, { status: e.target.value as ItemStatus })}
+                          className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 focus:outline-none focus:ring-2 focus:ring-cyan/50 ${statusPillClass[row.status]}`}
+                        >
+                          {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        {row.updated && (
+                          <div className="text-[10px] text-gray-400 mt-1">
+                            {new Date(row.updated).toLocaleDateString()} {new Date(row.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <textarea
+                          value={row.notes}
+                          onChange={e => updateRow(item.key, { notes: e.target.value })}
+                          placeholder="Dev notes..."
+                          rows={2}
+                          className="w-full text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
+                        />
+                      </td>
+                    </tr>
+                  </Fragment>
                 )
               })}
             </tbody>
