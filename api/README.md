@@ -8,6 +8,7 @@ Provides shared persistence for:
 - forward-work item status / notes
 - forward-work ordering
 - project runsheet entries
+- developer release notes
 
 Each write stores a timestamp and user name.
 

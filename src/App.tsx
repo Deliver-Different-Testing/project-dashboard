@@ -39,6 +39,7 @@ const projects: Project[] = [
 type SyncMode = 'shared' | 'local'
 
 interface RunsheetEntry { id: string; ts: number; text: string; by?: string | null }
+interface ReleaseNoteEntry { id: string; devKey: string; title: string; body: string; ts: number; by?: string | null }
 
 interface ForwardWorkItem {
   key: string
@@ -399,6 +400,19 @@ function normalizeRunsheetEntry(value: Partial<RunsheetEntry> & { ts?: number; t
   }
 }
 
+function normalizeReleaseNoteEntry(value: Partial<ReleaseNoteEntry> & { ts?: number; title?: string; body?: string; id?: string | number; devKey?: string }): ReleaseNoteEntry {
+  const ts = typeof value.ts === 'number' ? value.ts : Date.now()
+  const id = value.id !== undefined ? String(value.id) : String(ts)
+  return {
+    id,
+    devKey: typeof value.devKey === 'string' ? value.devKey : '',
+    title: typeof value.title === 'string' ? value.title : '',
+    body: typeof value.body === 'string' ? value.body : '',
+    ts,
+    by: typeof value.by === 'string' ? value.by : null,
+  }
+}
+
 async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`)
   if (!response.ok) throw new Error(`GET ${path} failed (${response.status})`)
@@ -463,6 +477,22 @@ function loadRunsheetEntries(projectSlug: string): RunsheetEntry[] {
 
 function saveRunsheetEntries(projectSlug: string, entries: RunsheetEntry[]) {
   localStorage.setItem(`runsheet-${projectSlug}`, JSON.stringify(entries))
+}
+
+function loadReleaseNotes(devKey: string): ReleaseNoteEntry[] {
+  try {
+    const raw = localStorage.getItem(`release-notes-${devKey}`)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(entry => normalizeReleaseNoteEntry(entry))
+  } catch {
+    return []
+  }
+}
+
+function saveReleaseNotes(devKey: string, entries: ReleaseNoteEntry[]) {
+  localStorage.setItem(`release-notes-${devKey}`, JSON.stringify(entries))
 }
 
 function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string }) {
@@ -857,6 +887,142 @@ function ProjectCard({ project, currentUser }: { project: Project; currentUser: 
   )
 }
 
+function ReleaseNotesPanel({ dev, currentUser }: { dev: Dev; currentUser: string }) {
+  const [entries, setEntries] = useState<ReleaseNoteEntry[]>(() => loadReleaseNotes(dev.key))
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
+  const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
+
+  useEffect(() => {
+    setEntries(loadReleaseNotes(dev.key))
+  }, [dev.key])
+
+  useEffect(() => {
+    saveReleaseNotes(dev.key, entries)
+  }, [dev.key, entries])
+
+  useEffect(() => {
+    if (!HAS_SHARED_API) return
+    let cancelled = false
+    const load = async () => {
+      try {
+        const data = await apiGet<ReleaseNoteEntry[]>(`/api/release-notes/${dev.key}`)
+        if (!cancelled) {
+          setEntries(data.map(normalizeReleaseNoteEntry))
+          setSyncMode('shared')
+        }
+      } catch {
+        if (!cancelled) setSyncMode('local')
+      }
+    }
+    void load()
+    const interval = window.setInterval(() => { void load() }, 15000)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [dev.key])
+
+  const addEntry = async () => {
+    const trimmedTitle = title.trim()
+    const trimmedBody = body.trim()
+    if (!trimmedTitle || !trimmedBody) return
+
+    const optimistic = normalizeReleaseNoteEntry({
+      id: `local-${Date.now()}`,
+      devKey: dev.key,
+      title: trimmedTitle,
+      body: trimmedBody,
+      ts: Date.now(),
+      by: userDisplayName(currentUser),
+    })
+
+    setEntries(prev => [optimistic, ...prev])
+    setTitle('')
+    setBody('')
+
+    if (!HAS_SHARED_API) return
+    try {
+      const saved = await apiSend<ReleaseNoteEntry>(`/api/release-notes/${dev.key}/entries`, 'POST', {
+        title: trimmedTitle,
+        body: trimmedBody,
+        createdBy: userDisplayName(currentUser),
+      })
+      setEntries(prev => [normalizeReleaseNoteEntry(saved), ...prev.filter(entry => entry.id !== optimistic.id)])
+      setSyncMode('shared')
+    } catch {
+      setSyncMode('local')
+    }
+  }
+
+  const deleteEntry = async (entry: ReleaseNoteEntry) => {
+    setEntries(prev => prev.filter(item => item.id !== entry.id))
+    if (!HAS_SHARED_API || entry.id.startsWith('local-')) return
+    try {
+      await apiSend(`/api/release-notes/${dev.key}/entries/${entry.id}`, 'DELETE')
+      setSyncMode('shared')
+    } catch {
+      setSyncMode('local')
+    }
+  }
+
+  return (
+    <section>
+      <div className="flex items-center justify-between gap-3 mb-3 mt-2">
+        <div className="flex items-center gap-2">
+          <span className="text-base">📝</span>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Release notes</h2>
+          <span className="text-xs text-gray-400">({entries.length})</span>
+        </div>
+        <span className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg ${syncMode === 'shared' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+          {syncMode === 'shared' ? '☁️ Shared notes' : '💾 Local notes'}
+        </span>
+      </div>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-2">
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Release title..."
+            className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50"
+          />
+          <textarea
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            placeholder="What shipped / changed / fixed..."
+            rows={3}
+            className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
+          />
+          <div className="flex justify-end">
+            <button onClick={() => void addEntry()} className="text-sm px-3 py-1.5 bg-cyan text-white rounded-lg hover:bg-cyan/80 transition font-medium">Add release note</button>
+          </div>
+        </div>
+        {entries.length === 0 ? (
+          <div className="p-5 text-sm text-gray-400">No release notes yet</div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {entries.map(entry => (
+              <div key={entry.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="font-medium text-primary">{entry.title}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {new Date(entry.ts).toLocaleDateString()} {new Date(entry.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {entry.by ? ` · ${entry.by}` : ''}
+                    </div>
+                  </div>
+                  <button onClick={() => void deleteEntry(entry)} className="text-gray-300 hover:text-red-400 text-xs">✕</button>
+                </div>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap mt-2 leading-relaxed">{entry.body}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 type Tab = DevKey
 
 const tabs: { key: Tab; label: string; emoji: string }[] = [
@@ -954,6 +1120,7 @@ export default function App() {
                 <ForwardWorkTable dev={activeDev} currentUser={editorName} />
               </div>
             </section>
+            <ReleaseNotesPanel dev={activeDev} currentUser={editorName} />
             <section>
               <SectionHeading icon="📦" title="Projects" count={tabProjects.length} />
               {tabProjects.length === 0 ? (

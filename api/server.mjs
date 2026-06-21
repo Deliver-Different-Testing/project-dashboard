@@ -52,6 +52,20 @@ async function ensureSchema() {
   `
 
   await sql`create index if not exists idx_dashboard_runsheet_entries_project on dashboard_runsheet_entries (project_slug, created_at desc)`
+
+  await sql`
+    create table if not exists dashboard_release_notes (
+      id bigserial primary key,
+      dev_key text not null,
+      title text not null,
+      body text not null,
+      created_at timestamptz not null default now(),
+      created_by text,
+      deleted_at timestamptz
+    )
+  `
+
+  await sql`create index if not exists idx_dashboard_release_notes_dev on dashboard_release_notes (dev_key, created_at desc)`
 }
 
 function sendJson(res, status, body) {
@@ -95,6 +109,17 @@ function normalizeRunsheet(row) {
     id: String(row.id),
     ts: new Date(row.created_at).getTime(),
     text: row.entry_text,
+    by: row.created_by || null,
+  }
+}
+
+function normalizeReleaseNote(row) {
+  return {
+    id: String(row.id),
+    devKey: row.dev_key,
+    title: row.title,
+    body: row.body,
+    ts: new Date(row.created_at).getTime(),
     by: row.created_by || null,
   }
 }
@@ -180,6 +205,38 @@ async function handleDeleteRunsheet(entryId, res) {
   sendEmpty(res)
 }
 
+async function handleGetReleaseNotes(devKey, res) {
+  const rows = await sql`
+    select id, dev_key, title, body, created_at, created_by
+    from dashboard_release_notes
+    where dev_key = ${devKey}
+      and deleted_at is null
+    order by created_at desc
+  `
+  sendJson(res, 200, rows.map(normalizeReleaseNote))
+}
+
+async function handlePostReleaseNote(devKey, req, res) {
+  const body = await readBody(req)
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+  const noteBody = typeof body.body === 'string' ? body.body.trim() : ''
+  const createdBy = typeof body.createdBy === 'string' ? body.createdBy : null
+  if (!title || !noteBody) return sendJson(res, 400, { error: 'title and body are required' })
+
+  const [row] = await sql`
+    insert into dashboard_release_notes (dev_key, title, body, created_by)
+    values (${devKey}, ${title}, ${noteBody}, ${createdBy})
+    returning id, dev_key, title, body, created_at, created_by
+  `
+
+  sendJson(res, 201, normalizeReleaseNote(row))
+}
+
+async function handleDeleteReleaseNote(entryId, res) {
+  await sql`update dashboard_release_notes set deleted_at = now() where id = ${entryId}`
+  sendEmpty(res)
+}
+
 const server = createServer(async (req, res) => {
   try {
     if (req.method === 'OPTIONS') return sendEmpty(res)
@@ -218,6 +275,21 @@ const server = createServer(async (req, res) => {
     const runsheetDeleteMatch = pathname.match(/^\/api\/runsheets\/[^/]+\/entries\/([^/]+)$/)
     if (req.method === 'DELETE' && runsheetDeleteMatch) {
       return await handleDeleteRunsheet(runsheetDeleteMatch[1], res)
+    }
+
+    const releaseNotesMatch = pathname.match(/^\/api\/release-notes\/([^/]+)$/)
+    if (req.method === 'GET' && releaseNotesMatch) {
+      return await handleGetReleaseNotes(decodeURIComponent(releaseNotesMatch[1]), res)
+    }
+
+    const releaseNotesCreateMatch = pathname.match(/^\/api\/release-notes\/([^/]+)\/entries$/)
+    if (req.method === 'POST' && releaseNotesCreateMatch) {
+      return await handlePostReleaseNote(decodeURIComponent(releaseNotesCreateMatch[1]), req, res)
+    }
+
+    const releaseNotesDeleteMatch = pathname.match(/^\/api\/release-notes\/[^/]+\/entries\/([^/]+)$/)
+    if (req.method === 'DELETE' && releaseNotesDeleteMatch) {
+      return await handleDeleteReleaseNote(releaseNotesDeleteMatch[1], res)
     }
 
     sendJson(res, 404, { error: 'Not found' })
