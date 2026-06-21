@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useMemo } from 'react'
+import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
 
 type DevKey = 'garry' | 'kevin' | 'kerran' | 'jacob' | 'strategy'
 
@@ -36,7 +36,9 @@ const projects: Project[] = [
   { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'Stage 1 focus: get existing Runbuilder capability working in the new React UI first; defer broader RouteBuilder modules until parity is operational.', live: 'https://deliver-different-testing.github.io/runbuilder/#/routes', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md', extraLinks: [{ label: 'Background doc', emoji: '📚', url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md' }, { label: 'New UI', emoji: '🖥️', url: 'https://deliver-different-testing.github.io/runbuilder/#/routes' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
-interface RunsheetEntry { ts: number; text: string }
+type SyncMode = 'shared' | 'local'
+
+interface RunsheetEntry { id: string; ts: number; text: string; by?: string | null }
 
 interface ForwardWorkItem {
   key: string
@@ -366,15 +368,60 @@ const statusPillClass: Record<ItemStatus, string> = {
   'Done': 'bg-green-100 text-green-700',
 }
 
-interface RowState { status: ItemStatus; notes: string; updated: number | null }
+interface RowState { status: ItemStatus; notes: string; updated: number | null; updatedBy?: string | null }
 
-const blankRow: RowState = { status: 'Not started', notes: '', updated: null }
+const blankRow: RowState = { status: 'Not started', notes: '', updated: null, updatedBy: null }
+
+const API_BASE = (import.meta.env.VITE_PROJECT_DASH_API_URL || '').replace(/\/$/, '')
+const HAS_SHARED_API = API_BASE.length > 0
+
+function userDisplayName(name: string) {
+  return name.trim() || 'Unknown'
+}
+
+function normalizeRowState(value: Partial<RowState> | undefined): RowState {
+  return {
+    status: value?.status && STATUS_OPTIONS.includes(value.status) ? value.status : 'Not started',
+    notes: typeof value?.notes === 'string' ? value.notes : '',
+    updated: typeof value?.updated === 'number' ? value.updated : null,
+    updatedBy: typeof value?.updatedBy === 'string' ? value.updatedBy : null,
+  }
+}
+
+function normalizeRunsheetEntry(value: Partial<RunsheetEntry> & { ts?: number; text?: string; id?: string | number }): RunsheetEntry {
+  const ts = typeof value.ts === 'number' ? value.ts : Date.now()
+  const id = value.id !== undefined ? String(value.id) : String(ts)
+  return {
+    id,
+    ts,
+    text: typeof value.text === 'string' ? value.text : '',
+    by: typeof value.by === 'string' ? value.by : null,
+  }
+}
+
+async function apiGet<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`)
+  if (!response.ok) throw new Error(`GET ${path} failed (${response.status})`)
+  return response.json()
+}
+
+async function apiSend<T>(path: string, method: 'POST' | 'PUT' | 'DELETE', body?: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  if (!response.ok) throw new Error(`${method} ${path} failed (${response.status})`)
+  return response.status === 204 ? undefined as T : response.json()
+}
 
 function loadDevState(devKey: string): Record<string, RowState> {
   try {
     const raw = localStorage.getItem(`forward-work:${devKey}:v1`)
     if (!raw) return {}
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return {}
+    return Object.fromEntries(Object.entries(parsed).map(([key, value]) => [key, normalizeRowState(value as Partial<RowState>)]))
   } catch {
     return {}
   }
@@ -402,14 +449,64 @@ function saveDevOrder(devKey: string, order: string[]) {
   localStorage.setItem(`forward-work-order:${devKey}:v1`, JSON.stringify(order))
 }
 
-function ForwardWorkTable({ dev }: { dev: Dev }) {
+function loadRunsheetEntries(projectSlug: string): RunsheetEntry[] {
+  try {
+    const raw = localStorage.getItem(`runsheet-${projectSlug}`)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(entry => normalizeRunsheetEntry(entry))
+  } catch {
+    return []
+  }
+}
+
+function saveRunsheetEntries(projectSlug: string, entries: RunsheetEntry[]) {
+  localStorage.setItem(`runsheet-${projectSlug}`, JSON.stringify(entries))
+}
+
+function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string }) {
   const devKey = dev.key
   const [state, setState] = useState<Record<string, RowState>>(() => loadDevState(devKey))
   const [order, setOrder] = useState<string[]>(() => loadDevOrder(devKey, dev.forwardWorkItems))
+  const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
+  const [syncMessage, setSyncMessage] = useState<string>(HAS_SHARED_API ? 'Shared sync connected' : 'Local-only mode')
+  const [editingNotesKey, setEditingNotesKey] = useState<string | null>(null)
+  const pollRef = useRef<number | null>(null)
+
+  const hydrateFromRemote = async () => {
+    if (!HAS_SHARED_API) return
+    try {
+      const data = await apiGet<{ state: Record<string, RowState>; order: string[] }>(`/api/forward-work/${devKey}`)
+      const nextState = Object.fromEntries(Object.entries(data.state || {}).map(([key, value]) => [key, normalizeRowState(value)]))
+      const remoteOrder = Array.isArray(data.order) ? data.order.filter(key => typeof key === 'string') : []
+      setState(prev => {
+        const merged = { ...prev }
+        Object.entries(nextState).forEach(([key, value]) => {
+          if (editingNotesKey === key) return
+          merged[key] = value
+        })
+        return merged
+      })
+      setOrder(loadDevOrder(devKey, dev.forwardWorkItems).map(key => key))
+      if (remoteOrder.length > 0) {
+        const known = new Set(dev.forwardWorkItems.map(item => item.key))
+        const cleaned = remoteOrder.filter(key => known.has(key))
+        const missing = dev.forwardWorkItems.map(item => item.key).filter(key => !cleaned.includes(key))
+        setOrder([...cleaned, ...missing])
+      }
+      setSyncMode('shared')
+      setSyncMessage('Shared sync connected')
+    } catch {
+      setSyncMode('local')
+      setSyncMessage('Shared API unavailable — using local browser state')
+    }
+  }
 
   useEffect(() => {
     setState(loadDevState(devKey))
     setOrder(loadDevOrder(devKey, dev.forwardWorkItems))
+    void hydrateFromRemote()
   }, [devKey, dev.forwardWorkItems])
 
   useEffect(() => {
@@ -429,8 +526,59 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
     saveDevOrder(devKey, order)
   }, [devKey, order])
 
-  const updateRow = (key: string, patch: Partial<RowState>) => {
-    setState(prev => ({ ...prev, [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now() } }))
+  useEffect(() => {
+    if (!HAS_SHARED_API || editingNotesKey) return
+    pollRef.current = window.setInterval(() => {
+      void hydrateFromRemote()
+    }, 15000)
+    return () => {
+      if (pollRef.current) window.clearInterval(pollRef.current)
+    }
+  }, [devKey, editingNotesKey, dev.forwardWorkItems])
+
+  const persistRow = async (key: string, row: RowState) => {
+    if (!HAS_SHARED_API) return
+    try {
+      const saved = await apiSend<RowState>(`/api/forward-work/${devKey}/${key}`, 'PUT', {
+        status: row.status,
+        notes: row.notes,
+        updatedBy: userDisplayName(currentUser),
+      })
+      setState(prev => ({ ...prev, [key]: normalizeRowState(saved) }))
+      setSyncMode('shared')
+      setSyncMessage(`Shared sync updated by ${userDisplayName(currentUser)}`)
+    } catch {
+      setSyncMode('local')
+      setSyncMessage('Could not sync change — kept locally in this browser')
+    }
+  }
+
+  const persistOrder = async (nextOrder: string[]) => {
+    if (!HAS_SHARED_API) return
+    try {
+      await apiSend(`/api/forward-work/${devKey}/order`, 'PUT', {
+        order: nextOrder,
+        updatedBy: userDisplayName(currentUser),
+      })
+      setSyncMode('shared')
+      setSyncMessage(`Order synced by ${userDisplayName(currentUser)}`)
+    } catch {
+      setSyncMode('local')
+      setSyncMessage('Could not sync order — kept locally in this browser')
+    }
+  }
+
+  const updateRowDraft = (key: string, patch: Partial<RowState>) => {
+    setState(prev => ({
+      ...prev,
+      [key]: { ...blankRow, ...prev[key], ...patch, updated: Date.now(), updatedBy: userDisplayName(currentUser) },
+    }))
+  }
+
+  const commitRow = (key: string, patch: Partial<RowState>) => {
+    const nextRow = { ...blankRow, ...state[key], ...patch, updated: Date.now(), updatedBy: userDisplayName(currentUser) }
+    setState(prev => ({ ...prev, [key]: nextRow }))
+    void persistRow(key, nextRow)
   }
 
   const orderedItems = useMemo(() => {
@@ -458,6 +606,7 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
       if (fromPos < 0 || toPos < 0) return prev
       ;[next[fromPos], next[toPos]] = [next[toPos], next[fromPos]]
       saveDevOrder(devKey, next)
+      void persistOrder(next)
       return next
     })
   }
@@ -470,12 +619,17 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
 
   return (
     <div className="border-t border-gray-100 bg-gray-50 p-4">
-      <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
         {STATUS_OPTIONS.map(s => (
           <span key={s} className={`px-2 py-0.5 rounded-full font-medium ${statusPillClass[s]}`}>
             {s}: {counts[s]}
           </span>
         ))}
+        </div>
+        <span className={`px-2 py-1 rounded-full font-medium ${syncMode === 'shared' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+          {syncMessage}
+        </span>
       </div>
       {dev.forwardWorkItems.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-4">No queued items</p>
@@ -539,7 +693,7 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
                       <td className="px-3 py-2">
                         <select
                           value={row.status}
-                          onChange={e => updateRow(item.key, { status: e.target.value as ItemStatus })}
+                          onChange={e => commitRow(item.key, { status: e.target.value as ItemStatus })}
                           className={`text-xs font-medium rounded-full px-2.5 py-1 border-0 focus:outline-none focus:ring-2 focus:ring-cyan/50 ${statusPillClass[row.status]}`}
                         >
                           {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -547,13 +701,19 @@ function ForwardWorkTable({ dev }: { dev: Dev }) {
                         {row.updated && (
                           <div className="text-[10px] text-gray-400 mt-1">
                             {new Date(row.updated).toLocaleDateString()} {new Date(row.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {row.updatedBy ? ` · ${row.updatedBy}` : ''}
                           </div>
                         )}
                       </td>
                       <td className="px-3 py-2">
                         <textarea
                           value={row.notes}
-                          onChange={e => updateRow(item.key, { notes: e.target.value })}
+                          onFocus={() => setEditingNotesKey(item.key)}
+                          onBlur={() => {
+                            setEditingNotesKey(current => current === item.key ? null : current)
+                            void persistRow(item.key, state[item.key] ?? row)
+                          }}
+                          onChange={e => updateRowDraft(item.key, { notes: e.target.value })}
                           placeholder="Dev notes..."
                           rows={2}
                           className="w-full text-xs px-2 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
@@ -577,28 +737,67 @@ const statusColors: Record<string, string> = {
   Paused: 'bg-amber-500',
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, currentUser }: { project: Project; currentUser: string }) {
   const [open, setOpen] = useState(false)
-  const [entries, setEntries] = useState<RunsheetEntry[]>([])
+  const [entries, setEntries] = useState<RunsheetEntry[]>(() => loadRunsheetEntries(project.slug))
   const [input, setInput] = useState('')
   const [filter, setFilter] = useState('')
-  const key = `runsheet-${project.slug}`
+  const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
 
   useEffect(() => {
-    const stored = localStorage.getItem(key)
-    if (stored) setEntries(JSON.parse(stored))
-  }, [key])
+    saveRunsheetEntries(project.slug, entries)
+  }, [project.slug, entries])
 
-  const save = (e: RunsheetEntry[]) => { setEntries(e); localStorage.setItem(key, JSON.stringify(e)) }
+  useEffect(() => {
+    if (!HAS_SHARED_API || !open) return
+    let cancelled = false
+    const load = async () => {
+      try {
+        const data = await apiGet<RunsheetEntry[]>(`/api/runsheets/${project.slug}`)
+        if (!cancelled) {
+          setEntries(data.map(normalizeRunsheetEntry))
+          setSyncMode('shared')
+        }
+      } catch {
+        if (!cancelled) setSyncMode('local')
+      }
+    }
+    void load()
+    const interval = window.setInterval(() => { void load() }, 15000)
+    return () => {
+      cancelled = true
+      window.clearInterval(interval)
+    }
+  }, [project.slug, open])
 
-  const addEntry = () => {
+  const addEntry = async () => {
     if (!input.trim()) return
-    const updated = [{ ts: Date.now(), text: input.trim() }, ...entries]
-    save(updated)
+    const optimistic = normalizeRunsheetEntry({ id: `local-${Date.now()}`, ts: Date.now(), text: input.trim(), by: userDisplayName(currentUser) })
+    setEntries(prev => [optimistic, ...prev])
     setInput('')
+    if (!HAS_SHARED_API) return
+    try {
+      const saved = await apiSend<RunsheetEntry>(`/api/runsheets/${project.slug}/entries`, 'POST', {
+        text: optimistic.text,
+        createdBy: userDisplayName(currentUser),
+      })
+      setEntries(prev => [normalizeRunsheetEntry(saved), ...prev.filter(entry => entry.id !== optimistic.id)])
+      setSyncMode('shared')
+    } catch {
+      setSyncMode('local')
+    }
   }
 
-  const deleteEntry = (ts: number) => save(entries.filter(e => e.ts !== ts))
+  const deleteEntry = async (entry: RunsheetEntry) => {
+    setEntries(prev => prev.filter(e => e.id !== entry.id))
+    if (!HAS_SHARED_API || entry.id.startsWith('local-')) return
+    try {
+      await apiSend(`/api/runsheets/${project.slug}/entries/${entry.id}`, 'DELETE')
+      setSyncMode('shared')
+    } catch {
+      setSyncMode('local')
+    }
+  }
 
   const filtered = filter ? entries.filter(e => e.text.toLowerCase().includes(filter.toLowerCase())) : entries
 
@@ -621,6 +820,9 @@ function ProjectCard({ project }: { project: Project }) {
           {project.extraLinks?.map(link => (
             <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">{link.emoji} {link.label}</a>
           ))}
+          <span className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg ${syncMode === 'shared' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+            {syncMode === 'shared' ? '☁️ Shared runsheet' : '💾 Local runsheet'}
+          </span>
           <button onClick={() => setOpen(!open)} className={`inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition ${open ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
             📋 Runsheet {entries.length > 0 && <span className="bg-white/20 rounded-full px-1.5">{entries.length}</span>}
           </button>
@@ -640,10 +842,11 @@ function ProjectCard({ project }: { project: Project }) {
           ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {filtered.map(e => (
-                <div key={e.ts} className="flex items-start gap-2 text-sm bg-white rounded-lg p-2 border border-gray-100">
+                <div key={e.id} className="flex items-start gap-2 text-sm bg-white rounded-lg p-2 border border-gray-100">
                   <span className="text-xs text-gray-400 whitespace-nowrap mt-0.5">{new Date(e.ts).toLocaleDateString()} {new Date(e.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   <span className="flex-1 text-gray-700">{e.text}</span>
-                  <button onClick={() => deleteEntry(e.ts)} className="text-gray-300 hover:text-red-400 text-xs">✕</button>
+                  <span className="text-[10px] text-gray-400 mt-0.5 whitespace-nowrap">{e.by || 'Unknown'}</span>
+                  <button onClick={() => deleteEntry(e)} className="text-gray-300 hover:text-red-400 text-xs">✕</button>
                 </div>
               ))}
             </div>
@@ -698,8 +901,13 @@ function SectionHeading({ icon, title, count }: { icon: string; title: string; c
 
 export default function App() {
   const [tab, setTab] = useState<Tab>(() => (localStorage.getItem('dash-tab') as Tab) || 'garry')
+  const [editorName, setEditorName] = useState(() => localStorage.getItem('dash-user-name') || 'Steve')
 
   const switchTab = (t: Tab) => { setTab(t); localStorage.setItem('dash-tab', t) }
+
+  useEffect(() => {
+    localStorage.setItem('dash-user-name', editorName)
+  }, [editorName])
 
   const activeDev = devs.find(d => d.key === tab)
   const tabProjects = projects.filter(p => p.owner === tab)
@@ -707,7 +915,21 @@ export default function App() {
   return (
     <div className="min-h-screen bg-light-grey" data-build={BUILD_ID}>
       <header className="bg-primary text-white px-6 py-4 shadow-lg">
-        <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold">⚡ DFRNT Project Dash</h1>
+            <p className="text-xs text-white/70 mt-1">{HAS_SHARED_API ? 'Shared Railway sync enabled' : 'Local browser mode — add VITE_PROJECT_DASH_API_URL for multi-user sync'}</p>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="text-white/80">Editing as</span>
+            <input
+              value={editorName}
+              onChange={e => setEditorName(e.target.value)}
+              className="px-3 py-1.5 rounded-lg text-primary bg-white border border-white/20 min-w-40"
+              placeholder="Your name"
+            />
+          </label>
+        </div>
       </header>
       <nav className="bg-white border-b border-gray-200 px-6 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto flex gap-1 overflow-x-auto">
@@ -729,7 +951,7 @@ export default function App() {
             <section>
               <SectionHeading icon="🗂️" title="Forward work" count={activeDev.forwardWorkItems.length} />
               <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <ForwardWorkTable dev={activeDev} />
+                <ForwardWorkTable dev={activeDev} currentUser={editorName} />
               </div>
             </section>
             <section>
@@ -740,7 +962,7 @@ export default function App() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {tabProjects.map(p => <ProjectCard key={p.slug} project={p} />)}
+                  {tabProjects.map(p => <ProjectCard key={p.slug} project={p} currentUser={editorName} />)}
                 </div>
               )}
             </section>
@@ -749,7 +971,7 @@ export default function App() {
           <section>
             <SectionHeading icon="🧭" title="Strategy & analysis projects" count={tabProjects.length} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {tabProjects.map(p => <ProjectCard key={p.slug} project={p} />)}
+              {tabProjects.map(p => <ProjectCard key={p.slug} project={p} currentUser={editorName} />)}
             </div>
           </section>
         )}
