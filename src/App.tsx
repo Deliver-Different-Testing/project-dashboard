@@ -172,7 +172,7 @@ const devs: Dev[] = [
       {
         key: 'routebuilder-rebuild',
         title: 'RouteBuilder rebuild',
-        summary: 'Stage 1 brief: make the existing Runbuilder job→run→route→live workflow work in the new React UI first, before expanding Quoting, Scheduled Routes, or Polygon Builder.',
+        summary: 'Stage 1 brief: make the existing Runbuilder job→run→route→live workflow work in the new React UI first, including RH-popout route criteria (A-B, A-A, forced-last-stop, delivery/pickup windows, fixed route before driver send), before expanding Quoting, Scheduled Routes, or Polygon Builder.',
         date: '2026-06-20',
         url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
       },
