@@ -628,6 +628,10 @@ function tenantReleaseTitle(item: ForwardWorkItem) {
     .replace(/\s+completed$/i, '')
     .trim()
 
+  if (/recurring\s+resilience/i.test(cleaned)) {
+    return 'Recurring booking resilience improvements'
+  }
+
   if (/improvement|improvements|update|updates|alignment|integration|resilience|cleanup|redesign|rebuild|fix|fixes|brief/i.test(cleaned)) {
     return sentenceCase(cleaned)
   }
@@ -636,6 +640,10 @@ function tenantReleaseTitle(item: ForwardWorkItem) {
 }
 
 function tenantImpactLine(item: ForwardWorkItem, highlights: string[]) {
+  if (/recurring\s+resilience/i.test(item.title)) {
+    return 'We’ve improved recurring booking processing so bad data no longer stops the whole run.'
+  }
+
   const summaryParts = splitSummary(item.summary)
   const candidate = summaryParts.impact || highlights[0] || item.summary
   const cleaned = cleanMarkdownLine(candidate)
@@ -648,6 +656,10 @@ function tenantImpactLine(item: ForwardWorkItem, highlights: string[]) {
 }
 
 function tenantNeedsToKnow(item: ForwardWorkItem, highlights: string[]) {
+  if (/recurring\s+resilience/i.test(item.title)) {
+    return 'If a recurring booking contains invalid data, it will now be skipped and recorded for follow-up while the rest of the valid bookings continue processing.'
+  }
+
   const combined = [item.summary, ...highlights].map(cleanMarkdownLine).filter(Boolean)
   const best = combined.find(line => /(can now|now|review|manage|view|continue|skip|record|see)/i.test(line) && !isTechnicalLine(line))
   if (best) return sentenceCase(best)
@@ -684,7 +696,7 @@ function buildAutoReleaseNote(item: ForwardWorkItem, markdown: string) {
   return {
     title: tenantReleaseTitle(item),
     baseBody: [
-      `We’ve released an update for ${item.title.toLowerCase()}.`,
+      `We’ve released an update for ${tenantReleaseTitle(item).toLowerCase()}.`,
       '',
       'What changed',
       `- ${changeLine}`,
