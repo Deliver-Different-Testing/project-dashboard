@@ -597,6 +597,24 @@ function extractDocHighlights(markdown: string) {
   return merged.filter((line, index) => merged.findIndex(other => other.toLowerCase() === line.toLowerCase()) === index).slice(0, 4)
 }
 
+function isTechnicalLine(line: string) {
+  return /(tbl|tuc|stp|api|sql|migration|controller|repository|context|foreign key|jwt|xact_abort|try\/catch|cursor|table|column|nvarchar|bit\b|identity\()/i.test(line)
+    || /[A-Za-z]+_[A-Za-z0-9_]+/.test(line)
+    || /[a-z]+[A-Z][A-Za-z]+/.test(line)
+}
+
+function splitSummary(summary: string) {
+  const sentences = summary
+    .split(/(?<=[.!?])\s+/)
+    .map(part => part.trim())
+    .filter(Boolean)
+
+  const impact = sentences.find(sentence => !isTechnicalLine(sentence)) || ''
+  const technical = sentences.find(sentence => isTechnicalLine(sentence)) || ''
+
+  return { impact, technical }
+}
+
 function composeReleaseNoteBody(baseBody: string, exceptions: string) {
   const trimmedBase = baseBody.trim()
   const trimmedExceptions = exceptions.trim()
@@ -614,19 +632,20 @@ function splitReleaseNoteBody(body: string) {
 }
 
 function buildAutoReleaseNote(item: ForwardWorkItem, markdown: string) {
-  const highlights = extractDocHighlights(markdown)
-  const shipped = [item.summary, ...highlights].filter(Boolean).slice(0, 4)
-  const bullets = shipped.map(point => `- ${point}`).join('\n')
+  const highlights = extractDocHighlights(markdown).filter(line => !isTechnicalLine(line))
+  const summaryParts = splitSummary(item.summary)
+  const changeLine = summaryParts.impact || highlights[0] || 'Delivered the work described in the linked handover / implementation note.'
   return {
     title: `${item.title} completed`,
     baseBody: [
       `Completed ${item.title} based on the linked handover / implementation note.`,
       '',
-      'What shipped',
-      bullets || '- Delivered the work described in the linked handover / implementation note.',
+      'What changed',
+      `- ${changeLine}`,
+      ...(highlights.slice(1, 2).map(line => `- ${line}`)),
       '',
-      'Outcome',
-      'This item is now marked done on the dashboard unless exceptions are noted below.',
+      'Why it matters',
+      `- ${summaryParts.impact || 'This work has been completed and is ready for use unless exceptions are noted below.'}`,
     ].join('\n').trim(),
   }
 }
