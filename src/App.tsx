@@ -615,6 +615,51 @@ function splitSummary(summary: string) {
   return { impact, technical }
 }
 
+function sentenceCase(text: string) {
+  const trimmed = text.trim()
+  if (!trimmed) return ''
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+}
+
+function tenantReleaseTitle(item: ForwardWorkItem) {
+  const cleaned = item.title
+    .replace(/\s+—\s+pull commit.*$/i, '')
+    .replace(/\s+\([^)]*\)$/g, '')
+    .replace(/\s+completed$/i, '')
+    .trim()
+
+  if (/improvement|improvements|update|updates|alignment|integration|resilience|cleanup|redesign|rebuild|fix|fixes|brief/i.test(cleaned)) {
+    return sentenceCase(cleaned)
+  }
+
+  return `${sentenceCase(cleaned)} update`
+}
+
+function tenantImpactLine(item: ForwardWorkItem, highlights: string[]) {
+  const summaryParts = splitSummary(item.summary)
+  const candidate = summaryParts.impact || highlights[0] || item.summary
+  const cleaned = cleanMarkdownLine(candidate)
+
+  if (/unblock|no longer|continue|review|manage|see|view|track|record|skip/i.test(cleaned)) {
+    return sentenceCase(cleaned)
+  }
+
+  return `This update improves ${item.title.toLowerCase()} and makes the workflow easier to use and support.`
+}
+
+function tenantNeedsToKnow(item: ForwardWorkItem, highlights: string[]) {
+  const combined = [item.summary, ...highlights].map(cleanMarkdownLine).filter(Boolean)
+  const best = combined.find(line => /(can now|now|review|manage|view|continue|skip|record|see)/i.test(line) && !isTechnicalLine(line))
+  if (best) return sentenceCase(best)
+  return 'No action is required unless exceptions are noted below.'
+}
+
+function relevantUiLine(item: ForwardWorkItem) {
+  if (!item.url) return ''
+  if (/github\.com/i.test(item.url)) return ''
+  return `View it here: ${item.url}`
+}
+
 function composeReleaseNoteBody(baseBody: string, exceptions: string) {
   const trimmedBase = baseBody.trim()
   const trimmedExceptions = exceptions.trim()
@@ -633,25 +678,26 @@ function splitReleaseNoteBody(body: string) {
 
 function buildAutoReleaseNote(item: ForwardWorkItem, markdown: string) {
   const highlights = extractDocHighlights(markdown).filter(line => !isTechnicalLine(line))
-  const summaryParts = splitSummary(item.summary)
-  const changeLine = summaryParts.impact || highlights[0] || 'Delivered the work described in the linked handover / implementation note.'
+  const changeLine = tenantImpactLine(item, highlights)
+  const needsToKnow = tenantNeedsToKnow(item, highlights)
+  const uiLine = relevantUiLine(item)
   return {
-    title: `${item.title} completed`,
+    title: tenantReleaseTitle(item),
     baseBody: [
-      `Completed ${item.title} based on the linked handover / implementation note.`,
+      `We’ve released an update for ${item.title.toLowerCase()}.`,
       '',
       'What changed',
       `- ${changeLine}`,
-      ...(highlights.slice(1, 2).map(line => `- ${line}`)),
       '',
-      'Why it matters',
-      `- ${summaryParts.impact || 'This work has been completed and is ready for use unless exceptions are noted below.'}`,
+      'What you need to know',
+      `- ${needsToKnow}`,
+      ...(uiLine ? ['', 'Where to find it', `- ${uiLine}`] : []),
     ].join('\n').trim(),
   }
 }
 
 function autoReleaseTitle(item: ForwardWorkItem) {
-  return `${item.title} completed`
+  return tenantReleaseTitle(item)
 }
 
 function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string }) {
