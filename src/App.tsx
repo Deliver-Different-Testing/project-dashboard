@@ -1183,10 +1183,8 @@ function ProjectCard({ project, currentUser }: { project: Project; currentUser: 
   )
 }
 
-function ReleaseNotesPanel({ dev, currentUser }: { dev: Dev; currentUser: string }) {
+function ReleaseNotesPanel({ dev }: { dev: Dev }) {
   const [entries, setEntries] = useState<ReleaseNoteEntry[]>(() => loadReleaseNotes(dev.key))
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
   const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
 
   useEffect(() => {
@@ -1230,44 +1228,6 @@ function ReleaseNotesPanel({ dev, currentUser }: { dev: Dev; currentUser: string
     }
   }, [dev.key])
 
-  const addEntry = async () => {
-    const trimmedTitle = title.trim()
-    const trimmedBody = body.trim()
-    if (!trimmedTitle || !trimmedBody) return
-
-    const optimistic = normalizeReleaseNoteEntry({
-      id: `local-${Date.now()}`,
-      devKey: dev.key,
-      title: trimmedTitle,
-      body: trimmedBody,
-      ts: Date.now(),
-      by: userDisplayName(currentUser),
-    })
-
-    const optimisticNext = [optimistic, ...entries]
-    setEntries(optimisticNext)
-    saveReleaseNotes(dev.key, optimisticNext)
-    emitReleaseNotesUpdated(dev.key)
-    setTitle('')
-    setBody('')
-
-    if (!HAS_SHARED_API) return
-    try {
-      const saved = await apiSend<ReleaseNoteEntry>(`/api/release-notes/${dev.key}/entries`, 'POST', {
-        title: trimmedTitle,
-        body: trimmedBody,
-        createdBy: userDisplayName(currentUser),
-      })
-      const next = [normalizeReleaseNoteEntry(saved), ...loadReleaseNotes(dev.key).filter(entry => entry.id !== optimistic.id)]
-      setEntries(next)
-      saveReleaseNotes(dev.key, next)
-      emitReleaseNotesUpdated(dev.key)
-      setSyncMode('shared')
-    } catch {
-      setSyncMode('local')
-    }
-  }
-
   const deleteEntry = async (entry: ReleaseNoteEntry) => {
     setEntries(prev => prev.filter(item => item.id !== entry.id))
     deleteReleaseNoteLocally(dev.key, entry.id)
@@ -1293,23 +1253,8 @@ function ReleaseNotesPanel({ dev, currentUser }: { dev: Dev; currentUser: string
         </span>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-2">
-          <input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="Release title..."
-            className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50"
-          />
-          <textarea
-            value={body}
-            onChange={e => setBody(e.target.value)}
-            placeholder="What shipped / changed / fixed..."
-            rows={3}
-            className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan/50 resize-y"
-          />
-          <div className="flex justify-end">
-            <button onClick={() => void addEntry()} className="text-sm px-3 py-1.5 bg-cyan text-white rounded-lg hover:bg-cyan/80 transition font-medium">Add release note</button>
-          </div>
+        <div className="p-4 border-b border-gray-100 bg-gray-50 text-xs text-gray-500">
+          Release notes are auto-generated when a forward-work item is marked <strong>Done</strong>. Developers only need to note any exceptions to spec.
         </div>
         {entries.length === 0 ? (
           <div className="p-5 text-sm text-gray-400">No release notes yet</div>
@@ -1437,7 +1382,7 @@ export default function App() {
                 <ForwardWorkTable dev={activeDev} currentUser={editorName} />
               </div>
             </section>
-            <ReleaseNotesPanel dev={activeDev} currentUser={editorName} />
+            <ReleaseNotesPanel dev={activeDev} />
             <section>
               <SectionHeading icon="📦" title="Projects" count={tabProjects.length} />
               {tabProjects.length === 0 ? (
