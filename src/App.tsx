@@ -73,6 +73,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'linehaul-flight-mode-minimal',
+        title: 'Linehaul flight mode — minimal setup brief',
+        summary: 'Add a Road / Flight toggle to the linehaul setup modal, use tblAirport code/name lookup, persist minimal flight-segment metadata, and hand booked jobs into the existing despatchweb domestic/nationwide flight path.',
+        date: '2026-06-22',
+        url: CONFIG_DOC('STEVE-LINEHAUL-FLIGHT-MODE-MINIMAL-GARRY-2026-06-22.md'),
+      },
+      {
         key: 'np-modal',
         title: 'NP Modal redesign',
         summary: 'Sticky directory header on /agents, popup NP modal mirroring courier shell (areas-covered map, tabs), narrow Edit Agent to promotion only.',
