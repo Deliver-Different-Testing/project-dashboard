@@ -220,6 +220,13 @@ const devs: Dev[] = [
         url: CONFIG_DOC('HANDOVER-KEVIN-RECURRING-RESILIENCE-2026-06-17.md'),
       },
       {
+        key: 'recurring-windows-booking-spec',
+        title: 'Recurring windows + booking-time persistence',
+        summary: 'Add pickup/delivery window defaults on tucJobType with client overrides, preserve the user-entered/uploaded recurring time from tucJobPrebook into live tucJob, and keep route-list grouping tied to schedule time.',
+        date: '2026-06-23',
+        url: CONFIG_DOC('KEVIN-RECURRING-WINDOWS-BOOKING-SPEC-2026-06-23.md'),
+      },
+      {
         key: 'usa-bulk-uploader-fixes',
         title: 'USA Bulk Uploader fixes',
         summary: 'Enable CSV upload, hide Google Drive until approval, make mapping labels generic, fix Boston/USA geocoding, make zipPolygon the coverage-first validation layer, and support stop type at import time.',
