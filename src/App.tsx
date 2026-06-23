@@ -204,6 +204,13 @@ const devs: Dev[] = [
         date: '2026-06-17',
         url: CONFIG_DOC('HANDOVER-KEVIN-RECURRING-RESILIENCE-2026-06-17.md'),
       },
+      {
+        key: 'usa-bulk-uploader-fixes',
+        title: 'USA Bulk Uploader fixes',
+        summary: 'Enable CSV upload, hide Google Drive until approval, make mapping labels generic, and fix Fix Addresses so Boston/USA geocoding resolves correctly.',
+        date: '2026-06-23',
+        url: 'https://github.com/Deliver-Different-Testing/bulkimport/blob/master/KEVIN-USA-BULK-UPLOADER-BRIEF-2026-06-23.md',
+      },
     ],
   },
   {
