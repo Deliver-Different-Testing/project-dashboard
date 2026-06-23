@@ -207,9 +207,16 @@ const devs: Dev[] = [
       {
         key: 'usa-bulk-uploader-fixes',
         title: 'USA Bulk Uploader fixes',
-        summary: 'Enable CSV upload, hide Google Drive until approval, make mapping labels generic, and fix Fix Addresses so Boston/USA geocoding resolves correctly.',
+        summary: 'Enable CSV upload, hide Google Drive until approval, make mapping labels generic, fix Boston/USA geocoding, make zipPolygon the coverage-first validation layer, and support stop type at import time.',
         date: '2026-06-23',
         url: 'https://github.com/Deliver-Different-Testing/bulkimport/blob/master/KEVIN-USA-BULK-UPLOADER-BRIEF-2026-06-23.md',
+      },
+      {
+        key: 'legacy-runbuilder-delivery-window-build',
+        title: 'Legacy RunBuilder delivery-window build mode',
+        summary: 'Add a build parameter in the existing date popup so ops can choose Max Boxes or Delivery Window, and build runs using the schedule day Start/End window instead of only MaxJobsPerRun.',
+        date: '2026-06-23',
+        url: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/KEVIN-RUNBUILDER-BUILD-WINDOW-SPEC-2026-06-23.md',
       },
     ],
   },
