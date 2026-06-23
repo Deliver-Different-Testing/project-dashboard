@@ -15,6 +15,11 @@ interface Project {
   extraLinks?: { label: string; emoji: string; url: string }[]
 }
 
+const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
+const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
+const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
+const BUILD_ID = '2026-06-23-2219'
+
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
   { name: 'PDF Overlay Tool', emoji: '📄', slug: 'pdf-overlay-tool', status: 'Active', owner: 'jacob', description: 'Standalone PDF template stamping R&D — renderer library, microservice, and admin field-mapper UI', repo: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool', docs: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/plan.md' },
@@ -33,7 +38,7 @@ const projects: Project[] = [
   { name: 'Stryker Rate Analysis', emoji: '🏥', slug: 'stryker-rate-analysis', status: 'Complete', owner: 'strategy', description: 'Mt Wellington → East Tamaki move impact — zone pricing, drive times, delivery volumes, AM medical analysis', live: 'https://deliver-different-testing.github.io/stryker-analysis/', repo: 'https://github.com/Deliver-Different-Testing/stryker-analysis' },
   { name: 'ECA Dallas Promo', emoji: '🌐', slug: 'eca-dallas-promo', status: 'Active', owner: 'strategy', description: '"35 Years of Intelligence" — promo site with VC Trap article, Auto-Mate intro', live: 'https://deliver-different-testing.github.io/eca-dallas-promo/', repo: 'https://github.com/Deliver-Different-Testing/eca-dallas-promo' },
   { name: '1on1', emoji: '👥', slug: '1on1', status: 'Active', owner: 'strategy', description: '1-on-1 meeting & check-in tool', live: 'https://deliver-different-testing.github.io/1on1/', repo: 'https://github.com/Deliver-Different-Testing/1on1' },
-  { name: 'RouteBuilder (RunBuilder v2)', emoji: '🛣️', slug: 'routebuilder', status: 'Active', owner: 'kevin', description: 'Stage 1 focus: get existing Runbuilder capability working in the new React UI first; defer broader RouteBuilder modules until parity is operational.', live: 'https://deliver-different-testing.github.io/runbuilder/#/routes', repo: 'https://github.com/Deliver-Different-Testing/routebuilder', docs: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md', extraLinks: [{ label: 'Background doc', emoji: '📚', url: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/RUNBUILDER-REBUILD-TO-ROUTEBUILDER-CONSOLIDATED-2026-06-20.md' }, { label: 'New UI', emoji: '🖥️', url: 'https://deliver-different-testing.github.io/runbuilder/#/routes' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
+  { name: 'Routed Operations (Route Builder v1)', emoji: '🛣️', slug: 'routed-operations', status: 'Active', owner: 'kevin', description: 'Umbrella Routed Operations product with Route Builder shipping first — stage 1 is parity for the legacy RunBuilder job→run→route→live workflow before broader modules.', live: 'https://deliver-different-testing.github.io/runbuilder/#/routes', repo: 'https://github.com/Deliver-Different-Testing/routed-operations', docs: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'), extraLinks: [{ label: 'Stage 1 plan', emoji: '📚', url: ROUTED_OPS_DOC('ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md') }, { label: 'Legacy fixes spec', emoji: '🧯', url: ROUTED_OPS_DOC('KEVIN-LEGACY-RUNBUILDER-FIXES-SPEC-2026-06-23.md') }, { label: 'New UI', emoji: '🖥️', url: 'https://deliver-different-testing.github.io/runbuilder/#/routes' }, { label: 'Mockup', emoji: '🎨', url: 'https://deliver-different-testing.github.io/runbuilder/' }] },
 ]
 
 type SyncMode = 'shared' | 'local'
@@ -69,10 +74,6 @@ interface Dev {
   forwardWorkUrl: string
   forwardWorkItems: ForwardWorkItem[]
 }
-
-const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
-const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
-const BUILD_ID = '2026-06-22-0315'
 
 const devs: Dev[] = [
   {
@@ -180,9 +181,23 @@ const devs: Dev[] = [
     name: 'Kevin',
     emoji: '🚚',
     focus: 'despatchweb (recurring bookings) + runviewer + RouteBuilder',
-    currentWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
-    forwardWorkUrl: 'https://github.com/Deliver-Different-Testing/routebuilder/blob/main/docs/ROUTEBUILDER-STAGE1-RUNBUILDER-PARITY-BUILD-PLAN-2026-06-20.md',
+    currentWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
+    forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
+      {
+        key: 'legacy-runbuilder-fixes-spec',
+        title: 'Legacy RunBuilder / RouteViewer fixes spec',
+        summary: 'Initial screenshot-driven fix pack: verify today-default date behaviour, trace run-status origin, and fix BUILDING/LIVE drift against actual dispatch/job state in the legacy interface.',
+        date: '2026-06-23',
+        url: ROUTED_OPS_DOC('KEVIN-LEGACY-RUNBUILDER-FIXES-SPEC-2026-06-23.md'),
+      },
+      {
+        key: 'routed-operations-handover',
+        title: 'Routed Operations handover',
+        summary: 'Rename RouteBuilder into the broader Routed Operations stream while keeping Route Builder as release 1 and preserving legacy RunBuilder as the reference workflow.',
+        date: '2026-06-23',
+        url: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
+      },
       {
         key: 'first-up-runviewer-recurring-fixes',
         title: 'First-up RunViewer + recurring fixes',
