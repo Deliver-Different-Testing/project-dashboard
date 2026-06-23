@@ -214,7 +214,7 @@ const devs: Dev[] = [
       {
         key: 'legacy-runbuilder-delivery-window-build',
         title: 'Legacy RunBuilder delivery-window build mode',
-        summary: 'Add a build parameter in the existing date popup so ops can choose Max Boxes or Delivery Window, and build runs using the schedule day Start/End window instead of only MaxJobsPerRun.',
+        summary: 'Add a build parameter in the existing date popup so ops can choose Max Boxes or Delivery Window, expose minutes-per-stop there as an editable build setting, and use the schedule day Start/End window instead of only MaxJobsPerRun.',
         date: '2026-06-23',
         url: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/KEVIN-RUNBUILDER-BUILD-WINDOW-SPEC-2026-06-23.md',
       },
