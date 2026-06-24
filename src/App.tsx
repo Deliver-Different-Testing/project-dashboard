@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-23-2219'
+const BUILD_ID = '2026-06-24-0448'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -84,6 +84,13 @@ const devs: Dev[] = [
     currentWorkUrl: CONFIG_DOC('STEVE-COMPLIANCE-BUNDLE-2026-06-13.md'),
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
+      {
+        key: 'linehaul-scanning-handover',
+        title: 'Linehaul scanning — finalised handover',
+        summary: 'Tote-first scan workflow for linehaul: verify current Additional Item propagation, add tblLinehaulTote + tblLinehaulToteItem, reuse tblBulkScan/ScanType for depot+tote audit, make first valid item bind tote to active LinehaulRunId, then let one tote scan fan out Picked Up across child linehaul jobs.',
+        date: '2026-06-24',
+        url: CONFIG_DOC('STEVE-LINEHAUL-SCANNING-HANDOVER-GARRY-2026-06-24.md'),
+      },
       {
         key: 'linehaul-flight-mode-minimal',
         title: 'Linehaul flight mode — minimal setup brief',
