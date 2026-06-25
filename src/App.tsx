@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-25-2315'
+const BUILD_ID = '2026-06-26-0010'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -84,6 +84,13 @@ const devs: Dev[] = [
     currentWorkUrl: CONFIG_DOC('STEVE-COMPLIANCE-BUNDLE-2026-06-13.md'),
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
+      {
+        key: 'linehaul-run-modal-master-job-selector',
+        title: 'Linehaul Run modal — master-job selector',
+        summary: 'Add a recurring master linehaul job lookup to Edit Linehaul Run, shortlist recurring active parent tucJobBooking rows by matching from/to depots, stamp the selected booking row with LinehaulRunId, and use that link as the missing bridge into Garry\'s tote scanning flow and runviewer visibility.',
+        date: '2026-06-25',
+        url: CONFIG_DOC('STEVE-LINEHAUL-RUN-MODAL-MASTER-JOB-GARRY-2026-06-25.md'),
+      },
       {
         key: 'linehaul-scanning-handover',
         title: 'Linehaul scanning — finalised handover',
