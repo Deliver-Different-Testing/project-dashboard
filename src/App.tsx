@@ -194,7 +194,7 @@ const devs: Dev[] = [
       {
         key: 'runviewer-offsets-admin-linehaul-handover',
         title: 'RunViewer offsets + Admin Manager + linehaul tweak',
-        summary: 'Persist resolved pickup/delivery early-late offsets across tucJobBooking, tblBulkJob, tucJob, and tucJobArchive; add Admin Manager service/speed editing for the offset mins; and remove duplicated delivery-location rendering in the linehaul dash while keeping the abbreviated right-hand destination detail.',
+        summary: 'Persist resolved pickup/delivery early-late offsets across tucJobBooking, tblBulkJob, tucJob, and tucJobArchive; add Admin Manager service/speed editing for the offset mins; preserve the user-selected recurring booking ready time into tucJobBooking/tucJob instead of reverting to schedule start time; and remove duplicated delivery-location rendering in the linehaul dash while keeping the abbreviated right-hand destination detail.',
         date: '2026-06-25',
         url: ROUTED_OPS_DOC('HANDOVER-KEVIN-RUNVIEWER-OFFSETS-ADMIN-LINEHAUL-2026-06-25.md'),
       },
