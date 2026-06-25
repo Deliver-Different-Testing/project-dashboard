@@ -261,9 +261,23 @@ const devs: Dev[] = [
     name: 'Kerran',
     emoji: '🧾',
     focus: 'Accounts — AR, BCTI, settlements, revenue tracking, payment method, contractor flows',
-    currentWorkUrl: ACCOUNTS_DOC('KERRAN-OUTSTANDING-WORK-2026-06-13.md'),
+    currentWorkUrl: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
+      {
+        key: 'ar-atb-ui-mock-to-real',
+        title: 'Aged Trial Balance UI mock → real build',
+        summary: 'The mocked /clients/ar Accounts Receivable screen is not done. Wire the ATB page from mock data to real QBO/Xero API, keep the filters/side panel, and make the mocked AR UI fully operational.',
+        date: '2026-06-18',
+        url: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
+      },
+      {
+        key: 'ar-pack',
+        title: 'AR / Accounts Receivable feature pack',
+        summary: 'Broader AR delivery behind the mocked ATB UI: snapshot/refresh/send flow, AR settings, tblAccountsSettings, template persistence, cadence engine, and reminder log tables.',
+        date: '2026-06-18',
+        url: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
+      },
       {
         key: 'payment-terms-xero-qbo',
         title: 'Payment Terms ↔ Xero / QBO integration',
@@ -277,13 +291,6 @@ const devs: Dev[] = [
         summary: 'Replace the list page with a JobType × Service matrix slide-over edit and link Services to GL accounts.',
         date: '2026-06-12',
         url: ACCOUNTS_DOC('KERRAN-REVENUE-TRACKING-RATIONALISATION-2026-06-12.md'),
-      },
-      {
-        key: 'ar-pack',
-        title: 'AR / Accounts Receivable feature pack',
-        summary: 'Wire /clients/ar from mock to real QBO/Xero API, land AR snapshot/refresh/send flow, and finish tblAccountsSettings/template/cadence/log tables.',
-        date: '2026-06-18',
-        url: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
       },
       {
         key: 'recurring-deductions',
