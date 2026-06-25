@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-25-0222'
+const BUILD_ID = '2026-06-25-2315'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -261,9 +261,16 @@ const devs: Dev[] = [
     name: 'Kerran',
     emoji: '🧾',
     focus: 'Accounts — AR, BCTI, settlements, revenue tracking, payment method, contractor flows',
-    currentWorkUrl: ACCOUNTS_DOC('KERRAN-AR-HANDOVER-IMPLEMENTATION-2026-06-18.md'),
+    currentWorkUrl: ACCOUNTS_DOC('KERRAN-ATB-NATIVE-ENDPOINT-FIX-2026-06-25.md'),
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
+      {
+        key: 'atb-native-term-cohort-handover',
+        title: 'ATB native endpoint + term-cohort handover',
+        summary: 'Replace the mixed All Terms ATB idea with a required term cohort selector, render one cohort per table with dynamic bucket columns, use native Xero/QBO aged-receivables reports for the financial truth, persist a DFRNT snapshot for reminder operations, and always send the DFRNT invoice PDF rather than provider reminder copies.',
+        date: '2026-06-25',
+        url: ACCOUNTS_DOC('KERRAN-ATB-NATIVE-ENDPOINT-FIX-2026-06-25.md'),
+      },
       {
         key: 'ar-atb-ui-mock-to-real',
         title: 'Aged Trial Balance UI mock → real build',
