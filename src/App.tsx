@@ -433,6 +433,7 @@ const devs: Dev[] = [
         title: 'Baggage pax portal changes',
         summary: 'Implement the baggage passenger-flow fixes against the real GitLab app: airline-code-driven branding, prefill the on-hold job delivery address from tucJob, and align Authority to Leave with booking app behaviour while posting ATL id cleanly back to DeliverToLeaveId.',
         date: '2026-06-26',
+        url: 'https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/JACOB-BAGGAGE-PAX-PORTAL-CHANGES-2026-06-26.md',
       },
       {
         key: 'dfrnt-csp',
