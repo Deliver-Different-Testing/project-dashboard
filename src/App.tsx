@@ -199,6 +199,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'print-manager-fixes',
+        title: 'Print Manager fixes',
+        summary: 'Make Print Manager job detail match the RunViewer/Linehaul detail, make item edits use the same pricing and extra-items-table logic as DespatchWeb, and fix the filter dropdown selectors so they do not cover each other and collapse cleanly.',
+        date: '2026-06-26',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-PRINT-MANAGER-FIXES-2026-06-26.md',
+      },
+      {
         key: 'runviewer-offsets-admin-linehaul-handover',
         title: 'RunViewer offsets + Admin Manager + linehaul tweak',
         summary: 'Persist resolved pickup/delivery early-late offsets across tucJobBooking, tblBulkJob, tucJob, and tucJobArchive; add Admin Manager service/speed editing for the offset mins; preserve the user-selected recurring booking ready time into tucJobBooking/tucJob instead of reverting to schedule start time; and remove duplicated delivery-location rendering in the linehaul dash while keeping the abbreviated right-hand destination detail.',
