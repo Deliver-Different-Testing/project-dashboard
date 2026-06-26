@@ -429,6 +429,12 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'baggage-pax-portal-changes',
+        title: 'Baggage pax portal changes',
+        summary: 'Implement the baggage passenger-flow fixes against the real GitLab app: airline-code-driven branding, prefill the on-hold job delivery address from tucJob, and align Authority to Leave with booking app behaviour while posting ATL id cleanly back to DeliverToLeaveId.',
+        date: '2026-06-26',
+      },
+      {
         key: 'dfrnt-csp',
         title: 'DFRNT CSP app build',
         summary: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant. Repo: Deliver-Different-Testing/DFRNT-CRM. Spec: DFRNT-CRM/IMPLEMENTATION.md.',
