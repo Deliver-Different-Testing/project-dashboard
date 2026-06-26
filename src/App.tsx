@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-26-0011'
+const BUILD_ID = '2026-06-26-0012'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -438,7 +438,7 @@ const devs: Dev[] = [
       {
         key: 'client-difot-reporting',
         title: 'Client DIFOT reporting',
-        summary: 'Build DIFOT inside a configurator shell under Client Reporting, do the heavy EF Core surfacing from tucJobArchive, use Zimmer-style parent + earliest DEL child timing, and shape the dataset so the same contract can drive screen preview, PDF, XLSX, and later Google Sheet export. Also follow the scaffold rule: sync the shell to the live configurator menu/route structure before starting.',
+        summary: 'Use the configurator scaffold first: sync the shell to the live configurator menu/route structure, then build DIFOT under Client Reporting. Do the heavy EF Core surfacing from tucJobArchive, use Zimmer-style parent + earliest DEL child timing, and shape the dataset so the same contract can drive screen preview, PDF, XLSX, and later Google Sheet export.',
         date: '2026-06-26',
         url: CONFIG_DOC('HANDOVER-CLIENT-DIFOT-REPORTING-2026-06-26.md'),
       },
