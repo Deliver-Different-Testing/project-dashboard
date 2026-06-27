@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-26-0012'
+const BUILD_ID = '2026-06-27-0013'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -198,6 +198,13 @@ const devs: Dev[] = [
     currentWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
+      {
+        key: 'runviewer-outstanding-fixes-consolidated',
+        title: 'RunViewer / Print Manager outstanding fixes',
+        summary: 'Single Kevin fix pack consolidating the open RunViewer + Print Manager issues, including tucJob-first print/status behaviour and the recurring schedule-time override bug across Booking App → tucJobBooking → live tucJob.',
+        date: '2026-06-27',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-RUNVIEWER-OUTSTANDING-FIXES-2026-06-27.md',
+      },
       {
         key: 'print-manager-fixes',
         title: 'Print Manager fixes',
