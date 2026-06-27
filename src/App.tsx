@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-27-0013'
+const BUILD_ID = '2026-06-27-0014'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -201,7 +201,7 @@ const devs: Dev[] = [
       {
         key: 'runviewer-outstanding-fixes-consolidated',
         title: 'RunViewer / Print Manager outstanding fixes',
-        summary: 'Single Kevin fix pack consolidating the open RunViewer + Print Manager issues, including tucJob-first print/status behaviour and the recurring schedule-time override bug across Booking App → tucJobBooking → live tucJob.',
+        summary: 'Single Kevin fix pack consolidating the open RunViewer + Print Manager issues, including tucJob-first print/status behaviour plus the recurring Booking App bugs where schedule time overrides the entered booking time and recurring creation fails to reliably seed booking items before tucJobItems copy-through.',
         date: '2026-06-27',
         url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-RUNVIEWER-OUTSTANDING-FIXES-2026-06-27.md',
       },
