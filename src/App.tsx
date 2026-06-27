@@ -213,6 +213,13 @@ const devs: Dev[] = [
         url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/master/docs/STEVE-KEVIN-RUNVIEWER-OUTSTANDING-FIXES-2026-06-27.md',
       },
       {
+        key: 'time-persistence-addendum',
+        title: 'Time persistence addendum',
+        summary: 'Tight addendum to fix #5: keep Kevin’s WebAPI PickupReadyDateTime fix, stop recurring parent jobs from reverting to schedule datetime, advance the initial live-insert window to the next valid day, and explicitly do not change ad hoc routed will-call time semantics.',
+        date: '2026-06-27',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer/blob/main/docs/STEVE-KEVIN-TIME-PERSISTENCE-ADDENDUM-2026-06-27.md',
+      },
+      {
         key: 'print-manager-fixes',
         title: 'Print Manager fixes',
         summary: 'Make Print Manager job detail match the RunViewer/Linehaul detail, make item edits use the same pricing and extra-items-table logic as DespatchWeb, and fix the filter dropdown selectors so they do not cover each other and collapse cleanly.',
