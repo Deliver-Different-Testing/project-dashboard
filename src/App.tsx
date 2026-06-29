@@ -206,6 +206,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'linehaul-run-id-recurring-linehaul-fix',
+        title: 'LinehaulRunID persistence on recurring linehaul legs',
+        summary: 'Persist the selected linehaul run against the recurring master booking row rather than the first live job number, and carry LinehaulRunID through recurring linehaul creation into tucJob for the initial live legs and tucJobBooking for recurring linehaul leg records.',
+        date: '2026-06-29',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer-fixes/blob/main/HANDOVER-KEVIN-LINEHAULRUNID-RECURRING-LINEHAUL-2026-06-29.md',
+      },
+      {
         key: 'runviewer-outstanding-fixes-consolidated',
         title: 'RunViewer / Print Manager outstanding fixes',
         summary: 'Single Kevin fix pack consolidating the open RunViewer + Print Manager issues, including tucJob-first print/status behaviour plus the recurring Booking App bugs where schedule time overrides the entered booking time and recurring creation fails to reliably seed booking items before tucJobItems copy-through.',
