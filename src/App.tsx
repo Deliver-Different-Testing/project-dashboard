@@ -464,9 +464,16 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'pdf-intake-job-creation-spec',
+        title: 'PDF intake → job creation spec + implementation map',
+        summary: 'The original product/spec markdown is now updated to reflect what is already coded versus what remains: pure-.NET extraction, SQL-backed submission queue, saved source PDF, field-level review UI, and the remaining OCR/template/richer-review work.',
+        date: '2026-06-29',
+        url: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/PDF_INTAKE_JOB_CREATION.md',
+      },
+      {
         key: 'pdf-intake-backend-handover',
         title: 'PDF intake backend — SQL-backed review queue',
-        summary: 'First real backend slice is now in the PDF Overlay Tool: managed .NET PDF extraction, tblPdfIntakeSubmission persistence, real /v1/intake submission/review/rates/book endpoints, and a React page wired to the live API contract. Next step is compile verification on a machine with dotnet plus richer field-level review UX.',
+        summary: 'First real backend slice is now in the PDF Overlay Tool: managed .NET PDF extraction, tblPdfIntakeSubmission persistence, real /v1/intake submission/review/rates/book/source endpoints, and a React page wired to the live API contract with field-level review controls. Next step is compile verification on a machine with dotnet plus richer multi-package/review UX.',
         date: '2026-06-29',
         url: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/HANDOVER-JACOB-PDF-INTAKE-BACKEND-2026-06-29.md',
       },
