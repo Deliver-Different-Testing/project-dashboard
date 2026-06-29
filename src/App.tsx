@@ -85,6 +85,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'master-job-persistence-anchor-check',
+        title: 'Master-job persistence anchor — quick check for today',
+        summary: 'Clean answer for today: spec intent says the durable master-job anchor is the recurring tucJobBooking row, not the first live recurring job number; implementation is not yet proven complete until the LinehaulRunID persistence work is actually verified end-to-end.',
+        date: '2026-06-30',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer-fixes/blob/main/ADDENDUM-KEVIN-GARRY-MASTER-JOB-PERSISTENCE-ANCHOR-2026-06-30.md',
+      },
+      {
         key: 'linehaul-scanning-clarifications',
         title: 'Linehaul scanning — clarification pack for Claude Code',
         summary: 'Answers the additional-item reconciliation questions and locks the target behaviour: unexpected items must become real backend items, propagate into downstream leg expected counts, reconcile tote completion against all expected pieces, and allow multiple totes per master leg.',
@@ -205,6 +212,13 @@ const devs: Dev[] = [
     currentWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
+      {
+        key: 'master-job-persistence-anchor-check',
+        title: 'Master-job persistence anchor — quick check for today',
+        summary: 'Clean answer for today: spec intent says the durable master-job anchor is the recurring tucJobBooking row, not the first live recurring job number; implementation is not yet proven complete until the LinehaulRunID persistence work is actually verified end-to-end.',
+        date: '2026-06-30',
+        url: 'https://github.com/Deliver-Different-Testing/runviewer-fixes/blob/main/ADDENDUM-KEVIN-GARRY-MASTER-JOB-PERSISTENCE-ANCHOR-2026-06-30.md',
+      },
       {
         key: 'linehaul-run-id-recurring-linehaul-fix',
         title: 'LinehaulRunID persistence on recurring linehaul legs',
