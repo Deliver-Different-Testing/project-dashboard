@@ -464,6 +464,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'pdf-intake-backend-handover',
+        title: 'PDF intake backend — SQL-backed review queue',
+        summary: 'First real backend slice is now in the PDF Overlay Tool: managed .NET PDF extraction, tblPdfIntakeSubmission persistence, real /v1/intake submission/review/rates/book endpoints, and a React page wired to the live API contract. Next step is compile verification on a machine with dotnet plus richer field-level review UX.',
+        date: '2026-06-29',
+        url: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/HANDOVER-JACOB-PDF-INTAKE-BACKEND-2026-06-29.md',
+      },
+      {
         key: 'client-difot-reporting',
         title: 'Client DIFOT reporting',
         summary: 'Use the configurator scaffold first: sync the shell to the live configurator menu/route structure, then build DIFOT under Client Reporting. Do the heavy EF Core surfacing from tucJobArchive, use Zimmer-style parent + earliest DEL child timing, and shape the dataset so the same contract can drive screen preview, PDF, XLSX, and later Google Sheet export.',
