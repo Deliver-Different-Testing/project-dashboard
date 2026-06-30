@@ -478,6 +478,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'recurring-scheduled-booking-check',
+        title: 'Recurring scheduled booking — zero-day + linehaul timing check',
+        summary: 'Trace the scheduled recurring booking SP chain and lock the behaviour for Initial days = 0, a new template-only/no-live-jobs mode, and the multi-linehaul bug where LH1 can drift 24 hours after pickup.',
+        date: '2026-06-30',
+        url: CONFIG_DOC('JACOB-RECURRING-SCHEDULED-BOOKING-CHECK-2026-06-30.md'),
+      },
+      {
         key: 'flight-functionality-behaviour-check',
         title: 'Flight functionality behaviour check',
         summary: 'Validate whether the existing domestic/nationwide flight path already gives us everything needed once a linehaul master job is booked as a flight job, with explicit focus on charter-flight handling, required job fields, and any hidden assumptions that would break the thin Road/Flight approach.',
