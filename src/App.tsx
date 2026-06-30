@@ -478,6 +478,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'flight-functionality-behaviour-check',
+        title: 'Flight functionality behaviour check',
+        summary: 'Validate whether the existing domestic/nationwide flight path already gives us everything needed once a linehaul master job is booked as a flight job, with explicit focus on charter-flight handling, required job fields, and any hidden assumptions that would break the thin Road/Flight approach.',
+        date: '2026-06-30',
+        url: CONFIG_DOC('JACOB-FLIGHT-FUNCTIONALITY-BEHAVIOUR-CHECK-2026-06-30.md'),
+      },
+      {
         key: 'pdf-intake-job-creation-spec',
         title: 'PDF intake → job creation spec + implementation map',
         summary: 'The original product/spec markdown is now updated to reflect what is already coded versus what remains: pure-.NET extraction, SQL-backed submission queue, saved source PDF, field-level review UI, and the remaining OCR/template/richer-review work.',
