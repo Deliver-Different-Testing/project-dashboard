@@ -18,7 +18,7 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-06-27-0015'
+const BUILD_ID = '2026-07-02-2028'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -84,6 +84,13 @@ const devs: Dev[] = [
     currentWorkUrl: CONFIG_DOC('STEVE-COMPLIANCE-BUNDLE-2026-06-13.md'),
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
+      {
+        key: 'linehaul-driver-workflow-simplification',
+        title: 'Linehaul driver workflow simplification',
+        summary: 'Keep the existing LH master-job linkage, make the linked master inherit/receive the linehaul run courier assignment, hide child LH jobs from the LH driver handset, and route the master into Tote Linehaul Pickup while preserving child-job tracking and chain of custody.',
+        date: '2026-07-02',
+        url: CONFIG_DOC('STEVE-LINEHAUL-DRIVER-WORKFLOW-SIMPLIFICATION-GARRY-2026-07-02.md'),
+      },
       {
         key: 'master-job-persistence-anchor-check',
         title: 'Master-job persistence anchor — quick check for today',
