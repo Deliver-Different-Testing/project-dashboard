@@ -18,7 +18,8 @@ interface Project {
 const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/dfrntdrive_configurator/blob/master/docs/${f}`
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
-const BUILD_ID = '2026-07-02-2028'
+const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/scheduled-rate-builder/blob/main/docs/${f}`
+const BUILD_ID = '2026-07-02-2336'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -327,6 +328,13 @@ const devs: Dev[] = [
     currentWorkUrl: ACCOUNTS_DOC('KERRAN-ATB-NATIVE-ENDPOINT-FIX-2026-06-25.md'),
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
+      {
+        key: 'client-modal-and-rates-migration',
+        title: 'Client modal + rates migration',
+        summary: 'Self-contained Kerran handover for the new client modal plus rates migration: final IA is Business → Clients / Customers and Business → Pricing & Rating as siblings, the client modal opens from Clients / Customers, and any schedule-linked behaviour must follow Dane’s schedules source of truth while the vendored schedules prototype is wired to real data.',
+        date: '2026-07-02',
+        url: SCHEDULED_RATE_DOC('STEVE-KERRAN-CLIENT-MODAL-AND-RATES-MIGRATION-2026-07-02.md'),
+      },
       {
         key: 'np-modal-redesign',
         title: 'NP Modal redesign',
