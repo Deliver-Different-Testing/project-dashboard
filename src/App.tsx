@@ -331,7 +331,7 @@ const devs: Dev[] = [
       {
         key: 'client-modal-and-rates-migration',
         title: 'Client modal + rates migration',
-        summary: 'Self-contained Kerran handover for the new client modal plus rates migration: final IA is Business → Clients / Customers and Business → Pricing & Rating as siblings, the client modal opens from Clients / Customers, and any schedule-linked behaviour must follow Dane’s schedules source of truth while the vendored schedules prototype is wired to real data.',
+        summary: 'Self-contained Kerran handover for the new client modal plus rates migration: final IA is Business → Clients / Customers and Business → Pricing & Rating as siblings, the client modal opens from Clients / Customers, schedule-linked behaviour must follow Dane’s schedules source of truth, and the real build should start in Kerran’s own Configurator repo copy rather than treating scheduled-rate-builder as the final landing place.',
         date: '2026-07-02',
         url: SCHEDULED_RATE_DOC('STEVE-KERRAN-CLIENT-MODAL-AND-RATES-MIGRATION-2026-07-02.md'),
       },
