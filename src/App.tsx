@@ -127,13 +127,6 @@ const devs: Dev[] = [
         url: CONFIG_DOC('STEVE-LINEHAUL-FLIGHT-MODE-MINIMAL-GARRY-2026-06-22.md'),
       },
       {
-        key: 'np-modal',
-        title: 'NP Modal redesign',
-        summary: 'Sticky directory header on /agents, popup NP modal mirroring courier shell (areas-covered map, tabs), narrow Edit Agent to promotion only.',
-        date: '2026-06-19',
-        url: CONFIG_DOC('STEVE-NP-MODAL-GARRY-2026-06-19.md'),
-      },
-      {
         key: 'quiz-module',
         title: 'Quiz module — pull commit d21ce47',
         summary: 'Greenfield module shipped on GitHub. Pull to GitLab, apply migration 007, deploy + smoke test per §7.',
@@ -334,6 +327,13 @@ const devs: Dev[] = [
     currentWorkUrl: ACCOUNTS_DOC('KERRAN-ATB-NATIVE-ENDPOINT-FIX-2026-06-25.md'),
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
+      {
+        key: 'np-modal-redesign',
+        title: 'NP Modal redesign',
+        summary: 'Reassign this from Garry to Kerran: deliver the /agents sticky directory header and popup NP modal mirroring the courier shell (areas-covered map, tabs), with Edit Agent narrowed to promotion only. Kerran owns this because he built the original Agent views and Agent Rates in Admin Manager.',
+        date: '2026-07-02',
+        url: CONFIG_DOC('STEVE-NP-MODAL-GARRY-2026-06-19.md'),
+      },
       {
         key: 'atb-native-term-cohort-handover',
         title: 'ATB native endpoint + term-cohort handover',
