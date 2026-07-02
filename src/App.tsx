@@ -213,6 +213,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'routed-speed-autobook-dual-zip-nz-addendum',
+        title: 'Routed-speed AutoBook — NZ + dual ZIP addendum',
+        summary: 'Extend the routed-speed autobook work to NZ tenants, resolve routes from pickup or delivery ZIP, and support split ownership where parent/LHP/linehaul inherit the pickup route while LHD inherits the delivery route when both sides map to different recurring routes.',
+        date: '2026-07-02',
+        url: CONFIG_DOC('KEVIN-ROUTED-SPEED-AUTOBOOK-DUAL-ZIP-NZ-ADDENDUM-2026-07-02.md'),
+      },
+      {
         key: 'master-job-persistence-anchor-check',
         title: 'Master-job persistence anchor — quick check for today',
         summary: 'Clean answer for today: spec intent says the durable master-job anchor is the recurring tucJobBooking row, not the first live recurring job number; implementation is not yet proven complete until the LinehaulRunID persistence work is actually verified end-to-end.',
