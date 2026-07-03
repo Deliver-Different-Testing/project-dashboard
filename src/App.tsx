@@ -86,6 +86,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'configurator-menu-structure-realignment',
+        title: 'Configurator menu structure realignment',
+        summary: 'Before any new configurator feature work, realign the local shell/scaffold to the live configurator sidebar and routing shape so Garry is building against the current menu structure rather than stale chrome.',
+        date: '2026-07-03',
+        url: CONFIG_DOC('CONFIGURATOR-SCAFFOLD-FUNCTION-2026-06-26.md'),
+      },
+      {
         key: 'linehaul-driver-workflow-simplification',
         title: 'Linehaul driver workflow simplification',
         summary: 'Keep the existing LH master-job linkage, make the linked master inherit/receive the linehaul run courier assignment, hide child LH jobs from the LH driver handset, and route the master into Tote Linehaul Pickup while preserving child-job tracking and chain of custody.',
