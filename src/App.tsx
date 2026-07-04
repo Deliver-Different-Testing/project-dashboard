@@ -336,6 +336,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
     forwardWorkItems: [
       {
+        key: 'rating-rewrite-project-bundle',
+        title: 'Rating rewrite project bundle',
+        summary: 'Single Kerran reference pack for the rating rebuild work completed on 4 Jul: System → Rating IA, screen-by-screen spec, working HTML model, screenshot, and the key decision split between current Rates and Scheduled / Routed rating.',
+        date: '2026-07-04',
+        url: CONFIG_DOC('KERRAN-RATING-REWRITE-PROJECT-2026-07-04.md'),
+      },
+      {
         key: 'client-modal-and-rates-migration',
         title: 'Client modal + rates migration',
         summary: 'Self-contained Kerran handover for the new client modal plus rates migration: final IA is Business → Clients / Customers and Business → Pricing & Rating as siblings; the modal now uses a persistent customer header, top tabs (Overview / Profile / Commercial / Operations / Services / Activity), an Overview dashboard focused on 12-month sales trend, lifetime value and service mix, and a retained right-hand context sidebar for Rates, Schedules and Zones. Real build starts in Kerran’s own Configurator repo copy, with schedule-linked behaviour following Dane’s schedules source of truth.',
