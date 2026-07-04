@@ -340,7 +340,7 @@ const devs: Dev[] = [
         title: 'Rating rewrite project bundle',
         summary: 'Single Kerran reference pack for the rating rebuild work completed on 4 Jul: System → Rating IA, screen-by-screen spec, working HTML model, screenshot, and the key decision split between current Rates and Scheduled / Routed rating.',
         date: '2026-07-04',
-        url: CONFIG_DOC('KERRAN-RATING-REWRITE-PROJECT-2026-07-04.md'),
+        url: 'https://deliver-different-testing.github.io/App-Configurator-v2-design/',
       },
       {
         key: 'client-modal-and-rates-migration',
