@@ -345,9 +345,9 @@ const devs: Dev[] = [
       },
       {
         key: 'client-modal-and-rates-migration',
-        title: 'Client modal + rates migration',
-        summary: 'Self-contained Kerran handover for the new client modal plus rates migration: final IA is Business → Clients / Customers and Business → Pricing & Rating as siblings; the modal now uses a persistent customer header, top tabs (Overview / Profile / Commercial / Operations / Services / Activity), an Overview dashboard focused on 12-month sales trend, lifetime value and service mix, and a retained right-hand context sidebar for Rates, Schedules and Zones. Real build starts in Kerran’s own Configurator repo copy, with schedule-linked behaviour following Dane’s schedules source of truth.',
-        date: '2026-07-02',
+        title: 'Client modal → pricing & rating migration',
+        summary: 'Single phased Kerran project: Phase 1 is the new client modal first (persistent header, top tabs, overview dashboard, right-hand context sidebar, real data wiring), Phase 2 is the pricing & rating migration into Business → Pricing & Rating with the newer tab structure and RH drawers, then Phase 3 keeps Schedule-linked as a handoff into Dane’s schedules source of truth.',
+        date: '2026-07-05',
         url: SCHEDULED_RATE_DOC('STEVE-KERRAN-CLIENT-MODAL-AND-RATES-MIGRATION-2026-07-02.md'),
       },
       {
