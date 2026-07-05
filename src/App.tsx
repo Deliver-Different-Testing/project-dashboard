@@ -345,8 +345,8 @@ const devs: Dev[] = [
       },
       {
         key: 'client-modal-and-rates-migration',
-        title: 'Client modal → pricing & rating migration',
-        summary: 'Single phased Kerran project: Phase 1 is the new client modal first (persistent header, top tabs, overview dashboard, right-hand context sidebar, real data wiring), Phase 2 is the pricing & rating migration into Business → Pricing & Rating with the newer tab structure and RH drawers, then Phase 3 keeps Schedule-linked as a handoff into Dane’s schedules source of truth.',
+        title: 'Client modal → schedules → pricing migration',
+        summary: 'Single phased Kerran project: Phase 1 is the new client modal first (persistent header, top tabs, overview dashboard, right-hand context sidebar, real data wiring), Phase 2 cleans up schedules / schedule-linked work against Dane’s source of truth because that legacy UI is the ugliest current surface, then Phase 3 lands pricing & rating into Business → Pricing & Rating with the newer tab structure and RH drawers.',
         date: '2026-07-05',
         url: SCHEDULED_RATE_DOC('STEVE-KERRAN-CLIENT-MODAL-AND-RATES-MIGRATION-2026-07-02.md'),
       },
