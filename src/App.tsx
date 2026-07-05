@@ -19,7 +19,8 @@ const CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/
 const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Accounts/blob/master/docs/${f}`
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
 const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/scheduled-rate-builder/blob/main/docs/${f}`
-const BUILD_ID = '2026-07-02-2336'
+const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
+const BUILD_ID = '2026-07-05-1704'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -332,9 +333,9 @@ const devs: Dev[] = [
     key: 'kerran',
     name: 'Kerran',
     emoji: '🧾',
-    focus: 'Accounts — AR, BCTI, settlements, revenue tracking, payment method, contractor flows',
-    currentWorkUrl: ACCOUNTS_DOC('KERRAN-ATB-NATIVE-ENDPOINT-FIX-2026-06-25.md'),
-    forwardWorkUrl: ACCOUNTS_DOC('FORWARD-KERRAN.md'),
+    focus: 'Kerran Configurator — client modal, schedules, pricing migration, and NP modal redesign',
+    currentWorkUrl: KERRAN_CONFIG_DOC('KERRAN-START-HERE-2026-07-05.md'),
+    forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
         key: 'rating-rewrite-project-bundle',
@@ -346,16 +347,16 @@ const devs: Dev[] = [
       {
         key: 'client-modal-and-rates-migration',
         title: 'Client modal → schedules → pricing migration',
-        summary: 'Single phased Kerran project: Phase 1 is the new client modal first (persistent header, top tabs, overview dashboard, right-hand context sidebar, real data wiring), Phase 2 cleans up schedules / schedule-linked work against Dane’s source of truth because that legacy UI is the ugliest current surface, then Phase 3 lands pricing & rating into Business → Pricing & Rating with the newer tab structure and RH drawers.',
+        summary: 'Single phased Kerran project: customer modal first, schedules / schedule-linked second, pricing & rating third. Latest review direction now includes the customer Contacts tab, removes the permanent RHS Related areas panel, and links the handover to the live customer/schedules/pricing previews.',
         date: '2026-07-05',
         url: SCHEDULED_RATE_DOC('STEVE-KERRAN-CLIENT-MODAL-AND-RATES-MIGRATION-2026-07-02.md'),
       },
       {
         key: 'np-modal-redesign',
         title: 'NP Modal redesign',
-        summary: 'Reassign this from Garry to Kerran: deliver the /agents sticky directory header and popup NP modal mirroring the courier shell (areas-covered map, tabs), with Edit Agent narrowed to promotion only. Kerran owns this because he built the original Agent views and Agent Rates in Admin Manager.',
-        date: '2026-07-02',
-        url: CONFIG_DOC('STEVE-NP-MODAL-GARRY-2026-06-19.md'),
+        summary: 'Kerran-owned NP modal redesign now lives in Kerran Configurator: customer-modal-based shell, fixed tab set, KPI-first overview, no permanent RHS Related areas panel, and widened hero detail cards. Handover now links to the live Kerran NP preview.',
+        date: '2026-07-05',
+        url: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
       },
       {
         key: 'atb-native-term-cohort-handover',
