@@ -20,7 +20,7 @@ const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testin
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
 const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/scheduled-rate-builder/blob/main/docs/${f}`
 const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
-const BUILD_ID = '2026-07-07-0800'
+const BUILD_ID = '2026-07-08-0545'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -222,6 +222,13 @@ const devs: Dev[] = [
     currentWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
+      {
+        key: 'legacy-runbuilder-build-window-amendment',
+        title: 'Legacy RunBuilder build-window amendment',
+        summary: 'Amend the 23 Jun build-window spec so Delivery Window mode groups by delivery-window start time rather than ScheduleID, allows same-start schedules to build together, warns ops when multiple schedules are present, and uses the earliest finish time / shortest window as the optimisation cap when grouped schedules end at different times.',
+        date: '2026-07-08',
+        url: 'https://github.com/Deliver-Different-Testing/runbuilder/blob/master/docs/KEVIN-RUNBUILDER-BUILD-WINDOW-AMENDMENT-2026-07-08.md',
+      },
       {
         key: 'routed-speed-autobook-dual-zip-nz-addendum',
         title: 'Routed-speed AutoBook — NZ + dual ZIP addendum',
