@@ -352,6 +352,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'driver-earnings-fuel-visibility-fix',
+        title: 'Driver earnings fuel visibility fix',
+        summary: 'Trace why Driver Fuel appears in the Driver Earnings Audit overview but is not clearly visible in the pricing breakdown drill-down, confirm whether the mismatch is from TblJobs.CourierFuel vs pricing rows/fallback items, and make the drill-down display consistent and explicit.',
+        date: '2026-07-27',
+        url: ACCOUNTS_DOC('KERRAN-DRIVER-EARNINGS-FUEL-VISIBILITY-FIX-2026-07-27.md'),
+      },
+      {
         key: 'rating-rewrite-project-bundle',
         title: 'Rating rewrite project bundle',
         summary: 'Single Kerran reference pack for the rating rebuild work completed on 4 Jul: System → Rating IA, screen-by-screen spec, working HTML model, screenshot, and the key decision split between current Rates and Scheduled / Routed rating.',
