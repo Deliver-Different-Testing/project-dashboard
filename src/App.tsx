@@ -88,6 +88,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'wait-time-defect',
+        title: 'Wait time defect — recorded but never charged',
+        summary: 'Investigate and fix the wait-time defect where recorded wait minutes are not flowing into rerating properly, delivery wait is ignored, and wait-time fuel is keyed off the wrong flag. Garry should use the defect repo as the handover reference for the despatchweb-side mapping and related fix path.',
+        date: '2026-07-27',
+        url: 'https://github.com/Deliver-Different-Testing/dfrnt-wait-time-defect',
+      },
+      {
         key: 'configurator-menu-structure-realignment',
         title: 'Configurator menu structure realignment',
         summary: 'Before any new configurator feature work, realign the local shell/scaffold to the live configurator sidebar and routing shape so Garry is building against the current menu structure rather than stale chrome.',
