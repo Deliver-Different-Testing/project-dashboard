@@ -223,6 +223,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'recurring-manual-fuel-bypass',
+        title: 'Recurring manual-fuel bypass + Rated Manually UI',
+        summary: 'Update both recurring insert SP paths to read tucJobBooking.RatedManually, skip client/courier fuel recompute for manually rated recurring jobs, and expose the Rated Manually checkbox in the Despatch Web recurring job detail UI.',
+        date: '2026-07-27',
+        url: 'https://github.com/Deliver-Different-Testing/recurring-fuel-template-defect/blob/main/docs/KEVIN-RECURRING-MANUAL-FUEL-BYPASS-2026-07-27.md',
+      },
+      {
         key: 'legacy-runbuilder-build-window-amendment',
         title: 'Legacy RunBuilder build-window amendment',
         summary: 'Amend the 23 Jun build-window spec so Delivery Window mode groups by delivery-window start time rather than ScheduleID, allows same-start schedules to build together, warns ops when multiple schedules are present, and uses the earliest finish time / shortest window as the optimisation cap when grouped schedules end at different times.',
