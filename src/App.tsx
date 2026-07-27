@@ -88,6 +88,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'configurator-scheduling-driver-real-vs-dummy',
+        title: 'Configurator scheduling driver — replace dummy shell with real scheduler',
+        summary: 'The live configurator /scheduling page is currently a prototype with hard-coded schedules, clients, rates, and simulator UI, not the embedded Courier Manager scheduler. Garry should use the legacy Courier Manager scheduler stack as the behaviour reference, then port or rebuild real schedule/time-slot/response wiring inside the configurator backend and frontend.',
+        date: '2026-07-27',
+        url: CONFIG_DOC('STEVE-SCHEDULING-DRIVER-GARRY-2026-07-27.md'),
+      },
+      {
         key: 'wait-time-defect',
         title: 'Wait time defect — recorded but never charged',
         summary: 'Investigate and fix the wait-time defect where recorded wait minutes are not flowing into rerating properly, delivery wait is ignored, and wait-time fuel is keyed off the wrong flag. Garry should use the defect repo as the handover reference for the despatchweb-side mapping and related fix path.',
