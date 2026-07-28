@@ -366,6 +366,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'openforce-master-sub-consolidated-settlements',
+        title: 'Openforce master/sub + consolidated settlements fix',
+        summary: 'Implement the OTG contractor-settlement corrections in the GitLab Accounts repo: keep sub-contractor earnings on the actual sub for Accounts/Openforce, wire the tenant-wide Consolidate Contractor Settlements setting into the QBO/Xero push path, and add Openforce batch-status visibility to the contractor-invoice batch detail UI.',
+        date: '2026-07-28',
+        url: ACCOUNTS_DOC('KERRAN-OPENFORCE-MASTER-SUB-AND-CONSOLIDATED-SETTLEMENTS-2026-07-28.md'),
+      },
+      {
         key: 'driver-earnings-fuel-visibility-fix',
         title: 'Driver earnings fuel visibility fix',
         summary: 'Trace why Driver Fuel appears in the Driver Earnings Audit overview but is not clearly visible in the pricing breakdown drill-down, confirm whether the mismatch is from TblJobs.CourierFuel vs pricing rows/fallback items, and make the drill-down display consistent and explicit.',
