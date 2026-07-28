@@ -89,9 +89,9 @@ const devs: Dev[] = [
     forwardWorkItems: [
       {
         key: 'configurator-scheduling-driver-real-vs-dummy',
-        title: 'Configurator scheduling driver — replace dummy shell with real scheduler',
-        summary: 'The live configurator /scheduling page is currently a prototype with hard-coded schedules, clients, rates, and simulator UI, not the embedded Courier Manager scheduler. Garry should use the legacy Courier Manager scheduler stack as the behaviour reference, then port or rebuild real schedule/time-slot/response wiring inside the configurator backend and frontend.',
-        date: '2026-07-27',
+        title: 'Configurator scheduler — reuse rules, rewrite legacy edges for USA',
+        summary: 'The rewritten handover now makes the call explicitly: reuse the real Courier Manager scheduling rules and entity shape, but rewrite the Angular frontend, NZ-specific notifications/phone handling, trigger-dependent behaviour, and brittle region/vehicle assumptions before wiring configurator /scheduling to real backend APIs and USA-safe tenant data.',
+        date: '2026-07-28',
         url: CONFIG_DOC('STEVE-SCHEDULING-DRIVER-GARRY-2026-07-27.md'),
       },
       {
