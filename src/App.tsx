@@ -237,6 +237,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'zip-polygon-seed-to-custom-coverage',
+        title: 'ZIP polygon seed shape → custom coverage polygon flow',
+        summary: 'Load ZIP/postcode geometry as a read-only starting shape in Polygon Builder, let ops edit it as coverage, then save the edited result into tblBulkRunPolygon/tblBulkRunPolygonPoint rather than mutating the source ZIP polygon data.',
+        date: '2026-07-29',
+        url: ROUTED_OPS_DOC('KEVIN-ZIP-POLYGON-TO-CUSTOM-COVERAGE-FLOW-2026-07-29.md'),
+      },
+      {
         key: 'recurring-manual-fuel-bypass',
         title: 'Recurring manual-fuel bypass + Rated Manually UI',
         summary: 'Update both recurring insert SP paths to read tucJobBooking.RatedManually, skip client/courier fuel recompute for manually rated recurring jobs, and expose the Rated Manually checkbox in the Despatch Web recurring job detail UI.',
