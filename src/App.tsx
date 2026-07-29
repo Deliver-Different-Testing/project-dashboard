@@ -373,6 +373,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'invoice-report-layout-changes',
+        title: 'Invoice report layout changes',
+        summary: 'New Invoice Builder report tidy-up for Kerran: keep each job row together across page breaks, split client address into separate builder fields for proper formatting, and reduce the white space between the header and the top of the job detail.',
+        date: '2026-07-29',
+        url: ACCOUNTS_DOC('KERRAN-INVOICE-REPORT-LAYOUT-CHANGES-2026-07-29.md'),
+      },
+      {
         key: 'openforce-master-sub-consolidated-settlements',
         title: 'Openforce master/sub + consolidated settlements fix',
         summary: 'Implement the OTG contractor-settlement corrections in the GitLab Accounts repo: keep sub-contractor earnings on the actual sub for Accounts/Openforce, wire the tenant-wide Consolidate Contractor Settlements setting into the QBO/Xero push path, and add Openforce batch-status visibility to the contractor-invoice batch detail UI.',
