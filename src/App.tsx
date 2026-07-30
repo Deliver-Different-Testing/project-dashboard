@@ -373,6 +373,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'completed-settlement-batch-earnings-statements',
+        title: 'Completed settlement batch earnings statement actions',
+        summary: 'Add completed-batch settlement actions in Accounts to download all contractor earnings statements, email all statements, and send a single contractor statement from the batch detail view, reusing the same earnings statement report/output already published to the courier portal settlements lane.',
+        date: '2026-07-30',
+        url: ACCOUNTS_DOC('KERRAN-COMPLETED-SETTLEMENT-BATCH-EARNINGS-STATEMENTS-2026-07-30.md'),
+      },
+      {
         key: 'invoice-statement-term-source-alignment',
         title: 'Invoice statement term source alignment',
         summary: 'Make the Invoice Builder statement aging block use the same term-resolution precedence as AR reminders: prefer accounting-native Xero/QBO term data first, then local Accounts payment term, then tenant default, so printed statement buckets cannot drift from the real external term.',
