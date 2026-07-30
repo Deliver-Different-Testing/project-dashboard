@@ -373,6 +373,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'invoice-statement-term-source-alignment',
+        title: 'Invoice statement term source alignment',
+        summary: 'Make the Invoice Builder statement aging block use the same term-resolution precedence as AR reminders: prefer accounting-native Xero/QBO term data first, then local Accounts payment term, then tenant default, so printed statement buckets cannot drift from the real external term.',
+        date: '2026-07-30',
+        url: ACCOUNTS_DOC('KERRAN-INVOICE-STATEMENT-TERM-SOURCE-ALIGNMENT-2026-07-30.md'),
+      },
+      {
         key: 'cancel-invoice-without-reissue',
         title: 'Cancel invoice without reissue option',
         summary: 'Add a second cancel path in Accounts so ops can cancel a wrongly timed invoice and release its jobs back to normal future invoice runs, while preserving the current cancel-to-reissue limbo workflow for correction scenarios.',
