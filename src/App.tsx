@@ -373,6 +373,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'cancel-invoice-without-reissue',
+        title: 'Cancel invoice without reissue option',
+        summary: 'Add a second cancel path in Accounts so ops can cancel a wrongly timed invoice and release its jobs back to normal future invoice runs, while preserving the current cancel-to-reissue limbo workflow for correction scenarios.',
+        date: '2026-07-30',
+        url: ACCOUNTS_DOC('KERRAN-CANCEL-INVOICE-WITHOUT-REISSUE-2026-07-30.md'),
+      },
+      {
         key: 'invoice-report-layout-changes',
         title: 'Invoice report layout changes',
         summary: 'New Invoice Builder report tidy-up for Kerran: keep each job row together across page breaks, split client address into separate builder fields for proper formatting, and reduce the white space between the header and the top of the job detail.',
