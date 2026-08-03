@@ -607,6 +607,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'feature-matrix-role-permission-enforcement',
+        title: 'Feature Matrix + Role Permission enforcement model',
+        summary: 'Jacob handover on how Configurator should enforce Feature Matrix, Role Permission, and feature-flag updates across Garry, Kevin, Kerran, and Jacob via a repo governance doc, mandatory impact blocks, and an OpenClaw release checker.',
+        date: '2026-08-03',
+        url: CONFIG_DOC('JACOB-FEATURE-MATRIX-ROLE-PERMISSION-ENFORCEMENT-2026-08-03.md'),
+      },
+      {
         key: 'recurring-scheduled-booking-check',
         title: 'Recurring scheduled booking — zero-day + linehaul timing check',
         summary: 'Trace the scheduled recurring booking SP chain and lock the behaviour for Initial days = 0, a new template-only/no-live-jobs mode, and the multi-linehaul bug where LH1 can drift 24 hours after pickup.',
