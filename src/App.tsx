@@ -382,7 +382,7 @@ const devs: Dev[] = [
       {
         key: 'invoice-process-review-resume',
         title: 'Invoice process review + resume flow',
-        summary: 'Make Invoice Processing resumable, keep customer-side pricing editable until final send, add Driver Earnings Audit-style invoice job drill-down in Generate Invoices, and keep the top process context panels sticky while scrolling.',
+        summary: 'Make Invoice Processing resumable, keep customer-side pricing editable until final send, add Driver Earnings Audit-style invoice job drill-down in Generate Invoices, force QBO/Xero re-sync after pricing edits, and keep the top process context panels sticky while scrolling.',
         date: '2026-08-03',
         url: ACCOUNTS_DOC('KERRAN-INVOICE-PROCESS-REVIEW-AND-RESUME-2026-08-03.md'),
       },
