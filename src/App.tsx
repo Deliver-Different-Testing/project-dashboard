@@ -237,6 +237,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'recurring-route-multi-schedule-live-routed-autodispatch',
+        title: 'Recurring route multi-schedule + live routed-speed auto-dispatch',
+        summary: 'Extend recurring routes so they work for both tucJobBooking materialised jobs and straight-to-live routed-speed jobs, keep route matching in-house, use PartiallyIncludedZips to pre-filter custom shapes before point-in-polygon checks, write RouteId onto live tucJob for RunViewer visibility, and ship Kevin with unit/integration/SP regression coverage for Medical Couriers scenarios.',
+        date: '2026-08-03',
+        url: CONFIG_DOC('STEVE-ROUTE-SCHEDULE-MULTI-BINDING-AND-WINDOW-AUTO-DISPATCH-2026-08-03.md'),
+      },
+      {
         key: 'zip-polygon-seed-to-custom-coverage',
         title: 'ZIP polygon seed shape → custom coverage polygon flow',
         summary: 'Load ZIP/postcode geometry as a read-only starting shape in Polygon Builder, let ops edit it as coverage, then save the edited result into tblBulkRunPolygon/tblBulkRunPolygonPoint rather than mutating the source ZIP polygon data.',
