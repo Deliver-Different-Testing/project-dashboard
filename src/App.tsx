@@ -380,6 +380,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'otg-fuel-logic-configurator-admin-manager',
+        title: 'OTG fuel logic + Configurator/Admin Manager controls',
+        summary: 'Implement OTG fuel changes so driver fuel can run off driver base or client base, add client-specific DriverFuelPercentage with fallback to VehicleSize.FuelPercentage, keep no-client-fuel = no-driver-fuel gating, extend the Admin Manager fuel editing window, and expose client/service override visibility in Kerran Configurator Available Services.',
+        date: '2026-08-04',
+        url: 'https://github.com/Deliver-Different-Testing/fuel-mfv-analysis/blob/master/IMPLEMENTATION.md',
+      },
+      {
         key: 'invoice-process-review-resume',
         title: 'Invoice process review + resume flow',
         summary: 'Make Invoice Processing resumable, keep customer-side pricing editable until final send, add Driver Earnings Audit-style invoice job drill-down in Generate Invoices, force QBO/Xero re-sync after pricing edits, and keep the top process context panels sticky while scrolling.',
