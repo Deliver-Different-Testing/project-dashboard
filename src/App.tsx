@@ -380,6 +380,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'client-revenue-report-accounts',
+        title: 'Client revenue report under Accounts Revenue Report',
+        summary: 'Extend the existing Accounts /revenue-report route with a client revenue audit: preset/custom date filters, client search, totals row, one row per client with base sales/fuel/driver cost/GP trend, expandable Driver Earnings Audit-style job detail, reuse of the existing Price Breakdown popup, and CSV download.',
+        date: '2026-08-05',
+        url: ACCOUNTS_DOC('KERRAN-CLIENT-REVENUE-REPORT-2026-08-05.md'),
+      },
+      {
         key: 'otg-fuel-logic-configurator-admin-manager',
         title: 'OTG fuel logic + Configurator/Admin Manager controls',
         summary: 'Implement OTG fuel changes so driver fuel can run off driver base or client base, add client-specific DriverFuelPercentage with fallback to VehicleSize.FuelPercentage, keep no-client-fuel = no-driver-fuel gating, extend the Admin Manager fuel editing window, and expose client/service override visibility in Kerran Configurator Available Services.',
