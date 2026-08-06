@@ -387,6 +387,13 @@ const devs: Dev[] = [
         url: ACCOUNTS_DOC('KERRAN-CLIENT-REVENUE-REPORT-2026-08-05.md'),
       },
       {
+        key: 'fsc-indexing-supplement',
+        title: 'FSC indexing supplement',
+        summary: 'Future-proof FSC for indexed auto-updates by adding indexing metadata, internal fuel index source/value tables, and support for weekly, fortnightly, or monthly refresh cycles that generate dated FSC rows ahead of runtime.',
+        date: '2026-08-06',
+        url: 'https://github.com/Deliver-Different-Testing/fuel-mfv-analysis/blob/master/FSC_INDEXING_SUPPLEMENT_2026-08-06.md',
+      },
+      {
         key: 'otg-fuel-logic-configurator-admin-manager',
         title: 'OTG fuel logic + Configurator/Admin Manager controls',
         summary: 'Implement OTG fuel changes so driver fuel can run off driver base or client base, add client-specific DriverFuelPercentage with fallback to VehicleSize.FuelPercentage, keep no-client-fuel = no-driver-fuel gating, extend the Admin Manager fuel editing window, and expose client/service override visibility in Kerran Configurator Available Services.',
