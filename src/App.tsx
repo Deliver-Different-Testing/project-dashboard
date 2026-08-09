@@ -20,6 +20,7 @@ const ACCOUNTS_DOC = (f: string) => `https://github.com/Deliver-Different-Testin
 const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/routed-operations/blob/main/docs/${f}`
 const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/scheduled-rate-builder/blob/main/docs/${f}`
 const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
+const DASHBOARD_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/project-dashboard/blob/master/docs/${f}`
 const BUILD_ID = '2026-07-08-0545'
 
 const projects: Project[] = [
@@ -627,6 +628,13 @@ const devs: Dev[] = [
     currentWorkUrl: CONFIG_DOC('CURRENT-JACOB.md'),
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
+      {
+        key: 'despatchweb-split-job-behaviour-fixes',
+        title: 'DespatchWeb split job behaviour fixes',
+        summary: 'Tighten split-job behaviour so pre-dispatch splits do not stamp leg A as dispatched, post-dispatch splits preserve the original dispatch/pickup timestamps on the pickup leg, leg B only gets dispatch metadata when assigned during split, and already-dispatched splits force the stale parent off the original courier handset.',
+        date: '2026-08-09',
+        url: DASHBOARD_DOC('JACOB-DESPATCHWEB-SPLIT-JOB-BEHAVIOUR-2026-08-09.md'),
+      },
       {
         key: 'feature-matrix-role-permission-enforcement',
         title: 'Feature Matrix + Role Permission enforcement model',
