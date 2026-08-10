@@ -98,7 +98,7 @@ const devs: Dev[] = [
       {
         key: 'wait-event-arrival-timestamps',
         title: 'Wait events should stamp pickup/delivery arrival timestamps',
-        summary: 'Extend Garry’s Aug 6 waiting-event work so the same Job Not Ready event path (types 60/87/88/89/90/91) also persists tenant-corrected arrival timestamps into tucJob.PickupArrivalTime and tucJob.DeliveryArrivalTime, preserving the earliest proven arrival per leg without disturbing charging behaviour.',
+        summary: 'Extend Garry’s Aug 6 waiting-event work so Job Not Ready events (types 60/87/88/89/90/91) stamp tenant-corrected pickup/delivery arrival fields, and make dispatcher-entered arrival times in DespatchWeb act as the fallback source for waiting-time charge/invoice output when the driver missed the event.',
         date: '2026-08-10',
         url: DASHBOARD_DOC('GARRY-WAIT-EVENT-ARRIVAL-TIMESTAMPS-2026-08-10.md'),
       },

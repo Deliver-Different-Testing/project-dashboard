@@ -2,10 +2,17 @@
 
 ## Ask
 
-Extend last week's waiting-time event work so the same **Job Not Ready / waiting** flow also stamps the real arrival timestamps onto:
+Close the disconnect between:
 
-- `tucJob.PickupArrivalTime`
-- `tucJob.DeliveryArrivalTime`
+- what operations can see/edit in **DespatchWeb**
+- what Garry's waiting-time pipeline is feeding through for **invoice display / charging**
+
+The required behaviour is now **two-path**:
+
+1. last week's **Job Not Ready / waiting event** flow should stamp the real arrival timestamps onto:
+   - `tucJob.PickupArrivalTime`
+   - `tucJob.DeliveryArrivalTime`
+2. if the driver forgets to raise the waiting / arrival event, a dispatcher-entered arrival time in DespatchWeb must still be enough to drive the waiting-time charge / invoice output from the same arrival fields
 
 This is for the same event family already used for pickup/delivery waiting charges:
 
@@ -42,7 +49,12 @@ Right now the waiting path **charges correctly**, but it does **not** also write
 - `PickupArrivalTime`
 - `DeliveryArrivalTime`
 
-Steve wants those two fields populated off the same wait-event evidence instead of remaining dispatcher/back-stamped only.
+Steve wants the arrival fields to become the shared operational source that bridges DespatchWeb and invoicing:
+
+- when there is a valid waiting event, stamp the arrival field from that event
+- when there is no waiting event, dispatcher-entered `PickupArrivalTime` / `DeliveryArrivalTime` must still support the waiting-time outcome
+
+That is the missing connection today: DespatchWeb can show one thing, while the invoicing path Garry built for Kerran is using a different source path.
 
 ## Current proven behaviour
 
@@ -76,10 +88,12 @@ Relevant file:
 
 ### Gap
 
-Neither path currently writes:
+There are two gaps today:
 
-- `tucJob.PickupArrivalTime`
-- `tucJob.DeliveryArrivalTime`
+1. neither path currently writes:
+   - `tucJob.PickupArrivalTime`
+   - `tucJob.DeliveryArrivalTime`
+2. if the driver forgets to create the waiting event, dispatcher-populated arrival fields in DespatchWeb are not acting as the fallback trigger for waiting-time charging / invoice display
 
 ## Required behaviour
 
@@ -111,11 +125,31 @@ So the write rule should be:
 
 In plain English: **preserve the earliest proven arrival for that leg**.
 
-### 4. Scope this to the waiting-event-driven path only
+### 4. Dispatcher-entered arrival fields must also work as the fallback path
 
-Do **not** redesign invoice querying or pricing as part of this task.
+If the driver forgets to start the waiting / arrival event at pickup or delivery, operations can still populate:
 
-This task is only to make the event-handling path also persist the arrival timestamps onto the job row.
+- `PickupArrivalTime`
+- `DeliveryArrivalTime`
+
+in DespatchWeb.
+
+That manual entry must be enough to trigger the same waiting-time outcome for the relevant leg.
+
+In plain English:
+
+- **preferred path:** driver raises Job Not Ready event, which stamps the arrival field and drives the charge
+- **fallback path:** no event exists, dispatcher enters the arrival field in DespatchWeb, and the waiting-time logic / invoice output still uses that field rather than silently showing no wait
+
+### 5. Scope
+
+Do **not** redesign invoice reporting beyond what is required to make DespatchWeb and invoice output agree on the same effective arrival source.
+
+The core requirement is to stop the source-of-truth split between:
+
+- event-driven waiting charge logic
+- dispatcher-visible arrival fields
+- invoice display/output
 
 ## Recommended implementation point
 
@@ -147,6 +181,37 @@ This is the safest place because:
 - the tenant/server clock correction is already there
 - leg classification is already there
 - duplicate charging / duplicate open-event handling is already managed there
+
+But this is only half the change. The other half is to make the manual DespatchWeb arrival-field path feed the same charging/display logic when no event exists.
+
+## Additional implementation requirement — unify the source used by invoicing / charging
+
+Today the attachment for Kerran effectively treats event-derived wait timing as one pipeline and DespatchWeb arrival fields as another. That split is the business problem.
+
+Required direction:
+
+- for each leg, determine an **effective arrival time**
+- prefer the event-derived corrected timestamp when a valid wait event exists
+- otherwise fall back to dispatcher-entered `PickupArrivalTime` / `DeliveryArrivalTime`
+- use that effective arrival consistently wherever waiting charge / invoice waiting timing is derived
+
+### Effective arrival rule
+
+For pickup:
+
+1. if a valid pickup waiting event exists, use the corrected event start
+2. else if `PickupArrivalTime` is populated, use `PickupArrivalTime`
+3. else there is no pickup waiting basis
+
+For delivery:
+
+1. if a valid delivery waiting event exists, use the corrected event start
+2. else if `DeliveryArrivalTime` is populated, use `DeliveryArrivalTime`
+3. else there is no delivery waiting basis
+
+### Why this matters
+
+That gives ops one visible field in DespatchWeb that still matters operationally when the handset flow is missed, and it gives Kerran/invoicing a stable source that agrees with what dispatch sees.
 
 ## Suggested SQL shape
 
@@ -190,11 +255,16 @@ Those fields are not the source timestamp; they are wait-minute fields and histo
 
 Use the event timestamp itself.
 
-### Do not rely on dispatcher-entered arrival values
+### Dispatcher-entered arrival values are now an intentional fallback, not something to ignore
 
-The attached invoice note calls out that the current arrival fields have historically been dispatcher/back-stamped and are not reliable measurement data.
+The attached invoice note correctly says the fields were historically unreliable for measurement.
 
-This task intentionally changes that for **future wait-event-driven jobs** by persisting the driver/event-sourced arrival time into those fields.
+This handover changes that rule going forward:
+
+- event-driven jobs should persist the driver/event-sourced arrival time into those fields
+- manual dispatcher entry should remain valid as the fallback when the driver missed the event
+
+So from this change onward, those fields should be treated as the operational bridge between DespatchWeb and invoice output, not ignored outright.
 
 ## Acceptance criteria
 
@@ -203,8 +273,10 @@ This task intentionally changes that for **future wait-event-driven jobs** by pe
 - Pickup leg wait event (`60/87/88/89/90/91`) results in `tucJob.PickupArrivalTime` being populated from the corrected wait-event start time.
 - Delivery leg wait event (`60/87/88/89/90/91`) results in `tucJob.DeliveryArrivalTime` being populated from the corrected wait-event start time.
 - Repeated waiting events on the same leg do not move the field later; the earliest proven arrival is preserved.
-- Existing waiting charge behaviour remains unchanged.
-- Existing wait notes / charge lines / event closing behaviour remain unchanged.
+- If no valid wait event exists, dispatcher-entered `PickupArrivalTime` still supports the pickup waiting-time outcome.
+- If no valid wait event exists, dispatcher-entered `DeliveryArrivalTime` still supports the delivery waiting-time outcome.
+- DespatchWeb-visible arrival values and invoice waiting-time output no longer disagree for the same job/leg.
+- Existing wait notes / charge lines / event closing behaviour remain unchanged except where necessary to enable the fallback.
 
 ### Regression / proof
 
@@ -216,7 +288,9 @@ At minimum prove on staging that:
 2. a delivery wait episode still charges correctly
 3. `PickupArrivalTime` now equals the corrected pickup waiting-event start
 4. `DeliveryArrivalTime` now equals the corrected delivery waiting-event start
-5. total job amount and pricing breakdown still reconcile exactly
+5. with no wait event present, manually entering `PickupArrivalTime` in DespatchWeb still produces the correct pickup waiting-time outcome
+6. with no wait event present, manually entering `DeliveryArrivalTime` in DespatchWeb still produces the correct delivery waiting-time outcome
+7. total job amount and pricing breakdown still reconcile exactly
 
 ### Historical / archive safety
 
@@ -251,3 +325,5 @@ Please extend the same waiting-event machinery you shipped last week so it also 
 - `DeliveryArrivalTime`
 
 using the **corrected tenant-local event time**, and preserving the **earliest event on each leg** rather than overwriting with later repeats.
+
+Then close the second gap as well: if the driver misses the event, a dispatcher-entered arrival time in DespatchWeb must still drive the waiting-time result so the operational screen and the invoice output are using the same effective arrival basis.
