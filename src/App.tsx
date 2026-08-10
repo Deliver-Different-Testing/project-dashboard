@@ -96,6 +96,13 @@ const devs: Dev[] = [
         url: CONFIG_DOC('STEVE-SCHEDULING-DRIVER-GARRY-2026-07-27.md'),
       },
       {
+        key: 'wait-event-arrival-timestamps',
+        title: 'Wait events should stamp pickup/delivery arrival timestamps',
+        summary: 'Extend Garry’s Aug 6 waiting-event work so the same Job Not Ready event path (types 60/87/88/89/90/91) also persists tenant-corrected arrival timestamps into tucJob.PickupArrivalTime and tucJob.DeliveryArrivalTime, preserving the earliest proven arrival per leg without disturbing charging behaviour.',
+        date: '2026-08-10',
+        url: DASHBOARD_DOC('GARRY-WAIT-EVENT-ARRIVAL-TIMESTAMPS-2026-08-10.md'),
+      },
+      {
         key: 'wait-time-defect',
         title: 'Wait time defect — recorded but never charged',
         summary: 'Investigate and fix the wait-time defect where recorded wait minutes are not flowing into rerating properly, delivery wait is ignored, and wait-time fuel is keyed off the wrong flag. Garry should use the defect repo as the handover reference for the despatchweb-side mapping and related fix path.',
