@@ -98,7 +98,7 @@ const devs: Dev[] = [
       {
         key: 'wait-event-arrival-timestamps',
         title: 'Wait events should stamp pickup/delivery arrival timestamps',
-        summary: 'Extend Garry’s Aug 6 waiting-event work so Job Not Ready events (types 60/87/88/89/90/91) stamp tenant-corrected pickup/delivery arrival fields, and make dispatcher-entered arrival times in DespatchWeb act as the fallback source for waiting-time charge/invoice output when the driver missed the event.',
+        summary: 'Extend Garry’s Aug 6 waiting-event work so Job Not Ready events (types 60/87/88/89/90/91) stamp tenant-corrected pickup/delivery arrival fields, make dispatcher-entered arrival times in DespatchWeb act as the fallback source when the driver missed the event, and ensure Invoice Builder reads those same fields for waiting-time display.',
         date: '2026-08-10',
         url: DASHBOARD_DOC('GARRY-WAIT-EVENT-ARRIVAL-TIMESTAMPS-2026-08-10.md'),
       },
@@ -387,6 +387,13 @@ const devs: Dev[] = [
     currentWorkUrl: KERRAN_CONFIG_DOC('KERRAN-START-HERE-2026-07-05.md'),
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
+      {
+        key: 'invoice-builder-wait-arrival-fields',
+        title: 'Invoice Builder should read pickup/delivery arrival fields for waiting display',
+        summary: 'Make Invoice Builder read tucJob.PickupArrivalTime and tucJob.DeliveryArrivalTime as the wait-start display source so dispatcher-populated arrival fields still show correctly on invoices when the driver missed the waiting event, aligned with Garry’s wait-event stamping/fallback work.',
+        date: '2026-08-10',
+        url: DASHBOARD_DOC('GARRY-WAIT-EVENT-ARRIVAL-TIMESTAMPS-2026-08-10.md'),
+      },
       {
         key: 'client-revenue-report-accounts',
         title: 'Client revenue report under Accounts Revenue Report',

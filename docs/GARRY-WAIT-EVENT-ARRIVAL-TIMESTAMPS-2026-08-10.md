@@ -141,7 +141,26 @@ In plain English:
 - **preferred path:** driver raises Job Not Ready event, which stamps the arrival field and drives the charge
 - **fallback path:** no event exists, dispatcher enters the arrival field in DespatchWeb, and the waiting-time logic / invoice output still uses that field rather than silently showing no wait
 
-### 5. Scope
+### 5. Invoice Builder must explicitly read the arrival fields
+
+Please do **not** leave this as an implied downstream consequence.
+
+The Invoice Builder / Accounts-side waiting-time display must explicitly read from:
+
+- `PickupArrivalTime`
+- `DeliveryArrivalTime`
+
+so manually populated dispatcher values can still display correctly on the invoice when the driver missed the waiting event.
+
+Required rule for invoice/output purposes:
+
+- if event-derived arrival has already been stamped into the field, Invoice Builder reads that field
+- if dispatch manually populated the field because the driver missed the event, Invoice Builder still reads that same field
+- Invoice Builder should not bypass the arrival fields and independently depend only on raw `tucEvent` presence
+
+That keeps the printable invoice aligned with what operations can see and correct in DespatchWeb.
+
+### 6. Scope
 
 Do **not** redesign invoice reporting beyond what is required to make DespatchWeb and invoice output agree on the same effective arrival source.
 
@@ -193,6 +212,8 @@ Required direction:
 - for each leg, determine an **effective arrival time**
 - prefer the event-derived corrected timestamp when a valid wait event exists
 - otherwise fall back to dispatcher-entered `PickupArrivalTime` / `DeliveryArrivalTime`
+- persist that onto the arrival fields
+- have Invoice Builder read those arrival fields for invoice waiting-time display
 - use that effective arrival consistently wherever waiting charge / invoice waiting timing is derived
 
 ### Effective arrival rule
@@ -212,6 +233,24 @@ For delivery:
 ### Why this matters
 
 That gives ops one visible field in DespatchWeb that still matters operationally when the handset flow is missed, and it gives Kerran/invoicing a stable source that agrees with what dispatch sees.
+
+## Accounts / Invoice Builder read-path requirement
+
+This needs an explicit Accounts-side implementation step, not just a DB/proc change.
+
+Wherever the invoice waiting-time section currently derives wait start/end display information, make it read from:
+
+- `PickupArrivalTime` as the pickup wait start / arrival source
+- `DeliveryArrivalTime` as the delivery wait start / arrival source
+- `PickUpTime` as pickup wait end
+- `ucjbComplTime` as delivery wait end
+
+So the builder can display the correct information whether the field was populated by:
+
+1. the event-driven waiting path, or
+2. a dispatcher manually correcting the arrival time in DespatchWeb
+
+If there is existing query/code that reads raw `tucEvent` directly for invoice display, change it so the invoice output prefers the arrival fields instead of bypassing them.
 
 ## Suggested SQL shape
 
@@ -275,6 +314,7 @@ So from this change onward, those fields should be treated as the operational br
 - Repeated waiting events on the same leg do not move the field later; the earliest proven arrival is preserved.
 - If no valid wait event exists, dispatcher-entered `PickupArrivalTime` still supports the pickup waiting-time outcome.
 - If no valid wait event exists, dispatcher-entered `DeliveryArrivalTime` still supports the delivery waiting-time outcome.
+- Invoice Builder reads `PickupArrivalTime` / `DeliveryArrivalTime` as the wait-start display source.
 - DespatchWeb-visible arrival values and invoice waiting-time output no longer disagree for the same job/leg.
 - Existing wait notes / charge lines / event closing behaviour remain unchanged except where necessary to enable the fallback.
 
@@ -290,7 +330,9 @@ At minimum prove on staging that:
 4. `DeliveryArrivalTime` now equals the corrected delivery waiting-event start
 5. with no wait event present, manually entering `PickupArrivalTime` in DespatchWeb still produces the correct pickup waiting-time outcome
 6. with no wait event present, manually entering `DeliveryArrivalTime` in DespatchWeb still produces the correct delivery waiting-time outcome
-7. total job amount and pricing breakdown still reconcile exactly
+7. Invoice Builder displays pickup waiting start from `PickupArrivalTime`
+8. Invoice Builder displays delivery waiting start from `DeliveryArrivalTime`
+9. total job amount and pricing breakdown still reconcile exactly
 
 ### Historical / archive safety
 
@@ -327,3 +369,5 @@ Please extend the same waiting-event machinery you shipped last week so it also 
 using the **corrected tenant-local event time**, and preserving the **earliest event on each leg** rather than overwriting with later repeats.
 
 Then close the second gap as well: if the driver misses the event, a dispatcher-entered arrival time in DespatchWeb must still drive the waiting-time result so the operational screen and the invoice output are using the same effective arrival basis.
+
+And make that explicit in Accounts: Invoice Builder should read `PickupArrivalTime` / `DeliveryArrivalTime` so the manually populated fields can display correctly on the invoice.
