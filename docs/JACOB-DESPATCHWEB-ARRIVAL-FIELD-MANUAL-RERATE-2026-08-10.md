@@ -253,6 +253,15 @@ So this task must explicitly review and fix the NZ waiting input contract so:
 - pickup waiting rerate uses the pickup waited minutes correctly, and
 - delivery waiting rerate uses the delivery waited minutes correctly
 
+**Jacob: check this mapping/input rule with Kerran before finalising the rerate change.** Kerran authored the rerating spec/workstream, so the canonical rerate wait-minute input needs to stay aligned with his design rather than drifting in DespatchWeb only.
+
+Default implementation rule if Kerran has not already defined a different contract:
+
+- live rerate `WaitTime` input should be based on the recorded wait minutes needed by rating
+- for this dispatcher-edit path, that means the rerate input must reflect the derived waited values created by the edit
+- if the rerate path uses one combined wait-minute input, the safe default is:
+  - `ISNULL(WaitedPickUp, 0) + ISNULL(WaitedDelivery, 0)`
+
 Do **not** ship a version that auto-rerates pickup edits but silently ignores delivery edits.
 
 ## Recommended design guardrails
@@ -331,3 +340,5 @@ That means:
 The key business outcome is that ops should no longer have to manually correct both the arrival timestamp **and** the wait charge as two separate actions.
 
 In other words: the dispatcher edit must first materialise the correct `WaitedPickUp` / `WaitedDelivery` minutes from the arrival-to-end timestamps, and only then call the normal rerate path so rating has the inputs it actually needs.
+
+Before Jacob closes this, he should confirm the final rerate wait-minute contract with **Kerran** so the DespatchWeb-side implementation matches the authored rerating spec.
