@@ -643,6 +643,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'despatchweb-arrival-field-manual-rerate',
+        title: 'Manual pickup/delivery arrival edit should rerate waiting time automatically',
+        summary: 'Extend the DespatchWeb dispatcher arrival-field edit path so manual PickupArrivalTime or DeliveryArrivalTime updates derive WaitedPickUp/WaitedDelivery, trigger the normal live NZ rerate flow, and rewrite PricingBreakdown with the waiting-time charge instead of leaving ops to correct both timestamp and charge separately.',
+        date: '2026-08-10',
+        url: DASHBOARD_DOC('JACOB-DESPATCHWEB-ARRIVAL-FIELD-MANUAL-RERATE-2026-08-10.md'),
+      },
+      {
         key: 'despatchweb-split-job-behaviour-fixes',
         title: 'DespatchWeb split job behaviour fixes',
         summary: 'Tighten split-job behaviour so pre-dispatch splits do not stamp leg A as dispatched, post-dispatch splits preserve the original dispatch/pickup timestamps on the pickup leg, leg B only gets dispatch metadata when assigned during split, and already-dispatched splits force the stale parent off the original courier handset.',
