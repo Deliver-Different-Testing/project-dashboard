@@ -92,6 +92,18 @@ Use:
 - wait start = `PickupArrivalTime`
 - wait end = `PickUpTime`
 
+Exact calculation rule:
+
+- `WaitedPickUp = max(0, DATEDIFF(MINUTE, PickupArrivalTime, PickUpTime))`
+
+Equivalent C# rule is fine, but it must be the same outcome as SQL `DATEDIFF(MINUTE, start, end)` on those two timestamps.
+
+Important:
+
+- both fields are already tenant-local wall-clock values in DespatchWeb
+- do **not** apply an additional timezone correction in this manual dispatcher-edit path
+- this task is about measuring the elapsed minutes between two already-corrected operational timestamps
+
 If either value is missing, there is no pickup waiting basis.
 
 ## 2. Delivery arrival manual edit must support delivery waiting rerate
@@ -110,6 +122,18 @@ Use:
 
 - wait start = `DeliveryArrivalTime`
 - wait end = `ucjbComplTime`
+
+Exact calculation rule:
+
+- `WaitedDelivery = max(0, DATEDIFF(MINUTE, DeliveryArrivalTime, ucjbComplTime))`
+
+Equivalent C# rule is fine, but it must be the same outcome as SQL `DATEDIFF(MINUTE, start, end)` on those two timestamps.
+
+Important:
+
+- both fields are already tenant-local wall-clock values in DespatchWeb
+- do **not** apply an additional timezone correction in this manual dispatcher-edit path
+- this task is about measuring the elapsed minutes between two already-corrected operational timestamps
 
 If either value is missing, there is no delivery waiting basis.
 
@@ -164,8 +188,8 @@ Required flow after `UpdateJobAsync(...)` succeeds:
 
 1. detect whether the edited field is `PickupArrivalTime` or `DeliveryArrivalTime`
 2. load the live job row
-3. compute the relevant wait minutes from the edited arrival field and the leg end time
-4. persist the relevant waited-minute field
+3. compute the relevant wait minutes from the edited arrival field and the leg end time using the exact rules below
+4. persist the relevant waited-minute field onto `WaitedPickUp` or `WaitedDelivery`
 5. run the existing NZ rerate path
 
 This should remain inside the same request flow so the dispatcher edit and resulting rerate are one user action.
@@ -186,13 +210,16 @@ Required rule:
 - pickup arrival edit updates `WaitedPickUp`
 - delivery arrival edit updates `WaitedDelivery`
 
-The derived minutes should be:
+Use this exact minute derivation:
 
 ```text
-max(0, floor_or_business-rule-rounded(endTime - arrivalTime))
+WaitedPickUp = max(0, DATEDIFF(MINUTE, PickupArrivalTime, PickUpTime))
+WaitedDelivery = max(0, DATEDIFF(MINUTE, DeliveryArrivalTime, ucjbComplTime))
 ```
 
-Use the same minute-rounding rule the business already expects for waiting-time charging. Do **not** invent a separate rounding rule in the UI/controller layer.
+Implementation can be in C# or SQL-adjacent code, but the result must be equivalent to SQL Server `DATEDIFF(MINUTE, start, end)` using the already-stored tenant-local timestamps.
+
+Do **not** invent a separate timezone conversion or alternate rounding rule in the UI/controller layer.
 
 ## D. Reuse the normal NZ rerate persistence path
 
@@ -302,3 +329,5 @@ That means:
 5. let the normal rerate persistence rewrite `ucjbAmount` and `PricingBreakdown`
 
 The key business outcome is that ops should no longer have to manually correct both the arrival timestamp **and** the wait charge as two separate actions.
+
+In other words: the dispatcher edit must first materialise the correct `WaitedPickUp` / `WaitedDelivery` minutes from the arrival-to-end timestamps, and only then call the normal rerate path so rating has the inputs it actually needs.
