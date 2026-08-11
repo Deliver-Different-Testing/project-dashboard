@@ -1,4 +1,4 @@
-# Shopify → Integrations Hub Upgrade — Jacob Implementation MD
+# Shopify Upgrade + Accelerated Checkout Fix + Integration Manager Migration — Jacob Implementation MD
 
 ## Claude Code Steps
 
@@ -16,7 +16,11 @@ npm run build
 
 ## 1. Goal
 
-Move the legacy Shopify integration into the **latest Integration Manager Integrations Hub** in a way that matches the real current codebase.
+This work needs to be delivered as **three distinct phases**, because there are really three separate problems to solve:
+
+1. **upgrade the current Shopify app/runtime off the old Urgent-specific ASP.NET implementation**
+2. **fix the Apple Pay / Google Pay rate gap as part of that upgrade**
+3. **introduce Shopify into Integration Manager as a generic DFRNT integration rather than an Urgent-only app-store product**
 
 This is **not** just a matter of adding a Shopify card.
 
@@ -30,7 +34,47 @@ The old Shopify implementation spans:
 - theme/widget installation
 - rate/window/package-size CRUD
 
-So the job is to migrate a **full integration product surface** into the new hub, not just a carrier definition.
+So the job is to migrate and modernise a **full integration product surface**, while also fixing current conversion-impacting checkout issues.
+
+---
+
+## 1.1 Phase summary Jacob should work to
+
+### Phase 1 — Shopify app modernisation / platform upgrade
+
+Objective:
+
+- replace the legacy Urgent-specific Shopify app/runtime architecture with a cleaner modern DFRNT-ready implementation
+
+Primary outcome:
+
+- the Shopify app is running on the new supported architecture without losing existing operational capability
+
+### Phase 2 — Apple Pay / Google Pay / accelerated checkout compatibility
+
+Objective:
+
+- fix the current issue where customers using Apple Pay or Google Pay do not see Urgent / DFRNT delivery rates
+
+Primary outcome:
+
+- accelerated checkout is either fully supported with correct rate visibility, or explicitly and safely handled with an agreed fallback/product rule
+
+### Phase 3 — Integration Manager migration + product generalisation
+
+Objective:
+
+- move Shopify into Integration Manager as a **generic tenant-capable DFRNT integration**, instead of leaving it as an Urgent Couriers-branded Shopify app only
+
+Primary outcome:
+
+- Shopify becomes a first-class Integration Manager integration with tenant-aware setup and management
+
+### Important note for scope control
+
+Steve will likely add **further enhancements and modernisation asks** on top of these phases.
+
+Jacob should therefore treat this document as the **base phased upgrade plan**, and add later enhancements under the relevant phase rather than mixing everything into one undifferentiated rebuild.
 
 ---
 
@@ -282,6 +326,112 @@ If you want a smaller first cut, do this minimum viable set:
 ---
 
 ## 8. Concrete Jacob Work Plan
+
+The original version of this document was written mostly from the Integration Manager migration angle.
+
+That is still important, but the work now needs to be explicitly sequenced into the three phases below.
+
+---
+
+## Phase 1 — Shopify app modernisation / platform upgrade
+
+This phase is about upgrading the existing Shopify app and worker off the old Urgent-specific ASP.NET shape without breaking current merchant capability.
+
+### Phase 1 scope
+
+- preserve install/auth behaviour
+- preserve checkout rate callback behaviour
+- preserve settings CRUD
+- preserve rates/windows/package-size CRUD
+- preserve theme/widget behaviour
+- preserve worker jobs
+- review whether the direct callback pattern should remain or be replaced during upgrade
+
+### Phase 1 key legacy references
+
+- `shopifyapp/Shopify.App/Api/Controllers/AuthController.cs`
+- `shopifyapp/Shopify.App/Api/Controllers/RatesController.cs`
+- `shopifyapp/Shopify.App/Api/Controllers/SettingsController.cs`
+- `shopifyapp/Shopify.Core/Application/Services/ShopService.cs`
+- `shopifyapp/Shopify.Core/Application/Services/RateService.cs`
+- `shopifyapp/Shopify.Core/Application/Services/SettingsService.cs`
+- `shopifyapp/Shopify.Core/Application/Services/ThemeService.cs`
+- `shopifyapp/Shopify.Core/Application/Services/OrderService.cs`
+- `shopifyservice/Shopify.Service/Program.cs`
+- `shopifyservice/Shopify.Service/Jobs/OrderJob.cs`
+- `shopifyservice/Shopify.Service/Jobs/AutoFulfullmentJob.cs`
+
+### Phase 1 required decisions
+
+Jacob needs to make and document these decisions explicitly:
+
+1. does the upgraded app still register Shopify carrier callbacks directly to the app, or is callback traffic moved behind a new DFRNT-controlled endpoint?
+2. does the worker remain a separate deployable process? **recommended: yes**
+3. what is the new source of truth for shop integration config currently held on `ShopifyShop` and related tables?
+
+### Phase 1 acceptance criteria
+
+- install / callback / uninstall still work
+- Shopify carrier service registration still works
+- existing merchant settings can still be read and updated
+- rates/windows/package sizes still have a functioning admin path
+- theme/widget functionality still has a valid runtime path
+- polling and auto-fulfilment still have a supported worker host
+
+---
+
+## Phase 2 — Apple Pay / Google Pay / accelerated checkout fix
+
+This phase is specifically about the current lost-conversion defect.
+
+### Current suspected root cause
+
+The current implementation is built around the **standard cart → checkout path**.
+
+Evidence from the current code:
+
+- carrier rates are returned from `POST /api/Rates`
+- the storefront widget is only injected on the cart page in `Shopify.App/Templates/urgent-couriers-app-head.liquid`
+- the injected JS in `Shopify.App/Templates/urgent-couriers-app.js` hooks standard cart/checkout controls and writes cart attributes before checkout
+
+That strongly suggests accelerated checkout methods such as Apple Pay / Google Pay can bypass the normal widget/cart-attribute flow the app depends on.
+
+### Phase 2 scope
+
+- confirm the exact behaviour difference between:
+  - standard checkout
+  - Apple Pay
+  - Google Pay
+  - any other accelerated checkout path in active client themes
+- determine whether Shopify is calling the carrier-service callback in each path
+- determine whether required delivery metadata / cart attributes are missing in accelerated checkout
+- implement a supported fix in the upgraded architecture
+
+### Phase 2 files Jacob should inspect first
+
+- `shopifyapp/Shopify.App/Templates/urgent-couriers-app-head.liquid`
+- `shopifyapp/Shopify.App/Templates/urgent-couriers-app.js`
+- `shopifyapp/Shopify.Core/Application/Services/RateService.cs`
+- `shopifyapp/Shopify.Core/Application/Services/ShopService.cs`
+
+### Phase 2 acceptance criteria
+
+- customers using Apple Pay can see valid Urgent / DFRNT delivery options where Shopify supports them
+- customers using Google Pay can see valid Urgent / DFRNT delivery options where Shopify supports them
+- if Shopify platform constraints make one path impossible, that limitation is documented and a deliberate product fallback is agreed instead of silently failing
+- standard checkout still works after the fix
+
+### Important rule
+
+Do **not** treat this as a nice-to-have after the migration.
+
+This is a release blocker for the upgrade because the current behaviour is costing merchants conversions.
+
+---
+
+## Phase 3 — Integration Manager migration + generic DFRNT productisation
+
+This phase is where Shopify stops being just an Urgent Couriers-branded app-store app and becomes a proper DFRNT integration.
 
 ## Step 1 — Decouple the hub catalog from carrier-only assumptions
 
@@ -565,37 +715,42 @@ Suggested new project:
 
 ---
 
-## 11. Phasing Recommendation
+## 11. Phased delivery summary
 
-## Phase 1 — Hub shell + setup + settings
+## Phase 1 — Shopify app modernisation / platform upgrade
+
+Ship:
+
+- upgraded app/runtime architecture
+- preserved install/auth/webhook capability
+- preserved settings + operational CRUD surface
+- preserved worker capability on a supported runtime
+- explicit decision on direct callback vs DFRNT-controlled endpoint/proxy path
+
+## Phase 2 — Apple Pay / Google Pay compatibility
+
+Ship:
+
+- validated accelerated-checkout behaviour
+- implemented fix for missing Urgent / DFRNT rates in Apple Pay / Google Pay paths
+- regression coverage for normal checkout vs accelerated checkout
+
+## Phase 3 — Integration Manager migration + DFRNT generalisation
 
 Ship:
 
 - Shopify card in Integrations Hub
-- Shopify detail layout
-- install/auth status
-- delivery settings
-- widget settings
+- Shopify-specific detail experience
+- tenant-aware/generic DFRNT integration model
+- migration away from Urgent-only app-store framing
 
-## Phase 2 — operational config
+This is the correct phased path because it separates:
 
-Ship:
+1. **technical upgrade**
+2. **live commercial defect fix**
+3. **product/platform migration**
 
-- rates
-- windows
-- package sizes
-- themes
-
-## Phase 3 — background jobs + cutover
-
-Ship:
-
-- polling worker
-- auto fulfilment worker
-- webhook validation
-- cutover from old Shopify app/service
-
-This phased path is safer than pretending the whole migration is “just UI”.
+Those should not be muddled into one vague rebuild task.
 
 ---
 
@@ -611,12 +766,12 @@ This phased path is safer than pretending the whole migration is “just UI”.
 
 ## 13. Acceptance Criteria
 
-Jacob’s upgrade is done when all of the below are true:
+Jacob’s phased upgrade is done when all of the below are true:
 
-- [ ] Shopify appears in Integrations Hub under **Other**.
-- [ ] Clicking Shopify opens a Shopify-specific detail experience, not the generic coming-soon card and not carrier-account tabs.
-- [ ] Integration definitions are no longer hard-wired to “active carrier type means carrier detail”.
+### Phase 1 complete
+
 - [ ] Shopify install/callback/uninstall flow exists in latest code.
+- [ ] Carrier service callback registration still works correctly.
 - [ ] Shop-level delivery settings can be read and updated in latest code.
 - [ ] Widget delivery and pickup settings can be read and updated in latest code.
 - [ ] Rates/windows/package sizes have a real latest-code management path.
@@ -624,19 +779,41 @@ Jacob’s upgrade is done when all of the below are true:
 - [ ] Polling and auto fulfilment background jobs have a latest-code host.
 - [ ] There is a documented data migration / coexistence plan for `ShopifyShop` and related tables.
 
+### Phase 2 complete
+
+- [ ] Apple Pay checkout path has been tested against the upgraded app.
+- [ ] Google Pay checkout path has been tested against the upgraded app.
+- [ ] Urgent / DFRNT delivery rates are visible in supported accelerated checkout paths.
+- [ ] Any unsupported accelerated checkout limitation is explicitly documented and commercially agreed rather than silently failing.
+
+### Phase 3 complete
+
+- [ ] Shopify appears in Integrations Hub under **Other** (or final agreed category).
+- [ ] Clicking Shopify opens a Shopify-specific detail experience, not the generic coming-soon card and not carrier-account tabs.
+- [ ] Integration definitions are no longer hard-wired to “active carrier type means carrier detail”.
+- [ ] Shopify is modelled as a generic DFRNT integration rather than an Urgent-only product surface.
+
 ---
 
-## 14. My Recommendation On Implementation Order
+## 14. Recommended implementation order
 
 Do this in order:
 
-1. fix the hub definition model
-2. add Shopify definition + custom detail routing
-3. port setup/install/status
-4. port settings
-5. port rates/windows/package sizes
-6. port theme management
-7. port worker jobs
-8. cut over production traffic
+1. complete the Shopify app/runtime upgrade
+2. prove and fix Apple Pay / Google Pay behaviour in that upgraded flow
+3. migrate Shopify into Integration Manager as a generic DFRNT integration
 
-If you skip step 1, the rest gets built on the wrong abstraction.
+More detailed sequence:
+
+1. port setup/install/status/runtime foundations
+2. port settings
+3. port rates/windows/package sizes/themes
+4. port worker jobs
+5. verify normal checkout behaviour
+6. verify Apple Pay / Google Pay behaviour and fix gaps
+7. fix the Integration Manager definition model
+8. add Shopify definition + custom detail routing
+9. migrate Shopify admin/control surfaces into Integration Manager
+10. cut over production traffic
+
+If you skip the accelerated-checkout validation in the middle, you risk shipping a modernised app that still loses conversions.
