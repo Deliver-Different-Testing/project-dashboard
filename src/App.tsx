@@ -700,10 +700,10 @@ const devs: Dev[] = [
       },
       {
         key: 'baggage-pax-portal-changes',
-        title: 'Baggage pax portal changes',
-        summary: 'Implement the baggage passenger-flow fixes against the real GitLab app: airline-code-driven branding, prefill the on-hold job delivery address from tucJob, and align Authority to Leave with booking app behaviour while posting ATL id cleanly back to DeliverToLeaveId.',
-        date: '2026-06-26',
-        url: 'https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/JACOB-BAGGAGE-PAX-PORTAL-CHANGES-2026-06-26.md',
+        title: 'Baggage pax portal delivery-window + file-reference update',
+        summary: 'Update the real GitLab baggage pax portal so it shows File Reference from ucjbClientRefA, renames Delivery time to Delivery window, returns the next 6 available dated windows, and derives each eco-run window from an explicit duration field that Jacob must also surface in the Admin Manager client-record UI.',
+        date: '2026-08-13',
+        url: 'https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/JACOB-BAGGAGE-PAX-PORTAL-DELIVERY-WINDOW-UPDATE-2026-08-13.md',
       },
       {
         key: 'dfrnt-csp',
