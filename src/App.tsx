@@ -89,6 +89,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'automation-engine-trigger-options-parity',
+        title: 'Automation Engine — restore old trigger reference options in new engine',
+        summary: 'Add the missing legacy trigger/schedule reference options from the old Automation Engine into the new engine dropdown: Start Time, Dispatch Time, Flight Departure, Flight Arrival, and Connection Flight Departure, while keeping the current Pickup/Delivery/Flight options unless they are proven duplicates.',
+        date: '2026-08-14',
+        url: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate/blob/main/docs/STEVE-AUTOMATION-ENGINE-TRIGGER-OPTIONS-GARRY-2026-08-14.md',
+      },
+      {
         key: 'configurator-scheduling-driver-real-vs-dummy',
         title: 'Configurator scheduler — reuse rules, rewrite legacy edges for USA',
         summary: 'The rewritten handover now makes the call explicitly: reuse the real Courier Manager scheduling rules and entity shape, but rewrite the Angular frontend, NZ-specific notifications/phone handling, trigger-dependent behaviour, and brittle region/vehicle assumptions before wiring configurator /scheduling to real backend APIs and USA-safe tenant data.',
