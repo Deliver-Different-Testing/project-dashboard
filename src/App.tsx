@@ -395,6 +395,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'invoice-review-defect-pack-progress',
+        title: 'Invoice review defect pack — progress update',
+        summary: 'Kerran has completed the ZIP leading-zero Accounts fix, the booking always-apply accessorial persistence fix, and the un-finalized invoice djob pricing-breakdown editability work. Archived IsAccessorial hiding now looks more like a verification/discussion item with Dane than a clearly live Kerran defect.',
+        date: '2026-08-14',
+        url: ACCOUNTS_DOC('KERRAN-INVOICE-REVIEW-DEFECT-CONSOLIDATION-2026-08-13.md'),
+      },
+      {
         key: 'invoice-builder-wait-arrival-fields',
         title: 'Invoice Builder should read pickup/delivery arrival fields for waiting display',
         summary: 'Make Invoice Builder read tucJob.PickupArrivalTime and tucJob.DeliveryArrivalTime as the wait-start display source so dispatcher-populated arrival fields still show correctly on invoices when the driver missed the waiting event, aligned with Garry’s wait-event stamping/fallback work.',
