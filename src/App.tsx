@@ -89,6 +89,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'configurator-menu-tweak',
+        title: 'Configurator menu tweak — Clients & Customers + Agent/NP tabs',
+        summary: 'Remove the separate Clients / Customers sidebar child, make Clients & Customers the clickable entry, move Agents/NPs up to the clickable parent level, and replace the left-nav children with top tabs for Find/Add New, Onboarding, and Associations.',
+        date: '2026-08-14',
+        url: KERRAN_CONFIG_DOC('STEVE-CONFIGURATOR-MENU-TWEAK-GARRY-2026-08-14.md'),
+      },
+      {
         key: 'automation-engine-trigger-options-parity',
         title: 'Automation Engine — restore old trigger reference options in new engine',
         summary: 'Add the missing legacy trigger/schedule reference options from the old Automation Engine into the new engine dropdown: Start Time, Dispatch Time, Flight Departure, Flight Arrival, and Connection Flight Departure, while keeping the current Pickup/Delivery/Flight options unless they are proven duplicates.',
