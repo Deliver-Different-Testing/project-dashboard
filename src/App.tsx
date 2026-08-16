@@ -89,6 +89,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'usa-agent-address-location-fix',
+        title: 'USA agent address location fix',
+        summary: 'On Agent detail and Agent list, USA tenants are showing Auckland in the agent address display even when the saved address is not in New Zealand. Trace the shared address mapping/formatter, remove the NZ fallback leakage, and make both surfaces render the correct tenant-local address data consistently.',
+        date: '2026-08-15',
+        url: CONFIG_DOC('STEVE-USA-AGENT-ADDRESS-LOCATION-GARRY-2026-08-15.md'),
+      },
+      {
         key: 'configurator-menu-tweak',
         title: 'Configurator menu tweak — Clients & Customers + Agent/NP tabs',
         summary: 'Remove the separate Clients / Customers sidebar child, make Clients & Customers the clickable entry, move Agents/NPs up to the clickable parent level, and replace the left-nav children with top tabs for Find/Add New, Onboarding, and Associations.',
@@ -418,7 +425,7 @@ const devs: Dev[] = [
       {
         key: 'client-revenue-report-accounts',
         title: 'Client revenue report under Accounts Revenue Report',
-        summary: 'Extend the existing Accounts /revenue-report route with a client revenue audit: preset/custom date filters, client search, totals row, one row per client with base sales/fuel/driver cost/GP trend, expandable Driver Earnings Audit-style job detail, reuse of the existing Price Breakdown popup, and CSV download.',
+        summary: 'Extend the existing Accounts /revenue-report route with a client revenue audit: preset/custom date filters, client search, totals row, one row per client with base sales/fuel/driver cost/GP trend, expandable Driver Earnings Audit-style job detail, reuse of the existing Price Breakdown popup, and query directly from TblJobs so Revenue Detail does not depend on invoice-batch completion to show jobs.',
         date: '2026-08-05',
         url: ACCOUNTS_DOC('KERRAN-CLIENT-REVENUE-REPORT-2026-08-05.md'),
       },
