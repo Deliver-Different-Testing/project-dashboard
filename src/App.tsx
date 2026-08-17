@@ -21,6 +21,7 @@ const ROUTED_OPS_DOC = (f: string) => `https://github.com/Deliver-Different-Test
 const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/scheduled-rate-builder/blob/main/docs/${f}`
 const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
 const DASHBOARD_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/project-dashboard/blob/master/docs/${f}`
+const BAGGAGE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/${f}`
 const BUILD_ID = '2026-07-08-0545'
 
 const projects: Project[] = [
@@ -670,6 +671,13 @@ const devs: Dev[] = [
     currentWorkUrl: CONFIG_DOC('CURRENT-JACOB.md'),
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
+      {
+        key: 'baggage-booking-flow-tweaks',
+        title: 'Baggage pax portal booking-flow tweaks',
+        summary: 'Small Jacob follow-up for the baggage app: remove the bottom phone number, make the countdown run from now to the first available run start with a confirm-before-run warning, remove Letter Box and default to Front Door, and switch the address section to a confirm-first / edit-on-demand flow because most bags will go to the saved address.',
+        date: '2026-08-17',
+        url: BAGGAGE_DOC('JACOB-BAGGAGE-PAX-PORTAL-BOOKING-FLOW-TWEAKS-2026-08-17.md'),
+      },
       {
         key: 'despatchweb-arrival-field-manual-rerate',
         title: 'Manual pickup/delivery arrival edit should rerate waiting time automatically',
