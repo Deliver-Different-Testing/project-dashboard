@@ -95,10 +95,11 @@ For a multi-stage movement such as Tauranga pickup with Auckland final delivery:
 1. **Initial booking for final delivery a few days later**
    - Parent remains in bulk/planned state
    - DEL remains in bulk/planned state
-2. **Day when LHP or LH1 becomes relevant**
+2. **Day when linehaul becomes relevant**
    - Parent goes live
+   - LHP / LH1 / LH2 may already exist in live tables, but this is the point where the parent becomes the family truth
 3. **LHP picked up from client on its way to depot**
-   - Parent becomes `In-transit`
+   - Parent becomes `Booked` → `In-transit`
 4. **Arrived in first depot / about to go onto linehaul**
    - Parent remains `In-transit`
 5. **All LH portions complete while DEL is not yet complete**
@@ -110,7 +111,7 @@ For a multi-stage movement such as Tauranga pickup with Auckland final delivery:
    - Parent becomes `Destination Delivery`, then `Completed` / `Done`
    - POD text triggers here
 
-This sequence matters because LHP and LH jobs can legitimately be live and completed before DEL is relevant. That must not be interpreted as the whole family being complete.
+This sequence matters because LHP, LH1, and LH2 can legitimately be live and completed before DEL is relevant. That must not be interpreted as the whole family being complete.
 
 ## Required behaviour
 
@@ -174,8 +175,8 @@ At minimum:
 - done/complete beats new for that leg, but child-leg completion does **not** automatically mean family completion
 - `null` never beats a populated status
 - parent/family state transitions are driven from explicit milestones:
-  - parent goes live when LHP or LH1 becomes relevant
-  - LHP pickup moves parent to `In-transit`
+  - parent goes live when the LHP/LH stage becomes relevant
+  - LHP pickup moves parent from `Booked` to `In-transit`
   - completion of all LH legs without DEL completion moves parent to `Destination Depot`
   - DEL delivery moves parent to `Destination Delivery`, then `Completed` / `Done`
 - parent/child release logic evaluates the resolved state, not raw mixed fields
@@ -364,7 +365,7 @@ Add targeted tests around:
 - void/done/new precedence rules
 - linehaul/LHP resolved-state mapping
 - parent go-live timing when LHP/LH becomes relevant
-- parent progression through `Booked` → `In-transit` → `Destination Depot` → `Destination Delivery` → `Completed` / `Done`
+- parent progression through `Booked` → `In-transit` → `Destination Depot` → `Destination Delivery` → `Completed` / `Done`, matching Vincent's table
 - POD notification gating so upstream completion does not trigger final-mile POD text early
 - family-aware void/repricing rules for LHP/LH/DEL edge cases
 - regression coverage for the earlier `new` vs `void` conflict
