@@ -267,6 +267,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'historic-otg-upload-routed-operations',
+        title: 'Historic OTG upload capability in Routed Operations',
+        summary: 'Build a separate historic-upload flow in Routed Operations for OTG legacy CSVs: preview + validation + audit trail, write confirmed rows into tucJobArchive only, keep the current tblQuoteJob quoting upload untouched, and make sure imported history cannot spill into live dispatch or normal invoice selection.',
+        date: '2026-08-17',
+        url: ROUTED_OPS_DOC('KEVIN-ROUTED-OPERATIONS-HISTORIC-OTG-UPLOAD-2026-08-17.md'),
+      },
+      {
         key: 'recurring-route-multi-schedule-live-routed-autodispatch',
         title: 'Recurring route multi-schedule + live routed-speed auto-dispatch',
         summary: 'Extend recurring routes so they work for both tucJobBooking materialised jobs and straight-to-live routed-speed jobs, keep route matching in-house, use PartiallyIncludedZips to pre-filter custom shapes before point-in-polygon checks, write RouteId onto live tucJob for RunViewer visibility, and ship Kevin with unit/integration/SP regression coverage for Medical Couriers scenarios.',
@@ -409,6 +416,13 @@ const devs: Dev[] = [
     currentWorkUrl: KERRAN_CONFIG_DOC('KERRAN-START-HERE-2026-07-05.md'),
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
+      {
+        key: 'otg-tucjobarchive-historic-db-upload',
+        title: 'OTG historic DB upload into tucJobArchive',
+        summary: 'Run a DB-level OTG history import into tucJobArchive: stage and validate the legacy CSV, map the core reporting/search fields, insert rows as completed historical jobs only, and explicitly stamp them so they cannot drift into downstream operational reuse.',
+        date: '2026-08-17',
+        url: ACCOUNTS_DOC('KERRAN-OTG-TUCJOBARCHIVE-HISTORIC-UPLOAD-2026-08-17.md'),
+      },
       {
         key: 'invoice-review-defect-pack-progress',
         title: 'Invoice review defect pack — progress update',
