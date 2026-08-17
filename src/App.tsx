@@ -445,6 +445,13 @@ const devs: Dev[] = [
         url: 'https://github.com/Deliver-Different-Testing/fuel-mfv-analysis/blob/master/IMPLEMENTATION.md',
       },
       {
+        key: 'accounts-minor-fixes-2026-08-17',
+        title: 'Minor Accounts app fixes',
+        summary: 'Small Kerran Accounts pass: remove the misleading blank batch download action while the export is fixed, confirm the issue is not caused by unsent invoices, swap Client Detail header Account Number from internal ID to account code, and tighten the invoice-history table so ops do not need to scroll sideways as much.',
+        date: '2026-08-17',
+        url: ACCOUNTS_DOC('KERRAN-ACCOUNTS-MINOR-FIXES-2026-08-17.md'),
+      },
+      {
         key: 'invoice-process-review-resume',
         title: 'Invoice process review + resume flow',
         summary: 'Make Invoice Processing resumable, keep customer-side pricing editable until final send, add Driver Earnings Audit-style invoice job drill-down in Generate Invoices, force QBO/Xero re-sync after pricing edits, and keep the top process context panels sticky while scrolling.',
