@@ -700,6 +700,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'baggage-deane-review-tweaks',
+        title: 'Baggage pax portal — Deane review tweaks',
+        summary: 'Small Jacob follow-up from Deane’s email: show Extra delivery information on the main screen and confirmation screens when present, and swap Booking Reference so it shows the Urgent job number consistently across the passenger flow.',
+        date: '2026-08-18',
+        url: BAGGAGE_DOC('JACOB-BAGGAGE-PAX-PORTAL-DEANE-REVIEW-TWEAKS-2026-08-18.md'),
+      },
+      {
         key: 'despatchweb-bulk-status-conflict-fix',
         title: 'DespatchWeb bulk status conflict fix',
         summary: 'Investigate the last-release regression where bulk/parent status shows new while job properties show done, linehaul/LHP surfaces show conflicting complete/null or complete/done state, and dispatch cannot get the parent and DEL out of bulk. Define one canonical resolved status, drive both UI and release logic from it, and stop duplicate status fields drifting out of sync.',
