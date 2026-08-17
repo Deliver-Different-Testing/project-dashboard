@@ -447,7 +447,7 @@ const devs: Dev[] = [
       {
         key: 'accounts-minor-fixes-2026-08-17',
         title: 'Minor Accounts app fixes',
-        summary: 'Small Kerran Accounts pass: remove the misleading blank batch download action while the export is fixed, confirm the issue is not caused by unsent invoices, swap Client Detail header Account Number from internal ID to account code, and tighten the invoice-history table so ops do not need to scroll sideways as much.',
+        summary: 'Small Kerran Accounts pass: remove the misleading blank batch download action while the export is fixed, confirm the issue is not caused by unsent invoices, swap Client Detail header Account Number from internal ID to account code, tighten the invoice-history table, and add a clear Select All action in the contractor settlement batch-selection flow.',
         date: '2026-08-17',
         url: ACCOUNTS_DOC('KERRAN-ACCOUNTS-MINOR-FIXES-2026-08-17.md'),
       },
