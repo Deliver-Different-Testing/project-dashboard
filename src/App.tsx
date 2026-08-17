@@ -672,6 +672,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'despatchweb-bulk-status-conflict-fix',
+        title: 'DespatchWeb bulk status conflict fix',
+        summary: 'Investigate the last-release regression where bulk/parent status shows new while job properties show done, linehaul/LHP surfaces show conflicting complete/null or complete/done state, and dispatch cannot get the parent and DEL out of bulk. Define one canonical resolved status, drive both UI and release logic from it, and stop duplicate status fields drifting out of sync.',
+        date: '2026-08-17',
+        url: DASHBOARD_DOC('JACOB-DESPATCHWEB-BULK-STATUS-CONFLICT-FIX-2026-08-17.md'),
+      },
+      {
         key: 'baggage-booking-flow-tweaks',
         title: 'Baggage pax portal booking-flow tweaks',
         summary: 'Small Jacob follow-up for the baggage app: remove the bottom phone number, make the countdown run from now to the first available run start with a confirm-before-run warning, remove Letter Box and default to Front Door, and switch the address section to a confirm-first / edit-on-demand flow because most bags will go to the saved address.',
