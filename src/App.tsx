@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'openforce-onboarding-execution-spec',
+        title: 'Openforce onboarding — real configurator execution build',
+        summary: 'Replace the fake configurator Openforce prototype with the real Courier Manager parity flow: Approval-stage actions stay explicit, Send to Openforce only appears for connected tenants, paperwork/compliance must hard-gate Approval, and courier creation must complete from the Openforce webhook rather than a fake frontend success path.',
+        date: '2026-08-17',
+        url: CONFIG_DOC('STEVE-OPENFORCE-ONBOARDING-EXECUTION-SPEC-2026-08-17.md'),
+      },
+      {
         key: 'usa-agent-address-location-fix',
         title: 'USA agent address location fix',
         summary: 'On Agent detail and Agent list, USA tenants are showing Auckland in the agent address display even when the saved address is not in New Zealand. Trace the shared address mapping/formatter, remove the NZ fallback leakage, and make both surfaces render the correct tenant-local address data consistently.',
