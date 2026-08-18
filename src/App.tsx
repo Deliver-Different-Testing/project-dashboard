@@ -424,6 +424,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'pricing-marcus-fixes-pack',
+        title: 'Pricing (Marcus) fixes pack',
+        summary: 'Single Kerran-ready handover for the Steve-assigned Pricing (Marcus) items: child-job repricing display drift, client-change-to-$0 on parent/child jobs, doubled manual pricing adjustments, nationwide local vs flight pricing inconsistency, and recurring insert-to-live raw-base-plus-fuel behaviour.',
+        date: '2026-08-18',
+        url: ACCOUNTS_DOC('KERRAN-PRICING-FIXES-MARCUS-2026-08-18.md'),
+      },
+      {
         key: 'otg-tucjobarchive-historic-db-upload',
         title: 'OTG historic DB upload into tucJobArchive',
         summary: 'Run a DB-level OTG history import into tucJobArchive: stage and validate the legacy CSV, map the core reporting/search fields, insert rows as completed historical jobs only, and explicitly stamp them so they cannot drift into downstream operational reuse.',
