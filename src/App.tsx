@@ -700,6 +700,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'bol-overlay-constant-offset-fix',
+        title: 'BOL overlay — constant offset print fix',
+        summary: 'Kenneth’s OTG BOL note points to a shared PDF overlay contract bug: the editor shows fields in the right boxes but the rendered PDF prints everything down/left by one constant offset. Trace the editor save/load coordinate conversion versus PdfOverlayRenderer fallback X/Y placement, then make field-map round-trips and rendered output use the same page-space coordinates.',
+        date: '2026-08-18',
+        url: 'https://github.com/Deliver-Different-Testing/PDF-Overlay-Tool/blob/main/docs/JACOB-BOL-OVERLAY-OFFSET-FIX-2026-08-18.md',
+      },
+      {
         key: 'baggage-deane-review-tweaks',
         title: 'Baggage pax portal — Deane review tweaks',
         summary: 'Small Jacob follow-up from Deane’s email: show Extra delivery information on the main screen and confirmation screens when present, and swap Booking Reference so it shows the Urgent job number consistently across the passenger flow.',
