@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'feature-matrix-role-permission-governance-garry',
+        title: 'Feature Matrix + Role Permissions — broaden into rollout governance',
+        summary: 'Take Jacob’s enforcement idea and turn it into a real system-wide governance rule: Feature Matrix and Role Permissions become the source of truth for all users, every new feature/page/app must be added during rollout, the MR impact block must include legacy permission-layer impact, and CI should backstop feature/permission/tree integrity rather than relying on a manual checker alone.',
+        date: '2026-08-20',
+        url: CONFIG_DOC('STEVE-FEATURE-MATRIX-ROLE-PERMISSION-GOVERNANCE-GARRY-2026-08-20.md'),
+      },
+      {
         key: 'openforce-onboarding-execution-spec',
         title: 'Openforce onboarding — real configurator execution build',
         summary: 'Replace the fake configurator Openforce prototype with the real Courier Manager parity flow: Approval-stage actions stay explicit, Send to Openforce only appears for connected tenants, paperwork/compliance must hard-gate Approval, and courier creation must complete from the Openforce webhook rather than a fake frontend success path.',
