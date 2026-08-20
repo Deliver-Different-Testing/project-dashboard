@@ -431,6 +431,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'otg-new-customer-visibility-investigation',
+        title: 'OTG new customer visibility investigation (Eccua Flowers)',
+        summary: 'Trace why Eccua Flowers was created but not seen in billing: legacy Admin Manager path vs new workflow, missing client-code/account-number expectations, QuickBooks AcctNum behaviour, and whether InvoiceScheduleId/billing setup is the actual batch blocker.',
+        date: '2026-08-20',
+        url: ACCOUNTS_DOC('KERRAN-OTG-NEW-CUSTOMER-VISIBILITY-INVESTIGATION-2026-08-20.md'),
+      },
+      {
         key: 'pricing-marcus-fixes-pack',
         title: 'Pricing (Marcus) fixes pack',
         summary: 'Single Kerran-ready handover for the Steve-assigned Pricing (Marcus) items: child-job repricing display drift, client-change-to-$0 on parent/child jobs, doubled manual pricing adjustments, nationwide local vs flight pricing inconsistency, and recurring insert-to-live raw-base-plus-fuel behaviour.',
