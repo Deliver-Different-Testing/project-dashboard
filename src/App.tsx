@@ -281,6 +281,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'client-webhook-cancelled-void-status',
+        title: 'Regular client webhook cancelled status for voided jobs',
+        summary: 'Patch the regular client JobStatus webhook so voided jobs emit Status = Cancelled, with CancelledAtUtc and CancelledBy / CancelReason when available, instead of leaving voids hidden behind the ucjbVoid flag.',
+        date: '2026-08-21',
+        url: CONFIG_DOC('KEVIN-CLIENT-WEBHOOK-CANCELLED-VOID-2026-08-21.md'),
+      },
+      {
         key: 'routed-operations-schedules-zones-zone-groups-handover',
         title: 'Routed Operations schedules + zones / zone groups handover',
         summary: 'Migrate the schedule maintenance slice into Routed Operations by lifting the existing Configurator schedules/territory UI code rather than recreating it, while preserving the real split: schedules depend on postcode groups, NZ/non-US territory uses BulkZonePostcode, and US territory uses ZoneName/ZoneZip.',
