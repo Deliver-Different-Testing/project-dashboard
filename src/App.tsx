@@ -281,6 +281,13 @@ const devs: Dev[] = [
     forwardWorkUrl: ROUTED_OPS_DOC('HANDOVER-KEVIN-ROUTED-OPERATIONS-2026-06-23.md'),
     forwardWorkItems: [
       {
+        key: 'routed-operations-schedules-zones-zone-groups-handover',
+        title: 'Routed Operations schedules + zones / zone groups handover',
+        summary: 'Move the schedule maintenance slice out of the old scheduled-rate-builder brief and into Routed Operations: reuse the existing React schedules prototype and territory UI, but implement the real legacy dependency surface as schedules + postcode/zone groups + zip/zones rather than pretending schedules can move alone.',
+        date: '2026-08-21',
+        url: ROUTED_OPS_DOC('KEVIN-SCHEDULES-ZONES-ZONE-GROUPS-HANDOVER-2026-08-21.md'),
+      },
+      {
         key: 'historic-otg-upload-routed-operations',
         title: 'Historic OTG upload capability in Routed Operations',
         summary: 'Build a separate historic-upload flow in Routed Operations for OTG legacy CSVs: preview + validation + audit trail, write confirmed rows into tucJobArchive only, keep the current tblQuoteJob quoting upload untouched, and make sure imported history cannot spill into live dispatch or normal invoice selection.',
