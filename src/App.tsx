@@ -445,6 +445,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'auto-rerate-profiles-rates-ui',
+        title: 'Auto rerate profiles — Rates UI + trigger orchestration split',
+        summary: 'Build auto rerate as a Configurator → Rates feature with per-client on/off, reusable rerate profiles, booked-vs-notified baseline selection, and a real excluded-speed selector UI, while the completion-path orchestration only decides when to call Kerran’s central rerate function instead of duplicating rerate logic.',
+        date: '2026-08-21',
+        url: KERRAN_CONFIG_DOC('STEVE-AUTO-RERATE-PROFILES-KERRAN-2026-08-21.md'),
+      },
+      {
         key: 'otg-new-customer-visibility-investigation',
         title: 'OTG new customer visibility investigation (Eccua Flowers)',
         summary: 'Trace why Eccua Flowers was created but not seen in billing: legacy Admin Manager path vs new workflow, missing client-code/account-number expectations, QuickBooks AcctNum behaviour, and whether InvoiceScheduleId/billing setup is the actual batch blocker.',
