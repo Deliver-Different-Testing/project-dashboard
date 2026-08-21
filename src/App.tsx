@@ -283,7 +283,7 @@ const devs: Dev[] = [
       {
         key: 'routed-operations-schedules-zones-zone-groups-handover',
         title: 'Routed Operations schedules + zones / zone groups handover',
-        summary: 'Move the schedule maintenance slice out of the old scheduled-rate-builder brief and into Routed Operations: reuse the existing React schedules prototype and territory UI, but implement the real legacy dependency surface as schedules + postcode/zone groups + zip/zones rather than pretending schedules can move alone.',
+        summary: 'Migrate the schedule maintenance slice into Routed Operations by lifting the existing Configurator schedules/territory UI code rather than recreating it, and wire the real legacy dependency surface as schedules + postcode/zone groups + zip/zones rather than pretending schedules can move alone.',
         date: '2026-08-21',
         url: ROUTED_OPS_DOC('KEVIN-SCHEDULES-ZONES-ZONE-GROUPS-HANDOVER-2026-08-21.md'),
       },
