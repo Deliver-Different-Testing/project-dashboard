@@ -445,6 +445,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'post-settlement-driver-payment-adjustments',
+        title: 'Post-settlement driver payment adjustments into next week settlement',
+        summary: 'Let Accounts correct driver payment after invoicing/settlement completion by creating a forward adjustment instead of rewriting history: if the corrected amount is higher create a Courier Extra Payment for the difference, if lower create a Courier Deduction, use the job number as reference, capture operator notes, and let the resulting row flow into the next settlement batch.',
+        date: '2026-08-25',
+        url: ACCOUNTS_DOC('KERRAN-POST-SETTLEMENT-DRIVER-PAYMENT-ADJUSTMENTS-2026-08-25.md'),
+      },
+      {
         key: 'accounting-customer-sync-buttons-accounts-configurator',
         title: 'Accounting customer sync button — Accounts + Configurator',
         summary: 'Add a manual Sync with QuickBooks/Xero action to the customer modal in both Accounts and Configurator, make existing customers resync changed fields instead of no-oping, fix invoice email drift first, include phone/contact field updates, prevent duplicate accounting customers, and for new QBO customers optionally let ops use the returned QuickBooks ID as the account code only when the code field is still blank.',
