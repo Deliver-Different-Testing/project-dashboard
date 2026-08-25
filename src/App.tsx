@@ -445,6 +445,20 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'accounting-customer-sync-buttons-accounts-configurator',
+        title: 'Accounting customer sync button — Accounts + Configurator',
+        summary: 'Add a manual Sync with QuickBooks/Xero action to the customer modal in both Accounts and Configurator, make existing customers resync changed fields instead of no-oping, fix invoice email drift first, include phone/contact field updates, prevent duplicate accounting customers, and on the new Configurator create/sync path write the returned accounting ID back into the local customer link/account-code path.',
+        date: '2026-08-25',
+        url: ACCOUNTS_DOC('KERRAN-ACCOUNTING-CUSTOMER-SYNC-BUTTONS-2026-08-25.md'),
+      },
+      {
+        key: 'courier-modal-code-topbar-openforce',
+        title: 'Courier modal — editable code, top-bar actions, Openforce number',
+        summary: 'Finish the operational courier-modal fixes: replace the old alpha courier-code fallback with one shared numeric allocator, let operators edit courier code on existing records, move modal actions into the top bar, and expose Openforce Number explicitly in the courier setup/edit flow.',
+        date: '2026-08-21',
+        url: KERRAN_CONFIG_DOC('STEVE-COURIER-MODAL-CODE-AND-TOPBAR-KERRAN-2026-08-21.md'),
+      },
+      {
         key: 'auto-rerate-profiles-rates-ui',
         title: 'Auto rerate profiles — Rates UI + trigger orchestration split',
         summary: 'Build auto rerate as a Configurator → Rates feature with per-client on/off, reusable rerate profiles, booked-vs-notified baseline selection, and a real excluded-speed selector UI, while the completion-path orchestration only decides when to call Kerran’s central rerate function instead of duplicating rerate logic.',
