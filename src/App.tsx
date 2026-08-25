@@ -447,7 +447,7 @@ const devs: Dev[] = [
       {
         key: 'accounting-customer-sync-buttons-accounts-configurator',
         title: 'Accounting customer sync button — Accounts + Configurator',
-        summary: 'Add a manual Sync with QuickBooks/Xero action to the customer modal in both Accounts and Configurator, make existing customers resync changed fields instead of no-oping, fix invoice email drift first, include phone/contact field updates, prevent duplicate accounting customers, and on the new Configurator create/sync path write the returned accounting ID back into the local customer link/account-code path.',
+        summary: 'Add a manual Sync with QuickBooks/Xero action to the customer modal in both Accounts and Configurator, make existing customers resync changed fields instead of no-oping, fix invoice email drift first, include phone/contact field updates, prevent duplicate accounting customers, and for new QBO customers optionally let ops use the returned QuickBooks ID as the account code only when the code field is still blank.',
         date: '2026-08-25',
         url: ACCOUNTS_DOC('KERRAN-ACCOUNTING-CUSTOMER-SYNC-BUTTONS-2026-08-25.md'),
       },
