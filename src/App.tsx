@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'auto-rerate-profiles-garry-orchestration-link',
+        title: 'Auto rerate profiles — Garry completion-path orchestration handoff',
+        summary: 'Use Kerran’s central auto-rerate profiles spec as the upstream reference for Garry-owned trigger/orchestration work: completion-path logic should only decide when to call the shared rerate function, not duplicate rerate rules or profile logic in a second implementation path.',
+        date: '2026-08-21',
+        url: KERRAN_CONFIG_DOC('STEVE-AUTO-RERATE-PROFILES-KERRAN-2026-08-21.md'),
+      },
+      {
         key: 'stryker-webhook-jobnumber-suffix-investigation',
         title: 'Stryker webhook — investigate client job-number suffix breakage',
         summary: 'Confirm whether regular client webhooks are breaking when DFRNT appends service/leg suffixes to client-generated job numbers, identify the payload field and affected flows, and advise whether the fix is payload correction, original-number exposure, or a dedicated altered-job-number event.',
