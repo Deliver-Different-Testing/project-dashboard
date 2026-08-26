@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'stryker-webhook-jobnumber-suffix-investigation',
+        title: 'Stryker webhook — investigate client job-number suffix breakage',
+        summary: 'Confirm whether regular client webhooks are breaking when DFRNT appends service/leg suffixes to client-generated job numbers, identify the payload field and affected flows, and advise whether the fix is payload correction, original-number exposure, or a dedicated altered-job-number event.',
+        date: '2026-08-22',
+        url: CONFIG_DOC('STEVE-STRYKER-WEBHOOK-JOBNUMBER-SUFFIX-INVESTIGATION-GARRY-2026-08-22.md'),
+      },
+      {
         key: 'feature-matrix-role-permission-governance-garry',
         title: 'Feature Matrix + Role Permissions — broaden into rollout governance',
         summary: 'Take Jacob’s enforcement idea and turn it into a real system-wide governance rule: Feature Matrix and Role Permissions become the source of truth for all users, every new feature/page/app must be added during rollout, the MR impact block must include legacy permission-layer impact, and CI should backstop feature/permission/tree integrity rather than relying on a manual checker alone.',
@@ -451,6 +458,13 @@ const devs: Dev[] = [
     currentWorkUrl: KERRAN_CONFIG_DOC('KERRAN-START-HERE-2026-07-05.md'),
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
+      {
+        key: 'openforce-onboarding-kerran-finishing-handover',
+        title: 'Openforce onboarding — finish post-webhook courier creation parity',
+        summary: 'Take over from Garry once Openforce updates the webhook URL: keep Garry’s send-to-Openforce flow, then make the approved/activated webhook create a real ready-to-work courier using the same practical defaults as Kerran’s normal courier creation path, with applicant removal from pipeline and fleet visibility verified end-to-end.',
+        date: '2026-08-26',
+        url: CONFIG_DOC('STEVE-OPENFORCE-ONBOARDING-KERRAN-FINISHING-HANDOVER-2026-08-26.md'),
+      },
       {
         key: 'post-settlement-driver-payment-adjustments',
         title: 'Post-settlement driver payment adjustments into next week settlement',
