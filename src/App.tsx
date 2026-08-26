@@ -139,6 +139,13 @@ const devs: Dev[] = [
         url: DASHBOARD_DOC('GARRY-WAIT-EVENT-ARRIVAL-TIMESTAMPS-2026-08-10.md'),
       },
       {
+        key: 'client-alert-delivery-window-config',
+        title: 'Client alert delivery window — per-client/per-speed ETA window config',
+        summary: 'Make recipient-facing tracking windows config-driven per client speed by adding early/late ETA-minute overrides on tblClientAvailableSpeed, wiring them through Admin/Configurator client-speed editing, and replacing the hardcoded 60/60 alert window logic with the configured values plus sensible fallback.',
+        date: '2026-08-05',
+        url: CONFIG_DOC('STEVE-CLIENT-ALERT-DELIVERY-WINDOW-GARRY-2026-08-05.md'),
+      },
+      {
         key: 'wait-time-defect',
         title: 'Wait time defect — recorded but never charged',
         summary: 'Investigate and fix the wait-time defect where recorded wait minutes are not flowing into rerating properly, delivery wait is ignored, and wait-time fuel is keyed off the wrong flag. Garry should use the defect repo as the handover reference for the despatchweb-side mapping and related fix path.',
