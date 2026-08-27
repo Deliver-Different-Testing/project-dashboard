@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'np-agent-single-modal-addendum',
+        title: 'NP/Agent modal — collapse detail + promotion into one working modal',
+        summary: 'Update the Agent/NP modal work so the smaller Edit Agent popup is absorbed into the main larger modal: upgrade Agent → NP inside the main modal, manage areas/regions/ZIP coverage there, and show a coverage map in-modal by borrowing Kevin’s route ZIP/polygon display approach.',
+        date: '2026-08-27',
+        url: CONFIG_DOC('STEVE-NP-MODAL-GARRY-2026-06-19.md'),
+      },
+      {
         key: 'auto-rerate-profiles-garry-orchestration-link',
         title: 'Auto rerate profiles — Garry completion-path orchestration handoff',
         summary: 'Use Kerran’s central auto-rerate profiles spec as the upstream reference for Garry-owned trigger/orchestration work: completion-path logic should only decide when to call the shared rerate function, not duplicate rerate rules or profile logic in a second implementation path.',
