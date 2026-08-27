@@ -146,13 +146,6 @@ const devs: Dev[] = [
         url: 'https://github.com/Deliver-Different-Testing/Adminmanagerupdate/blob/main/docs/STEVE-AUTOMATION-ENGINE-TRIGGER-OPTIONS-GARRY-2026-08-14.md',
       },
       {
-        key: 'configurator-scheduling-driver-real-vs-dummy',
-        title: 'Configurator scheduler — reuse rules, rewrite legacy edges for USA',
-        summary: 'The rewritten handover now makes the call explicitly: reuse the real Courier Manager scheduling rules and entity shape, but rewrite the Angular frontend, NZ-specific notifications/phone handling, trigger-dependent behaviour, and brittle region/vehicle assumptions before wiring configurator /scheduling to real backend APIs and USA-safe tenant data.',
-        date: '2026-07-28',
-        url: CONFIG_DOC('STEVE-SCHEDULING-DRIVER-GARRY-2026-07-27.md'),
-      },
-      {
         key: 'wait-event-arrival-timestamps',
         title: 'Wait events should stamp pickup/delivery arrival timestamps',
         summary: 'Extend Garry’s Aug 6 waiting-event work so Job Not Ready events (types 60/87/88/89/90/91) stamp tenant-corrected pickup/delivery arrival fields, make dispatcher-entered arrival times in DespatchWeb act as the fallback source when the driver missed the event, and ensure Invoice Builder reads those same fields for waiting-time display.',
@@ -321,6 +314,13 @@ const devs: Dev[] = [
         summary: 'Migrate the schedule maintenance slice into Routed Operations by lifting the existing Configurator schedules/territory UI code rather than recreating it, while preserving the real split: schedules depend on postcode groups, NZ/non-US territory uses BulkZonePostcode, and US territory uses ZoneName/ZoneZip.',
         date: '2026-08-21',
         url: ROUTED_OPS_DOC('KEVIN-SCHEDULES-ZONES-ZONE-GROUPS-HANDOVER-2026-08-21.md'),
+      },
+      {
+        key: 'driver-scheduling-routed-operations',
+        title: 'Driver Scheduling into Routed Operations',
+        summary: 'Move Driver Scheduling out of Garry’s queue and into Kevin’s Routed Operations lane: reuse the modern Configurator /scheduling framework as the shell, but lift-and-shift + modernise the real old Courier Manager scheduler behaviour underneath rather than inventing a new scheduler.',
+        date: '2026-08-27',
+        url: ROUTED_OPS_DOC('KEVIN-DRIVER-SCHEDULING-ROUTED-OPERATIONS-HANDOVER-2026-08-27.md'),
       },
       {
         key: 'historic-otg-upload-routed-operations',
