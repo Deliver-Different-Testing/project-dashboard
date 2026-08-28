@@ -23,11 +23,18 @@ async function ensureSchema() {
       item_key text not null,
       status text not null,
       notes text not null default '',
+      project_type text,
+      sprint_start_date date,
+      sprint_end_date date,
       updated_at timestamptz not null default now(),
       updated_by text,
       primary key (dev_key, item_key)
     )
   `
+
+  await sql`alter table dashboard_forward_work_state add column if not exists project_type text`
+  await sql`alter table dashboard_forward_work_state add column if not exists sprint_start_date date`
+  await sql`alter table dashboard_forward_work_state add column if not exists sprint_end_date date`
 
   await sql`
     create table if not exists dashboard_forward_work_order (
@@ -112,6 +119,9 @@ function normalizeRow(row) {
   return {
     status: row.status,
     notes: row.notes || '',
+    projectType: row.project_type || null,
+    sprintStartDate: row.sprint_start_date ? String(row.sprint_start_date) : null,
+    sprintEndDate: row.sprint_end_date ? String(row.sprint_end_date) : null,
     updated: row.updated_at ? new Date(row.updated_at).getTime() : null,
     updatedBy: row.updated_by || null,
   }
@@ -143,7 +153,7 @@ function normalizeReleaseNote(row) {
 
 async function handleGetForwardWork(devKey, res) {
   const [stateRows, orderRows] = await Promise.all([
-    sql`select item_key, status, notes, updated_at, updated_by from dashboard_forward_work_state where dev_key = ${devKey}`,
+    sql`select item_key, status, notes, project_type, sprint_start_date, sprint_end_date, updated_at, updated_by from dashboard_forward_work_state where dev_key = ${devKey}`,
     sql`select item_key from dashboard_forward_work_order where dev_key = ${devKey} order by position asc`,
   ])
 
@@ -156,18 +166,24 @@ async function handlePutForwardWork(devKey, itemKey, req, res) {
   const body = await readBody(req)
   const status = typeof body.status === 'string' ? body.status : 'Not started'
   const notes = typeof body.notes === 'string' ? body.notes : ''
+  const projectType = typeof body.projectType === 'string' && body.projectType.trim() ? body.projectType.trim() : null
+  const sprintStartDate = typeof body.sprintStartDate === 'string' && body.sprintStartDate.trim() ? body.sprintStartDate.trim() : null
+  const sprintEndDate = typeof body.sprintEndDate === 'string' && body.sprintEndDate.trim() ? body.sprintEndDate.trim() : null
   const updatedBy = typeof body.updatedBy === 'string' ? body.updatedBy : null
 
   const [row] = await sql`
-    insert into dashboard_forward_work_state (dev_key, item_key, status, notes, updated_at, updated_by)
-    values (${devKey}, ${itemKey}, ${status}, ${notes}, now(), ${updatedBy})
+    insert into dashboard_forward_work_state (dev_key, item_key, status, notes, project_type, sprint_start_date, sprint_end_date, updated_at, updated_by)
+    values (${devKey}, ${itemKey}, ${status}, ${notes}, ${projectType}, ${sprintStartDate}, ${sprintEndDate}, now(), ${updatedBy})
     on conflict (dev_key, item_key)
     do update set
       status = excluded.status,
       notes = excluded.notes,
+      project_type = excluded.project_type,
+      sprint_start_date = excluded.sprint_start_date,
+      sprint_end_date = excluded.sprint_end_date,
       updated_at = now(),
       updated_by = excluded.updated_by
-    returning status, notes, updated_at, updated_by
+    returning status, notes, project_type, sprint_start_date, sprint_end_date, updated_at, updated_by
   `
 
   sendJson(res, 200, normalizeRow(row))
