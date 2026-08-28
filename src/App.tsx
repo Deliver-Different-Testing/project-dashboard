@@ -552,7 +552,7 @@ const devs: Dev[] = [
       {
         key: 'fsc-indexing-supplement',
         title: 'FSC indexing supplement',
-        summary: 'Future-proof FSC for indexed auto-updates by adding indexing metadata, internal fuel index source/value tables, and support for weekly, fortnightly, or monthly refresh cycles that generate dated FSC rows ahead of runtime.',
+        summary: 'Future-proof FSC for indexed auto-updates by adding indexing metadata, internal fuel index source/value tables, support for weekly/fortnightly/monthly refresh cycles, and the ability for one FSC profile to be assigned to multiple clients instead of forcing a 1:1 client/profile model.',
         date: '2026-08-06',
         url: 'https://github.com/Deliver-Different-Testing/fuel-mfv-analysis/blob/master/FSC_INDEXING_SUPPLEMENT_2026-08-06.md',
       },
