@@ -115,13 +115,19 @@ async function readBody(req) {
   return raw ? JSON.parse(raw) : {}
 }
 
+function normalizeDateOnly(value) {
+  if (!value) return null
+  if (typeof value === 'string') return value.slice(0, 10)
+  return new Date(value).toISOString().slice(0, 10)
+}
+
 function normalizeRow(row) {
   return {
     status: row.status,
     notes: row.notes || '',
     projectType: row.project_type || null,
-    sprintStartDate: row.sprint_start_date ? String(row.sprint_start_date) : null,
-    sprintEndDate: row.sprint_end_date ? String(row.sprint_end_date) : null,
+    sprintStartDate: normalizeDateOnly(row.sprint_start_date),
+    sprintEndDate: normalizeDateOnly(row.sprint_end_date),
     updated: row.updated_at ? new Date(row.updated_at).getTime() : null,
     updatedBy: row.updated_by || null,
   }
