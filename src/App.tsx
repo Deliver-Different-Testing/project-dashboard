@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'contacts-tile-access-ui-refinement',
+        title: 'Contacts + Tile Access UI refinement',
+        summary: 'Refactor the permissions/contact IA so Team & Users becomes Contacts with a client filter, client users use the full contact modal, Stakeholder Classes becomes Client Types, Internal Roles becomes Roles, internal stops acting as a visibility shortcut, and Role Permissions / Feature Matrix / Tenant Config move into a DF Admin-only System/Platform area.',
+        date: '2026-08-30',
+        url: CONFIG_DOC('STEVE-CONTACTS-AND-TILE-ACCESS-UI-REFINEMENT-GARRY-2026-08-30.md'),
+      },
+      {
         key: 'np-agent-single-modal-addendum',
         title: 'NP/Agent modal — collapse detail + promotion into one working modal',
         summary: 'Update the Agent/NP modal work so the smaller Edit Agent popup is absorbed into the main larger modal: upgrade Agent → NP inside the main modal, manage areas/regions/ZIP coverage there, and show a coverage map in-modal by borrowing Kevin’s route ZIP/polygon display approach.',
