@@ -805,6 +805,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'np-despatchweb-dashboard-visibility',
+        title: 'NP DespatchWeb dashboard visibility + default view',
+        summary: 'Clarify Jacob’s NP behaviour in DespatchWeb: DF Admin should decide which dashboards NP users can access, but if Main Dashboard is enabled the NP should land in an NP All Jobs default view that still uses the existing logged-in NP filtering so only assigned jobs appear; blank Driver Locations is acceptable for MVP when that view has no driver-location mapping.',
+        date: '2026-08-30',
+        url: CONFIG_DOC('JACOB-NP-DESPATCHWEB-DASHBOARD-VISIBILITY-2026-08-30.md'),
+      },
+      {
         key: 'bol-overlay-constant-offset-fix',
         title: 'BOL overlay — constant offset print fix',
         summary: 'Kenneth’s OTG BOL note points to a shared PDF overlay contract bug: the editor shows fields in the right boxes but the rendered PDF prints everything down/left by one constant offset. Trace the editor save/load coordinate conversion versus PdfOverlayRenderer fallback X/Y placement, then make field-map round-trips and rendered output use the same page-space coordinates.',
