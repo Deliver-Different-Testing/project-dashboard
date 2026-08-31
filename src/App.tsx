@@ -480,6 +480,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'np-demotion-back-to-agent',
+        title: 'Demote Network Partner back to Agent',
+        summary: 'Turn the current warning-only NP downgrade edge case into a real safe demotion flow: untick IsNetworkPartner, archive the linked NP tucClient shell, disable its NP portal contacts, preserve historical NpAgentId rows, and block the demotion when active NP-scoped couriers or non-standard linked client rows still exist.',
+        date: '2026-08-31',
+        url: CONFIG_DOC('KERRAN-NP-DEMOTION-BACK-TO-AGENT-2026-08-31.md'),
+      },
+      {
         key: 'openforce-onboarding-kerran-finishing-handover',
         title: 'Openforce onboarding — finish post-webhook courier creation parity',
         summary: 'Take over from Garry once Openforce updates the webhook URL: keep Garry’s send-to-Openforce flow, then make the approved/activated webhook create a real ready-to-work courier using the same practical defaults as Kerran’s normal courier creation path, with applicant removal from pipeline and fleet visibility verified end-to-end.',
