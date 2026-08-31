@@ -90,6 +90,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-GARRY.md'),
     forwardWorkItems: [
       {
+        key: 'contacts-table-ux-addendum',
+        title: 'Contacts table UX addendum',
+        summary: 'Small follow-up on the Team & Users → Contacts refactor: lock the Contacts page header and table header row while scrolling, and add header-click sorting on the main table columns so the page remains usable at larger contact counts.',
+        date: '2026-08-31',
+        url: CONFIG_DOC('STEVE-CONTACTS-TABLE-UX-ADDENDUM-GARRY-2026-08-31.md'),
+      },
+      {
         key: 'contacts-tile-access-ui-refinement',
         title: 'Contacts + Tile Access UI refinement',
         summary: 'Refactor the permissions/contact IA so Team & Users becomes Contacts with a client filter, client users use the full contact modal, Stakeholder Classes becomes Client Types, Internal Roles becomes Roles, internal stops acting as a visibility shortcut, and Role Permissions / Feature Matrix / Tenant Config move into a DF Admin-only System/Platform area.',
