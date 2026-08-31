@@ -482,7 +482,7 @@ const devs: Dev[] = [
       {
         key: 'np-demotion-back-to-agent',
         title: 'Demote Network Partner back to Agent',
-        summary: 'Turn the current warning-only NP downgrade edge case into a real safe demotion flow: untick IsNetworkPartner, archive the linked NP tucClient shell, disable its NP portal contacts, preserve historical NpAgentId rows, and block the demotion when active NP-scoped couriers or non-standard linked client rows still exist.',
+        summary: 'Turn the current warning-only NP downgrade edge case into a real safe demotion flow: untick IsNetworkPartner, archive the linked NP tucClient shell, disable its NP portal contacts, preserve historical NpAgentId rows, and block the demotion when active NP-scoped couriers or non-standard linked client rows still exist; also add Active/Inactive filtering plus sticky headers to the customers list and cascade client inactivation to contacts unless they still belong to another active client.',
         date: '2026-08-31',
         url: CONFIG_DOC('KERRAN-NP-DEMOTION-BACK-TO-AGENT-2026-08-31.md'),
       },
