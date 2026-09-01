@@ -819,6 +819,13 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'automations-email-fields-multi-recipient',
+        title: 'Automations — Booked By Email, Logged in Contact Email, multi-select recipients',
+        summary: 'Add Booked By Email, rename Client contact email to Logged in Contact Email, make the automations recipient picker multi-select.',
+        date: '2026-09-01',
+        url: CONFIG_DOC('JACOB-AUTOMATIONS-EMAIL-FIELDS-2026-09-01.md'),
+      },
+      {
         key: 'np-despatchweb-dashboard-visibility',
         title: 'NP DespatchWeb dashboard visibility + default view',
         summary: 'Clarify Jacob’s NP behaviour in DespatchWeb: DF Admin should decide which dashboards NP users can access, but if Main Dashboard is enabled the NP should land in an NP All Jobs default view that still uses the existing logged-in NP filtering so only assigned jobs appear; blank Driver Locations is acceptable for MVP when that view has no driver-location mapping.',
