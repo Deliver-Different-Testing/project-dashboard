@@ -487,6 +487,13 @@ const devs: Dev[] = [
     forwardWorkUrl: KERRAN_CONFIG_DOC('STEVE-NP-MODAL-KERRAN-2026-07-05.md'),
     forwardWorkItems: [
       {
+        key: 'courier-list-and-courier-detail-ui-tidy-up',
+        title: 'Courier List & courier detail UI tidy-up',
+        summary: 'Sticky table header and sortable columns on the Courier List; Internal checkbox on the courier Profile status box; sticky header and repositioned tabs on the courier detail page.',
+        date: '2026-09-02',
+        url: CONFIG_DOC('KERRAN-COURIER-LIST-AND-COURIER-DETAIL-2026-09-02.md'),
+      },
+      {
         key: 'np-demotion-back-to-agent',
         title: 'Demote Network Partner back to Agent',
         summary: 'Turn the current warning-only NP downgrade edge case into a real safe demotion flow: untick IsNetworkPartner, archive the linked NP tucClient shell, disable its NP portal contacts, preserve historical NpAgentId rows, and block the demotion when active NP-scoped couriers or non-standard linked client rows still exist; also add Active/Inactive filtering, sticky headers, header-row sorting, and client→contact inactivation cascading on the customers list unless the contact still belongs to another active client.',
