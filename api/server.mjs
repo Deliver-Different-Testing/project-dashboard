@@ -80,6 +80,21 @@ async function ensureSchema() {
 
   await sql`create index if not exists idx_dashboard_release_notes_dev on dashboard_release_notes (dev_key, created_at desc)`
 
+  await sql`
+    create table if not exists dashboard_dynamic_work_items (
+      dev_key text not null,
+      item_key text not null,
+      title text not null,
+      summary text not null default '',
+      date date,
+      url text,
+      created_at timestamptz not null default now(),
+      created_by text,
+      deleted_at timestamptz,
+      primary key (dev_key, item_key)
+    )
+  `
+
   await sql`alter table dashboard_release_notes add column if not exists source_item_key text`
   await sql`alter table dashboard_release_notes add column if not exists source_url text`
   await sql`alter table dashboard_release_notes add column if not exists auto_generated boolean not null default false`
@@ -155,6 +170,58 @@ function normalizeReleaseNote(row) {
     ts: new Date(row.created_at).getTime(),
     by: row.created_by || null,
   }
+}
+
+function normalizeDynamicItem(row) {
+  return {
+    key: row.item_key,
+    title: row.title,
+    summary: row.summary || '',
+    date: normalizeDateOnly(row.date),
+    url: row.url || undefined,
+  }
+}
+
+async function handleGetDynamicItems(devKey, res) {
+  const rows = await sql`
+    select item_key, title, summary, date, url
+    from dashboard_dynamic_work_items
+    where dev_key = ${devKey}
+      and deleted_at is null
+    order by created_at desc
+  `
+  sendJson(res, 200, rows.map(normalizeDynamicItem))
+}
+
+async function handlePostDynamicItem(devKey, req, res) {
+  const body = await readBody(req)
+  const itemKey = typeof body.itemKey === 'string' ? body.itemKey.trim() : ''
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+  const summary = typeof body.summary === 'string' ? body.summary : ''
+  const date = typeof body.date === 'string' && body.date.trim() ? body.date.trim() : null
+  const url = typeof body.url === 'string' && body.url.trim() ? body.url.trim() : null
+  const createdBy = typeof body.createdBy === 'string' ? body.createdBy : null
+  if (!itemKey || !title) return sendJson(res, 400, { error: 'itemKey and title are required' })
+
+  const [row] = await sql`
+    insert into dashboard_dynamic_work_items (dev_key, item_key, title, summary, date, url, created_by)
+    values (${devKey}, ${itemKey}, ${title}, ${summary}, ${date}, ${url}, ${createdBy})
+    on conflict (dev_key, item_key)
+    do update set
+      title = excluded.title,
+      summary = excluded.summary,
+      date = excluded.date,
+      url = excluded.url,
+      deleted_at = null
+    returning item_key, title, summary, date, url
+  `
+
+  sendJson(res, 201, normalizeDynamicItem(row))
+}
+
+async function handleDeleteDynamicItem(devKey, itemKey, res) {
+  await sql`update dashboard_dynamic_work_items set deleted_at = now() where dev_key = ${devKey} and item_key = ${itemKey}`
+  sendEmpty(res)
 }
 
 async function handleGetForwardWork(devKey, res) {
@@ -311,6 +378,19 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'GET' && pathname === '/health') {
       return sendJson(res, 200, { ok: true })
+    }
+
+    const dynamicItemsMatch = pathname.match(/^\/api\/forward-work\/([^/]+)\/items$/)
+    if (req.method === 'GET' && dynamicItemsMatch) {
+      return await handleGetDynamicItems(decodeURIComponent(dynamicItemsMatch[1]), res)
+    }
+    if (req.method === 'POST' && dynamicItemsMatch) {
+      return await handlePostDynamicItem(decodeURIComponent(dynamicItemsMatch[1]), req, res)
+    }
+
+    const dynamicItemDeleteMatch = pathname.match(/^\/api\/forward-work\/([^/]+)\/items\/([^/]+)$/)
+    if (req.method === 'DELETE' && dynamicItemDeleteMatch) {
+      return await handleDeleteDynamicItem(decodeURIComponent(dynamicItemDeleteMatch[1]), decodeURIComponent(dynamicItemDeleteMatch[2]), res)
     }
 
     const forwardMatch = pathname.match(/^\/api\/forward-work\/([^/]+)$/)

@@ -1290,6 +1290,12 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
   const devKey = dev.key
   const [state, setState] = useState<Record<string, RowState>>(() => loadDevState(devKey))
   const [order, setOrder] = useState<string[]>(() => loadDevOrder(devKey, dev.forwardWorkItems))
+  // Items pushed in dynamically (e.g. Urgent Connect tickets) merged ahead of the hardcoded queue
+  const [dynamicItems, setDynamicItems] = useState<ForwardWorkItem[]>([])
+  const workItems = useMemo(() => {
+    const staticKeys = new Set(dev.forwardWorkItems.map(item => item.key))
+    return [...dynamicItems.filter(item => !staticKeys.has(item.key)), ...dev.forwardWorkItems]
+  }, [dynamicItems, dev.forwardWorkItems])
   const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
   const [syncMessage, setSyncMessage] = useState<string>(HAS_SHARED_API ? 'Shared sync connected' : 'Local-only mode')
   const [editingNotesKey, setEditingNotesKey] = useState<string | null>(null)
@@ -1305,7 +1311,14 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
   const hydrateFromRemote = async () => {
     if (!HAS_SHARED_API) return
     try {
-      const data = await apiGet<{ state: Record<string, RowState>; order: string[] }>(`/api/forward-work/${devKey}`)
+      const [data, remoteDynamic] = await Promise.all([
+        apiGet<{ state: Record<string, RowState>; order: string[] }>(`/api/forward-work/${devKey}`),
+        apiGet<ForwardWorkItem[]>(`/api/forward-work/${devKey}/items`).catch(() => [] as ForwardWorkItem[]),
+      ])
+      const dynamicList = Array.isArray(remoteDynamic) ? remoteDynamic.filter(item => item && typeof item.key === 'string') : []
+      setDynamicItems(dynamicList)
+      const staticKeys = new Set(dev.forwardWorkItems.map(item => item.key))
+      const allItems = [...dynamicList.filter(item => !staticKeys.has(item.key)), ...dev.forwardWorkItems]
       const nextState = Object.fromEntries(Object.entries(data.state || {}).map(([key, value]) => [key, normalizeRowState(value)]))
       const remoteOrder = Array.isArray(data.order) ? data.order.filter(key => typeof key === 'string') : []
       setState(prev => {
@@ -1316,11 +1329,11 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
         })
         return merged
       })
-      setOrder(loadDevOrder(devKey, dev.forwardWorkItems).map(key => key))
+      setOrder(loadDevOrder(devKey, allItems).map(key => key))
       if (remoteOrder.length > 0) {
-        const known = new Set(dev.forwardWorkItems.map(item => item.key))
+        const known = new Set(allItems.map(item => item.key))
         const cleaned = remoteOrder.filter(key => known.has(key))
-        const missing = dev.forwardWorkItems.map(item => item.key).filter(key => !cleaned.includes(key))
+        const missing = allItems.map(item => item.key).filter(key => !cleaned.includes(key))
         setOrder([...cleaned, ...missing])
       }
       setSyncMode('shared')
@@ -1335,7 +1348,10 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
     setState(loadDevState(devKey))
     setOrder(loadDevOrder(devKey, dev.forwardWorkItems))
     void hydrateFromRemote()
-  }, [devKey, dev.forwardWorkItems])
+    // Only on dev switch — workItems changes on every dynamic-item fetch and
+    // re-running this would overwrite the remote-synced order with localStorage.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [devKey])
 
   useEffect(() => {
     saveDevState(devKey, state)
@@ -1343,12 +1359,12 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
 
   useEffect(() => {
     setOrder(prev => {
-      const known = new Set(dev.forwardWorkItems.map(item => item.key))
+      const known = new Set(workItems.map(item => item.key))
       const cleaned = prev.filter(key => known.has(key))
-      const missing = dev.forwardWorkItems.map(item => item.key).filter(key => !cleaned.includes(key))
+      const missing = workItems.map(item => item.key).filter(key => !cleaned.includes(key))
       return [...cleaned, ...missing]
     })
-  }, [dev.forwardWorkItems])
+  }, [workItems])
 
   useEffect(() => {
     saveDevOrder(devKey, order)
@@ -1362,7 +1378,7 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
     return () => {
       if (pollRef.current) window.clearInterval(pollRef.current)
     }
-  }, [devKey, editingNotesKey, dev.forwardWorkItems])
+  }, [devKey, editingNotesKey, workItems])
 
   const persistRow = async (key: string, row: RowState) => {
     if (!HAS_SHARED_API) return
@@ -1527,11 +1543,11 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
 
   const orderedItems = useMemo(() => {
     const orderIndex = new Map(order.map((key, index) => [key, index]))
-    const items = [...dev.forwardWorkItems].sort((a, b) => (orderIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER) - (orderIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER))
+    const items = [...workItems].sort((a, b) => (orderIndex.get(a.key) ?? Number.MAX_SAFE_INTEGER) - (orderIndex.get(b.key) ?? Number.MAX_SAFE_INTEGER))
     const open = items.filter(item => (state[item.key]?.status ?? 'Not started') !== 'Done')
     const done = items.filter(item => (state[item.key]?.status ?? 'Not started') === 'Done')
     return [...open, ...done]
-  }, [dev.forwardWorkItems, order, state])
+  }, [workItems, order, state])
 
   const moveItem = (key: string, direction: -1 | 1) => {
     const isDone = (state[key]?.status ?? 'Not started') === 'Done'
@@ -1555,7 +1571,7 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
     })
   }
 
-  const counts = dev.forwardWorkItems.reduce<Record<ItemStatus, number>>((acc, item) => {
+  const counts = workItems.reduce<Record<ItemStatus, number>>((acc, item) => {
     const s = state[item.key]?.status ?? 'Not started'
     acc[s] = (acc[s] ?? 0) + 1
     return acc
@@ -1575,7 +1591,7 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
           {syncMessage}
         </span>
       </div>
-      {dev.forwardWorkItems.length === 0 ? (
+      {workItems.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-4">No queued items</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
