@@ -25,3 +25,4 @@
 |------|-------|
 | 2026-03-07 | HANDOVER.md pushed (complete, deployment-ready) |
 | 2026-03-14 | PROJECT-STATUS.md added for dev productivity tracking |
+| 2026-09-07 | Sprint board tab added (first tab). Rolling 2-week sprints over every developer's forward work; targets stored on the Railway forward-work row. See `docs/SPRINT-BOARD.md`. |

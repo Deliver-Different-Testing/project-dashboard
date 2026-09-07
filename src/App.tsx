@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useMemo, useRef } from 'react'
+import { Fragment, useState, useEffect, useMemo, useRef, type DragEvent } from 'react'
 
 type DevKey = 'garry' | 'kevin' | 'kerran' | 'jacob' | 'strategy'
 
@@ -22,7 +22,7 @@ const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-
 const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
 const DASHBOARD_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/project-dashboard/blob/master/docs/${f}`
 const BAGGAGE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/${f}`
-const BUILD_ID = '2026-07-08-0545'
+const BUILD_ID = '2026-09-07-1200'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -961,9 +961,18 @@ const statusPillClass: Record<ItemStatus, string> = {
   'Done': 'bg-green-100 text-green-700',
 }
 
-interface RowState { status: ItemStatus; notes: string; updated: number | null; updatedBy?: string | null }
+interface RowState {
+  status: ItemStatus
+  notes: string
+  updated: number | null
+  updatedBy?: string | null
+  // Set from the Sprint board; stored on the same Railway row as status/notes.
+  projectType?: string | null
+  sprintStartDate?: string | null
+  sprintEndDate?: string | null
+}
 
-const blankRow: RowState = { status: 'Not started', notes: '', updated: null, updatedBy: null }
+const blankRow: RowState = { status: 'Not started', notes: '', updated: null, updatedBy: null, projectType: null, sprintStartDate: null, sprintEndDate: null }
 
 const API_BASE = (import.meta.env.VITE_PROJECT_DASH_API_URL || '').replace(/\/$/, '')
 const HAS_SHARED_API = API_BASE.length > 0
@@ -978,6 +987,9 @@ function normalizeRowState(value: Partial<RowState> | undefined): RowState {
     notes: typeof value?.notes === 'string' ? value.notes : '',
     updated: typeof value?.updated === 'number' ? value.updated : null,
     updatedBy: typeof value?.updatedBy === 'string' ? value.updatedBy : null,
+    projectType: typeof value?.projectType === 'string' && value.projectType ? value.projectType : null,
+    sprintStartDate: typeof value?.sprintStartDate === 'string' && value.sprintStartDate ? value.sprintStartDate.slice(0, 10) : null,
+    sprintEndDate: typeof value?.sprintEndDate === 'string' && value.sprintEndDate ? value.sprintEndDate.slice(0, 10) : null,
   }
 }
 
@@ -1386,6 +1398,10 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
       const saved = await apiSend<RowState>(`/api/forward-work/${devKey}/${key}`, 'PUT', {
         status: row.status,
         notes: row.notes,
+        // Carry the Sprint board fields through so a status/notes edit here never clears them.
+        projectType: row.projectType ?? null,
+        sprintStartDate: row.sprintStartDate ?? null,
+        sprintEndDate: row.sprintEndDate ?? null,
         updatedBy: userDisplayName(currentUser),
       })
       setState(prev => ({ ...prev, [key]: normalizeRowState(saved) }))
@@ -1648,6 +1664,9 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
                           ) : item.title}
                         </div>
                         <div className="text-xs text-gray-500 mt-0.5 leading-snug">{item.summary}</div>
+                        {sprintChipLabel(row) && (
+                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-cyan/10 text-primary text-[10px] font-semibold" title="Sprint target set on the Sprint board">📅 {sprintChipLabel(row)}</span>
+                        )}
                       </td>
                       <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">{item.date ?? '—'}</td>
                       <td className="px-3 py-2">
@@ -2065,9 +2084,583 @@ function ReleaseNotesPanel({ dev, currentUser }: { dev: Dev; currentUser: string
   )
 }
 
-type Tab = DevKey
+// ---------------------------------------------------------------------------
+// Sprint board — rolling 2-week sprints across every developer's forward work.
+// Ported from hub/docs/ai-native-sales-implementation-plan.html (Strategic
+// Planner Calendar). Sprint targets live on the same Railway forward-work row
+// as status/notes, so a target set here shows on the developer's tab too.
+// ---------------------------------------------------------------------------
+
+const SPRINT_BOARD_START = '2026-09-01'
+const SPRINT_BOARD_END = '2027-08-31'
+const SPRINT_LENGTH_DAYS = 14
+
+interface Sprint {
+  id: string
+  number: number
+  startIso: string
+  endIso: string
+  quarterKey: string
+  quarterTag: string
+  quarterTitle: string
+}
+
+interface ProjectTypeOption { value: string; label: string; short: string; pill: string }
+
+const PROJECT_TYPE_OPTIONS: ProjectTypeOption[] = [
+  { value: '', label: 'Type not set', short: 'No type', pill: 'bg-gray-100 text-gray-500' },
+  { value: 'core', label: 'Core / enabling', short: 'Core', pill: 'bg-amber-100 text-amber-800' },
+  { value: 'strategic', label: 'Strategic automation', short: 'Strategic', pill: 'bg-cyan/15 text-primary' },
+  { value: 'onboarding', label: 'On-boarding feature set', short: 'On-boarding', pill: 'bg-purple-100 text-purple-700' },
+]
+
+function projectTypeMeta(value: string | null | undefined): ProjectTypeOption {
+  return PROJECT_TYPE_OPTIONS.find(option => option.value === (value || '')) ?? PROJECT_TYPE_OPTIONS[0]
+}
+
+function utcDate(iso: string) {
+  return new Date(`${iso}T00:00:00Z`)
+}
+
+function isoPlusDays(iso: string, days: number) {
+  const next = utcDate(iso)
+  next.setUTCDate(next.getUTCDate() + days)
+  return next.toISOString().slice(0, 10)
+}
+
+function formatIsoDate(iso: string, options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) {
+  return utcDate(iso).toLocaleDateString('en-NZ', { ...options, timeZone: 'UTC' })
+}
+
+function localTodayIso() {
+  const now = new Date()
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
+function quarterOf(iso: string) {
+  const date = utcDate(iso)
+  const year = date.getUTCFullYear()
+  const quarter = Math.floor(date.getUTCMonth() / 3) + 1
+  const first = new Date(Date.UTC(year, (quarter - 1) * 3, 1))
+  const last = new Date(Date.UTC(year, quarter * 3 - 1, 1))
+  const month = (value: Date) => value.toLocaleDateString('en-NZ', { month: 'long', timeZone: 'UTC' })
+  return { key: `q${quarter}-${year}`, tag: `Q${quarter} ${year}`, title: `${month(first)} – ${month(last)} ${year}` }
+}
+
+function generateSprints(): Sprint[] {
+  const sprints: Sprint[] = []
+  let cursor = SPRINT_BOARD_START
+  let number = 1
+  while (cursor < SPRINT_BOARD_END) {
+    const endIso = isoPlusDays(cursor, SPRINT_LENGTH_DAYS - 1)
+    const quarter = quarterOf(cursor)
+    sprints.push({ id: `${cursor}|${endIso}`, number, startIso: cursor, endIso, quarterKey: quarter.key, quarterTag: quarter.tag, quarterTitle: quarter.title })
+    cursor = isoPlusDays(endIso, 1)
+    number += 1
+  }
+  return sprints
+}
+
+const SPRINTS = generateSprints()
+const SPRINT_BY_ID = new Map(SPRINTS.map(sprint => [sprint.id, sprint]))
+
+function sprintIdForRow(row: Pick<RowState, 'sprintStartDate' | 'sprintEndDate'>): string | null {
+  if (!row.sprintStartDate || !row.sprintEndDate) return null
+  const id = `${row.sprintStartDate}|${row.sprintEndDate}`
+  return SPRINT_BY_ID.has(id) ? id : null
+}
+
+function sprintDateRange(sprint: Pick<Sprint, 'startIso' | 'endIso'>) {
+  return `${formatIsoDate(sprint.startIso)} – ${formatIsoDate(sprint.endIso)}`
+}
+
+function sprintLabel(sprint: Sprint) {
+  return `Sprint ${sprint.number} · ${sprintDateRange(sprint)}`
+}
+
+/** Short label for a row's sprint target, or null when unscheduled. */
+function sprintChipLabel(row: Pick<RowState, 'sprintStartDate' | 'sprintEndDate'>): string | null {
+  const id = sprintIdForRow(row)
+  if (id) return sprintLabel(SPRINT_BY_ID.get(id)!)
+  if (row.sprintStartDate && row.sprintEndDate) return `${formatIsoDate(row.sprintStartDate)} – ${formatIsoDate(row.sprintEndDate)}`
+  return null
+}
+
+function currentSprint(todayIso: string) {
+  return SPRINTS.find(sprint => sprint.startIso <= todayIso && todayIso <= sprint.endIso)
+}
+
+interface PlannerItem {
+  id: string
+  devKey: DevKey
+  devName: string
+  devEmoji: string
+  item: ForwardWorkItem
+  forwardWorkUrl: string
+  row: RowState
+}
+
+interface PlannerFilters {
+  owner: DevKey | 'all'
+  strategicOnly: boolean
+  hideCore: boolean
+  onboardingOnly: boolean
+  showDone: boolean
+}
+
+function plannerSummary(list: PlannerItem[]) {
+  if (list.length === 0) return 'Nothing targeted yet'
+  const counts = list.reduce<Record<string, number>>((acc, entry) => {
+    acc[entry.row.status] = (acc[entry.row.status] || 0) + 1
+    return acc
+  }, {})
+  const parts = STATUS_OPTIONS.filter(status => counts[status]).map(status => `${counts[status]} ${status.toLowerCase()}`)
+  return `${list.length} workstream${list.length === 1 ? '' : 's'}${parts.length ? ' · ' + parts.join(' · ') : ''}`
+}
+
+function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragEnd, onTypeChange, onMove }: {
+  entry: PlannerItem
+  expanded: boolean
+  dragging: boolean
+  onToggle: () => void
+  onDragStart: (event: DragEvent<HTMLElement>, id: string) => void
+  onDragEnd: () => void
+  onTypeChange: (entry: PlannerItem, value: string) => void
+  onMove: (entry: PlannerItem, sprintId: string | null) => void
+}) {
+  const type = projectTypeMeta(entry.row.projectType)
+  const sprintId = sprintIdForRow(entry.row)
+  const customDates = !sprintId && entry.row.sprintStartDate && entry.row.sprintEndDate
+  return (
+    <article
+      draggable
+      onDragStart={event => onDragStart(event, entry.id)}
+      onDragEnd={onDragEnd}
+      className={`rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm cursor-grab active:cursor-grabbing transition ${dragging ? 'opacity-40' : ''}`}
+    >
+      <div role="button" tabIndex={0} onClick={onToggle} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onToggle() } }} className="cursor-pointer">
+        <div className="flex items-start gap-1.5">
+          <span className={`text-[10px] text-gray-400 mt-1 transition-transform ${expanded ? 'rotate-90' : ''}`}>▶</span>
+          <div className="min-w-0 flex-1 text-[13px] font-semibold text-primary leading-snug">{entry.item.title}</div>
+        </div>
+        <div className="mt-1.5 ml-4 flex flex-wrap gap-1">
+          <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">{entry.devEmoji} {entry.devName}</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${statusPillClass[entry.row.status]}`}>{entry.row.status}</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${type.pill}`}>{type.short}</span>
+        </div>
+      </div>
+      {expanded && (
+        <div className="mt-2 ml-4 pt-2 border-t border-gray-100 space-y-2">
+          <p className="text-xs text-gray-600 leading-snug">{entry.item.summary}</p>
+          <label className="block">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Project type</span>
+            <select
+              value={entry.row.projectType || ''}
+              onChange={event => onTypeChange(entry, event.target.value)}
+              className="mt-1 w-full text-xs rounded-lg border border-gray-200 px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-cyan/50"
+            >
+              {PROJECT_TYPE_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sprint target</span>
+            <select
+              value={sprintId ?? ''}
+              onChange={event => onMove(entry, event.target.value || null)}
+              className="mt-1 w-full text-xs rounded-lg border border-gray-200 px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-cyan/50"
+            >
+              <option value="">Unscheduled</option>
+              {SPRINTS.map(sprint => <option key={sprint.id} value={sprint.id}>{sprintLabel(sprint)}</option>)}
+            </select>
+          </label>
+          {customDates && (
+            <div className="text-[11px] text-amber-700">Custom dates {entry.row.sprintStartDate} → {entry.row.sprintEndDate} — pick a sprint above to align it.</div>
+          )}
+          {entry.row.notes && <p className="text-[11px] text-gray-500 italic leading-snug">“{entry.row.notes}”</p>}
+          {entry.row.updated && (
+            <div className="text-[10px] text-gray-400">
+              Updated {new Date(entry.row.updated).toLocaleDateString()}{entry.row.updatedBy ? ` · ${entry.row.updatedBy}` : ''}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {entry.item.url && (
+              <a href={entry.item.url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium px-2 py-1 rounded-lg bg-cyan/10 text-primary hover:bg-cyan/20 transition">📄 Open MD</a>
+            )}
+            <a href={entry.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">🛣️ Forward work doc</a>
+          </div>
+        </div>
+      )}
+    </article>
+  )
+}
+
+function SprintPlanner({ currentUser }: { currentUser: string }) {
+  const [rowsByDev, setRowsByDev] = useState<Record<string, Record<string, RowState>>>(() => Object.fromEntries(devs.map(dev => [dev.key, loadDevState(dev.key)])))
+  const [dynamicByDev, setDynamicByDev] = useState<Record<string, ForwardWorkItem[]>>({})
+  const [orderByDev, setOrderByDev] = useState<Record<string, string[]>>(() => Object.fromEntries(devs.map(dev => [dev.key, loadDevOrder(dev.key, dev.forwardWorkItems)])))
+  const [loading, setLoading] = useState(HAS_SHARED_API)
+  const [syncMode, setSyncMode] = useState<SyncMode>(HAS_SHARED_API ? 'shared' : 'local')
+  const [syncMessage, setSyncMessage] = useState(HAS_SHARED_API ? 'Loading shared sprint state…' : 'Local-only mode — sprint targets stay in this browser')
+  const [filters, setFilters] = useState<PlannerFilters>({ owner: 'all', strategicOnly: false, hideCore: false, onboardingOnly: false, showDone: false })
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dragOverZone, setDragOverZone] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [showPastQuarters, setShowPastQuarters] = useState(false)
+  const pendingSaves = useRef(0)
+  const draggingRef = useRef<string | null>(null)
+
+  const today = localTodayIso()
+  const current = useMemo(() => currentSprint(today), [today])
+
+  useEffect(() => {
+    if (!HAS_SHARED_API) return
+    let cancelled = false
+    const refresh = async (initial = false) => {
+      try {
+        const results = await Promise.all(devs.map(async dev => {
+          const [data, dynamic] = await Promise.all([
+            apiGet<{ state: Record<string, RowState>; order: string[] }>(`/api/forward-work/${dev.key}`),
+            apiGet<ForwardWorkItem[]>(`/api/forward-work/${dev.key}/items`).catch(() => [] as ForwardWorkItem[]),
+          ])
+          return { dev, data, dynamic }
+        }))
+        if (cancelled) return
+        // Never clobber an optimistic change that is still being written or dragged.
+        if (!initial && (pendingSaves.current > 0 || draggingRef.current)) return
+        setRowsByDev(Object.fromEntries(results.map(({ dev, data }) => [
+          dev.key,
+          Object.fromEntries(Object.entries(data.state || {}).map(([key, value]) => [key, normalizeRowState(value)])),
+        ])))
+        setDynamicByDev(Object.fromEntries(results.map(({ dev, dynamic }) => [
+          dev.key,
+          Array.isArray(dynamic) ? dynamic.filter(item => item && typeof item.key === 'string') : [],
+        ])))
+        setOrderByDev(Object.fromEntries(results.map(({ dev, data }) => [
+          dev.key,
+          Array.isArray(data.order) ? data.order.filter(key => typeof key === 'string') : [],
+        ])))
+        setSyncMode('shared')
+        setSyncMessage('Shared sync connected')
+        setLoading(false)
+      } catch {
+        if (cancelled) return
+        setSyncMode('local')
+        setSyncMessage('Shared API unavailable — showing local browser state')
+        setLoading(false)
+      }
+    }
+    void refresh(true)
+    const timer = window.setInterval(() => { void refresh() }, 20000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [])
+
+  const items = useMemo<PlannerItem[]>(() => devs.flatMap(dev => {
+    const staticKeys = new Set(dev.forwardWorkItems.map(item => item.key))
+    const all = [...(dynamicByDev[dev.key] || []).filter(item => !staticKeys.has(item.key)), ...dev.forwardWorkItems]
+    const orderIndex = new Map((orderByDev[dev.key] || []).map((key, index) => [key, index]))
+    return all
+      .map(item => ({
+        id: `${dev.key}:${item.key}`,
+        devKey: dev.key,
+        devName: dev.name,
+        devEmoji: dev.emoji,
+        item,
+        forwardWorkUrl: dev.forwardWorkUrl,
+        row: normalizeRowState(rowsByDev[dev.key]?.[item.key]),
+      }))
+      .sort((a, b) => (orderIndex.get(a.item.key) ?? Number.MAX_SAFE_INTEGER) - (orderIndex.get(b.item.key) ?? Number.MAX_SAFE_INTEGER))
+  }), [dynamicByDev, orderByDev, rowsByDev])
+
+  const passesFilters = (entry: PlannerItem) => {
+    const type = entry.row.projectType || ''
+    if (filters.owner !== 'all' && entry.devKey !== filters.owner) return false
+    if (filters.strategicOnly && type !== 'strategic') return false
+    if (filters.hideCore && type === 'core') return false
+    if (filters.onboardingOnly && type !== 'onboarding') return false
+    return true
+  }
+
+  const visible = items.filter(passesFilters)
+  const backlog = visible.filter(entry => !sprintIdForRow(entry.row) && (filters.showDone || entry.row.status !== 'Done'))
+  const bySprint = new Map<string, PlannerItem[]>()
+  visible.forEach(entry => {
+    const id = sprintIdForRow(entry.row)
+    if (!id) return
+    bySprint.set(id, [...(bySprint.get(id) || []), entry])
+  })
+  const scheduledCount = items.filter(entry => sprintIdForRow(entry.row)).length
+  const unscheduledOpenCount = items.filter(entry => !sprintIdForRow(entry.row) && entry.row.status !== 'Done').length
+  const currentList = current ? items.filter(entry => sprintIdForRow(entry.row) === current.id) : []
+
+  const quarters = useMemo(() => {
+    const groups: { key: string; tag: string; title: string; sprints: Sprint[] }[] = []
+    SPRINTS.forEach(sprint => {
+      let group = groups.find(candidate => candidate.key === sprint.quarterKey)
+      if (!group) {
+        group = { key: sprint.quarterKey, tag: sprint.quarterTag, title: sprint.quarterTitle, sprints: [] }
+        groups.push(group)
+      }
+      group.sprints.push(sprint)
+    })
+    return groups
+  }, [])
+
+  const persist = async (entry: PlannerItem, patch: Partial<RowState>) => {
+    const previous = rowsByDev[entry.devKey]?.[entry.item.key]
+    const next: RowState = { ...blankRow, ...entry.row, ...patch, updated: Date.now(), updatedBy: userDisplayName(currentUser) }
+    setRowsByDev(prev => ({ ...prev, [entry.devKey]: { ...prev[entry.devKey], [entry.item.key]: next } }))
+    if (!HAS_SHARED_API) {
+      saveDevState(entry.devKey, { ...loadDevState(entry.devKey), [entry.item.key]: next })
+      setSyncMessage(`Saved ${entry.item.title} locally`)
+      return
+    }
+    pendingSaves.current += 1
+    setSyncMessage(`Saving ${entry.item.title}…`)
+    try {
+      const saved = await apiSend<RowState>(`/api/forward-work/${entry.devKey}/${entry.item.key}`, 'PUT', {
+        status: next.status,
+        notes: next.notes,
+        projectType: next.projectType ?? null,
+        sprintStartDate: next.sprintStartDate ?? null,
+        sprintEndDate: next.sprintEndDate ?? null,
+        updatedBy: next.updatedBy,
+      })
+      setRowsByDev(prev => ({ ...prev, [entry.devKey]: { ...prev[entry.devKey], [entry.item.key]: normalizeRowState(saved) } }))
+      setSyncMode('shared')
+      setSyncMessage(`Saved ${entry.item.title} · ${userDisplayName(currentUser)}`)
+    } catch {
+      setRowsByDev(prev => ({ ...prev, [entry.devKey]: { ...prev[entry.devKey], [entry.item.key]: normalizeRowState(previous) } }))
+      setSyncMode('local')
+      setSyncMessage(`Could not save ${entry.item.title} — change reverted`)
+    } finally {
+      pendingSaves.current -= 1
+    }
+  }
+
+  const moveTo = (entry: PlannerItem, sprintId: string | null) => {
+    if (sprintIdForRow(entry.row) === sprintId && !(sprintId === null && entry.row.sprintStartDate)) return
+    const sprint = sprintId ? SPRINT_BY_ID.get(sprintId) : undefined
+    void persist(entry, { sprintStartDate: sprint?.startIso ?? null, sprintEndDate: sprint?.endIso ?? null })
+  }
+
+  const changeType = (entry: PlannerItem, value: string) => {
+    if ((entry.row.projectType || '') === value) return
+    void persist(entry, { projectType: value || null })
+  }
+
+  const onDragStart = (event: DragEvent<HTMLElement>, id: string) => {
+    draggingRef.current = id
+    setDraggingId(id)
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', id)
+  }
+
+  const onDragEnd = () => {
+    draggingRef.current = null
+    setDraggingId(null)
+    setDragOverZone(null)
+  }
+
+  // Drop zones carry their id in data-zone so one set of handlers serves every zone.
+  const onZoneDragOver = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    const zoneId = event.currentTarget.dataset.zone ?? null
+    setDragOverZone(zone => (zone === zoneId ? zone : zoneId))
+  }
+  const onZoneDragLeave = (event: DragEvent<HTMLElement>) => {
+    if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return
+    const zoneId = event.currentTarget.dataset.zone
+    setDragOverZone(zone => (zone === zoneId ? null : zone))
+  }
+  const onZoneDrop = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault()
+    const zoneId = event.currentTarget.dataset.zone
+    const id = event.dataTransfer.getData('text/plain') || draggingRef.current
+    draggingRef.current = null
+    setDragOverZone(null)
+    setDraggingId(null)
+    if (!id || !zoneId) return
+    const entry = items.find(candidate => candidate.id === id)
+    if (!entry) return
+    moveTo(entry, zoneId === 'backlog' ? null : zoneId)
+  }
+  const zoneProps = { onDragOver: onZoneDragOver, onDragLeave: onZoneDragLeave, onDrop: onZoneDrop }
+
+  const renderCard = (entry: PlannerItem) => (
+    <PlannerCard
+      key={entry.id}
+      entry={entry}
+      expanded={expandedId === entry.id}
+      dragging={draggingId === entry.id}
+      onToggle={() => setExpandedId(open => (open === entry.id ? null : entry.id))}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onTypeChange={changeType}
+      onMove={moveTo}
+    />
+  )
+
+  const toggleFilter = (key: 'strategicOnly' | 'hideCore' | 'onboardingOnly' | 'showDone') => {
+    setFilters(prev => {
+      const next = { ...prev, [key]: !prev[key] }
+      // Strategic-only and on-boarding-only are mutually exclusive views.
+      if (key === 'strategicOnly' && next.strategicOnly) next.onboardingOnly = false
+      if (key === 'onboardingOnly' && next.onboardingOnly) next.strategicOnly = false
+      return next
+    })
+  }
+
+  const dropHint = 'rounded-lg border border-dashed border-gray-300 bg-white/60 px-3 py-4 text-center text-xs text-gray-400'
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-primary"><span className="mr-2">📅</span>Sprint board</h3>
+            <p className="text-gray-600 text-sm mt-1 max-w-3xl">
+              Rolling 2-week sprints from {formatIsoDate(SPRINT_BOARD_START, { day: 'numeric', month: 'long', year: 'numeric' })}. Drag a workstream from the unscheduled list into a sprint to set its target dates.
+              Targets save to the shared Railway forward-work row, so they show on each developer's tab too.
+            </p>
+          </div>
+          <span className={`text-xs px-2 py-1 rounded-full font-medium ${syncMode === 'shared' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{syncMessage}</span>
+        </div>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-lg bg-cyan/10 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Current sprint</div>
+            {current ? (
+              <>
+                <div className="text-base font-semibold text-primary">Sprint {current.number}</div>
+                <div className="text-xs text-gray-600">{sprintDateRange(current)}</div>
+              </>
+            ) : (
+              <div className="text-sm text-gray-600">Board starts {formatIsoDate(SPRINT_BOARD_START)}</div>
+            )}
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">In current sprint</div>
+            <div className="text-base font-semibold text-primary">{currentList.length}</div>
+            <div className="text-xs text-gray-600">{currentList.filter(entry => entry.row.status === 'In progress').length} in progress · {currentList.filter(entry => entry.row.status === 'Done').length} done</div>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Scheduled</div>
+            <div className="text-base font-semibold text-primary">{scheduledCount}</div>
+            <div className="text-xs text-gray-600">across {SPRINTS.length} sprints</div>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Unscheduled</div>
+            <div className="text-base font-semibold text-primary">{unscheduledOpenCount}</div>
+            <div className="text-xs text-gray-600">open workstreams without a sprint</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] items-start">
+        <aside
+          data-zone="backlog"
+          {...zoneProps}
+          className={`lg:sticky lg:top-16 bg-white rounded-xl border border-gray-200 shadow-sm p-4 transition ${dragOverZone === 'backlog' ? 'ring-2 ring-cyan bg-cyan/5' : ''}`}
+        >
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Unscheduled</h4>
+            <span className="text-xs text-gray-400">({backlog.length})</span>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 mb-3">Done work is hidden unless shown. Drop a card anywhere on this panel to unschedule it.</p>
+          <div className="space-y-2 mb-3">
+            <select
+              value={filters.owner}
+              onChange={event => setFilters(prev => ({ ...prev, owner: event.target.value as PlannerFilters['owner'] }))}
+              className="w-full text-xs rounded-lg border border-gray-200 px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-cyan/50"
+            >
+              <option value="all">All developers</option>
+              {devs.map(dev => <option key={dev.key} value={dev.key}>{dev.emoji} {dev.name}</option>)}
+            </select>
+            <div className="grid grid-cols-1 gap-1.5 text-xs text-gray-700">
+              <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5"><input type="checkbox" checked={filters.strategicOnly} onChange={() => toggleFilter('strategicOnly')} /> Strategic automation only</label>
+              <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5"><input type="checkbox" checked={filters.hideCore} onChange={() => toggleFilter('hideCore')} /> Hide core / enabling</label>
+              <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5"><input type="checkbox" checked={filters.onboardingOnly} onChange={() => toggleFilter('onboardingOnly')} /> On-boarding feature set only</label>
+              <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5"><input type="checkbox" checked={filters.showDone} onChange={() => toggleFilter('showDone')} /> Show done work</label>
+            </div>
+          </div>
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto rounded-lg p-1">
+            {loading ? (
+              <div className={dropHint}>Loading workstreams…</div>
+            ) : backlog.length === 0 ? (
+              <div className={dropHint}>{draggingId ? 'Drop here to unschedule' : 'Everything matching these filters is scheduled'}</div>
+            ) : backlog.map(renderCard)}
+          </div>
+        </aside>
+
+        <div className="space-y-5 min-w-0">
+          {quarters.map(quarter => {
+            const quarterEntries = quarter.sprints.reduce((sum, sprint) => sum + (bySprint.get(sprint.id)?.length ?? 0), 0)
+            const quarterPast = quarter.sprints.every(sprint => sprint.endIso < today)
+            const collapsed = quarterPast && !showPastQuarters
+            return (
+              <section key={quarter.key} className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+                <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
+                  <div>
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-semibold tracking-wide">{quarter.tag}</span>
+                    <h4 className="text-base font-semibold text-primary mt-1">{quarter.title}</h4>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>{quarterEntries} workstream{quarterEntries === 1 ? '' : 's'}</span>
+                    {quarterPast && (
+                      <button type="button" onClick={() => setShowPastQuarters(value => !value)} className="px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50">
+                        {collapsed ? 'Show past sprints' : 'Hide past sprints'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {!collapsed && (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {quarter.sprints.map(sprint => {
+                      const list = bySprint.get(sprint.id) || []
+                      const isCurrent = sprint.id === current?.id
+                      const isPast = sprint.endIso < today
+                      return (
+                        <div
+                          key={sprint.id}
+                          id={isCurrent ? 'sprint-current' : undefined}
+                          data-zone={sprint.id}
+                          {...zoneProps}
+                          className={`rounded-lg border p-3 min-h-44 transition ${isCurrent ? 'border-cyan bg-cyan/5' : 'border-gray-200 bg-gray-50'} ${isPast ? 'opacity-70' : ''} ${dragOverZone === sprint.id ? 'ring-2 ring-cyan' : ''}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="text-sm font-semibold text-primary">Sprint {sprint.number}</div>
+                              <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">{sprintDateRange(sprint)}</div>
+                            </div>
+                            {isCurrent && <span className="px-2 py-0.5 rounded-full bg-cyan text-primary text-[10px] font-bold">Current</span>}
+                            {isPast && !isCurrent && <span className="px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 text-[10px] font-semibold">Past</span>}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1 mb-2">{plannerSummary(list)}</div>
+                          <div className="space-y-2">
+                            {list.length === 0 ? <div className={dropHint}>Drop workstreams here</div> : list.map(renderCard)}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </section>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+type Tab = DevKey | 'sprints'
 
 const tabs: { key: Tab; label: string; emoji: string }[] = [
+  { key: 'sprints', label: 'Sprint board', emoji: '📅' },
   { key: 'garry', label: 'Garry', emoji: '🛠️' },
   { key: 'kevin', label: 'Kevin', emoji: '🚚' },
   { key: 'kerran', label: 'Kerran', emoji: '🧾' },
@@ -2152,8 +2745,10 @@ export default function App() {
           ))}
         </div>
       </nav>
-      <main className="max-w-6xl mx-auto p-6 space-y-6">
-        {activeDev ? (
+      <main className={`${tab === 'sprints' ? 'max-w-[1400px]' : 'max-w-6xl'} mx-auto p-6 space-y-6`}>
+        {tab === 'sprints' ? (
+          <SprintPlanner currentUser={editorName} />
+        ) : activeDev ? (
           <>
             <DevHeader dev={activeDev} />
             <section>

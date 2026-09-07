@@ -235,13 +235,25 @@ async function handleGetForwardWork(devKey, res) {
   sendJson(res, 200, { state, order })
 }
 
+function optionalText(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
 async function handlePutForwardWork(devKey, itemKey, req, res) {
   const body = await readBody(req)
   const status = typeof body.status === 'string' ? body.status : 'Not started'
   const notes = typeof body.notes === 'string' ? body.notes : ''
-  const projectType = typeof body.projectType === 'string' && body.projectType.trim() ? body.projectType.trim() : null
-  const sprintStartDate = typeof body.sprintStartDate === 'string' && body.sprintStartDate.trim() ? body.sprintStartDate.trim() : null
-  const sprintEndDate = typeof body.sprintEndDate === 'string' && body.sprintEndDate.trim() ? body.sprintEndDate.trim() : null
+
+  // Sprint-board fields: a client that omits them (e.g. a plain status update)
+  // keeps whatever is stored; send an explicit null to clear one.
+  const [existing] = await sql`
+    select project_type, sprint_start_date, sprint_end_date
+    from dashboard_forward_work_state
+    where dev_key = ${devKey} and item_key = ${itemKey}
+  `
+  const projectType = body.projectType === undefined ? (existing?.project_type ?? null) : optionalText(body.projectType)
+  const sprintStartDate = body.sprintStartDate === undefined ? normalizeDateOnly(existing?.sprint_start_date) : optionalText(body.sprintStartDate)
+  const sprintEndDate = body.sprintEndDate === undefined ? normalizeDateOnly(existing?.sprint_end_date) : optionalText(body.sprintEndDate)
   const updatedBy = typeof body.updatedBy === 'string' ? body.updatedBy : null
 
   const [row] = await sql`

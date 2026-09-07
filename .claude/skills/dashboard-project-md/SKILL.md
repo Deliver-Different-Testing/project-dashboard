@@ -32,6 +32,16 @@ So "put an MD on <dev>'s dashboard" is two deliverables:
 
 Do both. One without the other either hides the doc (no card) or links to nothing (no MD).
 
+## The Sprint board tab
+
+The first tab on the dashboard is the **Sprint board** (`SprintPlanner` in `src/App.tsx`).
+It does not have its own data: it lays every developer's `forwardWorkItems` (plus dynamic
+items from the API) out across rolling 2-week sprints. A workstream's sprint target and
+project type are stored on the *same* Railway forward-work row as its status and notes
+(`projectType`, `sprintStartDate`, `sprintEndDate`). So adding a forward-work item to a
+developer in `devs` automatically makes it available on the board — nothing extra to do.
+Details in `docs/SPRINT-BOARD.md`.
+
 ## Branch awareness — important
 
 `project-dashboard` has several branches that are **different products**:
