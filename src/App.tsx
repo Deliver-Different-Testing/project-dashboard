@@ -1,4 +1,9 @@
 import { Fragment, useState, useEffect, useMemo, useRef, type DragEvent } from 'react'
+import {
+  RUNWAY, RUNWAY_PROJECT_BY_ID, type RunwayProject, type RunwayStatus,
+  projectRunway, fullPlanPotential, crossingsForSchedule, runwayMonthRange,
+  ymIdx, ymLabel, ymEndIso, fmtK, projectHours, projectHoursLabel, hoursLabel, functionStyle, TEAM_SHORT,
+} from './runway'
 
 type DevKey = 'garry' | 'kevin' | 'kerran' | 'jacob' | 'strategy'
 
@@ -22,7 +27,7 @@ const SCHEDULED_RATE_DOC = (f: string) => `https://github.com/Deliver-Different-
 const KERRAN_CONFIG_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/Kerran-Configurator/blob/kerran/new-ui-foundation/docs/${f}`
 const DASHBOARD_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/project-dashboard/blob/master/docs/${f}`
 const BAGGAGE_DOC = (f: string) => `https://github.com/Deliver-Different-Testing/baggage-portal/blob/master/${f}`
-const BUILD_ID = '2026-09-07-1200'
+const BUILD_ID = '2026-09-07-1800'
 
 const projects: Project[] = [
   { name: 'DFRNT CSP', emoji: '💬', slug: 'dfrnt-csp', status: 'Active', owner: 'jacob', description: 'Unified inbox (email/chat/tasks), client health, Auto-Mate AI assistant', live: 'https://deliver-different-testing.github.io/DFRNT-CRM/', repo: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM', docs: 'https://github.com/Deliver-Different-Testing/DFRNT-CRM/blob/main/IMPLEMENTATION.md' },
@@ -69,6 +74,8 @@ interface ForwardWorkItem {
   summary: string
   date: string | null
   url?: string
+  /** Delivery commitment from the developer's MD (YYYY-MM-DD). The Sprint board target is the live plan; this is what was agreed at handover. */
+  due?: string | null
 }
 
 interface Dev {
@@ -827,6 +834,34 @@ const devs: Dev[] = [
     forwardWorkUrl: CONFIG_DOC('FORWARD-JACOB.md'),
     forwardWorkItems: [
       {
+        key: 'voice-agent-3cx-client-lookup-endpoint',
+        title: '3CX voice agent — client lookup by caller phone number (Integration Manager endpoint)',
+        summary: 'Automation Runway enabler (v1). Add one Integration Manager endpoint that resolves the calling phone number to a client and contact, so Andy’s 3CX voice agent knows who is calling before it books or answers. The voice flows themselves are built outside DFRNT; this endpoint is the only dev dependency. Spec MD to follow.',
+        date: '2026-09-07',
+        due: '2026-10-31',
+      },
+      {
+        key: 'email-chat-parser-tracking-pod-updates',
+        title: 'Email/chat parser — tracking, POD and job-detail update requests',
+        summary: 'Automation Runway s2. Extend the intake parser so inbound emails and chats asking for tracking, a POD, or a job-detail change are recognised and answered or applied automatically instead of landing on Customer Service. Builds on the PDF intake review queue. Spec MD to follow.',
+        date: '2026-09-07',
+        due: '2026-10-31',
+      },
+      {
+        key: 'csp-chatbot-intercom-replacement',
+        title: 'CSP chatbot — Intercom replacement',
+        summary: 'Automation Runway i1. Client-facing chatbot inside DFRNT CSP that answers from Kenneth’s new help docs and hands off to a person when it cannot. Needed before Intercom is switched off. Spec MD to follow.',
+        date: '2026-09-07',
+        due: '2026-10-31',
+      },
+      {
+        key: 'ndp-eco-overnight-tracking-links',
+        title: 'NDP / Eco Overnight — tracking link improvements',
+        summary: 'Automation Runway item. Improve the tracking links sent for NDP / Eco Overnight jobs so customers self-serve delivery status instead of calling Customer Service. Spec MD to follow.',
+        date: '2026-09-07',
+        due: '2026-11-30',
+      },
+      {
         key: 'automations-email-fields-multi-recipient',
         title: 'Automations — Booked By Email, Logged in Contact Email, multi-select recipients',
         summary: 'Add Booked By Email, rename Client contact email to Logged in Contact Email, make the automations recipient picker multi-select.',
@@ -949,6 +984,53 @@ const devs: Dev[] = [
   },
 ]
 
+// Which developer forward-work items deliver which Automation Runway projects.
+// Key is `${devKey}:${itemKey}`; values are project ids from src/data/automation-runway.json.
+// A linked item counts as "Strategic automation" on the Sprint board, and a runway project's
+// hours land in the sprint where the last of its linked items is scheduled.
+const RUNWAY_LINKS: Record<string, string[]> = {
+  // Job Distribution
+  'kevin:recurring-route-multi-schedule-live-routed-autodispatch': ['p1'],
+  'kevin:routed-operations-schedules-zones-zone-groups-handover': ['p1'],
+  'kevin:driver-scheduling-routed-operations': ['p1'],
+  'kevin:zip-polygon-seed-to-custom-coverage': ['p2'],
+  'garry:np-agent-single-modal-addendum': ['p2'],
+  // Job Intake
+  'jacob:voice-agent-3cx-client-lookup-endpoint': ['v1'],
+  'jacob:csp-chatbot-intercom-replacement': ['i1'],
+  'jacob:pdf-intake-job-creation-spec': ['i3'],
+  'jacob:pdf-intake-backend-handover': ['i3'],
+  'kevin:runviewer-outstanding-fixes-consolidated': ['i2'],
+  // Job Support
+  'jacob:automations-email-fields-multi-recipient': ['s1'],
+  'garry:automation-engine-trigger-options-parity': ['s1'],
+  'jacob:email-chat-parser-tracking-pod-updates': ['s2'],
+  'garry:client-alert-delivery-window-config': ['s3'],
+  'garry:courier-portal-phase-3': ['s6'],
+  'garry:courier-portal-and-modal': ['s6'],
+  'kerran:courier-list-and-courier-detail-ui-tidy-up': ['s6'],
+  'kerran:courier-modal-code-topbar-openforce': ['s6'],
+  'jacob:ndp-eco-overnight-tracking-links': ['xrc3b2em'],
+  // Reporting
+  'kerran:client-revenue-report-accounts': ['r1'],
+  'jacob:client-difot-reporting': ['r2'],
+  'kerran:ar-reminder-cycle': ['r3'],
+  'kerran:ar-pack': ['r3'],
+  'kerran:tenant-generated-contractor-invoices': ['r4'],
+  'kerran:bcti-auto-allocate-credits': ['r4'],
+}
+function runwayIdsFor(devKey: string, itemKey: string): string[] {
+  return RUNWAY_LINKS[`${devKey}:${itemKey}`] ?? []
+}
+const LINKED_RUNWAY_IDS = new Set(Object.values(RUNWAY_LINKS).flat())
+/** Runway projects with no developer item yet. They appear on the Sprint board as their own cards. */
+const RUNWAY_ONLY_PROJECTS = RUNWAY.projects.filter(project => !LINKED_RUNWAY_IDS.has(project.id))
+/** Pseudo developer key under which runway-only cards store sprint targets in Railway. */
+const RUNWAY_SOURCE_KEY = 'runway'
+function runwayLinkedItemCount(projectId: string) {
+  return Object.values(RUNWAY_LINKS).filter(ids => ids.includes(projectId)).length
+}
+
 type ItemStatus = 'Not started' | 'In progress' | 'Blocked' | 'In review' | 'Done'
 
 const STATUS_OPTIONS: ItemStatus[] = ['Not started', 'In progress', 'Blocked', 'In review', 'Done']
@@ -959,6 +1041,10 @@ const statusPillClass: Record<ItemStatus, string> = {
   'Blocked': 'bg-red-100 text-red-700',
   'In review': 'bg-amber-100 text-amber-800',
   'Done': 'bg-green-100 text-green-700',
+}
+
+function runwayStatusToItemStatus(status: RunwayStatus): ItemStatus {
+  return status === 'done' ? 'Done' : status === 'active' ? 'In progress' : 'Not started'
 }
 
 interface RowState {
@@ -1664,9 +1750,17 @@ function ForwardWorkTable({ dev, currentUser }: { dev: Dev; currentUser: string 
                           ) : item.title}
                         </div>
                         <div className="text-xs text-gray-500 mt-0.5 leading-snug">{item.summary}</div>
-                        {sprintChipLabel(row) && (
-                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-cyan/10 text-primary text-[10px] font-semibold" title="Sprint target set on the Sprint board">📅 {sprintChipLabel(row)}</span>
-                        )}
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {item.due && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold" title="Delivery commitment from the handover MD">⏰ Due {formatIsoDate(item.due, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          )}
+                          {sprintChipLabel(row) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan/10 text-primary text-[10px] font-semibold" title="Sprint target set on the Sprint board">📅 {sprintChipLabel(row)}</span>
+                          )}
+                          {runwayIdsFor(devKey, item.key).map(id => RUNWAY_PROJECT_BY_ID.get(id)).filter((project): project is RunwayProject => !!project).map(project => (
+                            <span key={project.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold" title={`Automation Runway: ${project.name} (${projectHoursLabel(project) || 'enabler'})`}>🛫 {project.name.length > 48 ? project.name.slice(0, 46) + '…' : project.name}</span>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-3 py-2 text-xs text-gray-600 whitespace-nowrap">{item.date ?? '—'}</td>
                       <td className="px-3 py-2">
@@ -2193,16 +2287,23 @@ function currentSprint(todayIso: string) {
 
 interface PlannerItem {
   id: string
-  devKey: DevKey
+  /** A DevKey, or RUNWAY_SOURCE_KEY for a runway project that has no developer item yet. */
+  devKey: string
   devName: string
   devEmoji: string
   item: ForwardWorkItem
   forwardWorkUrl: string
   row: RowState
+  runwayIds: string[]
+  runwayOnly: boolean
+}
+
+function effectiveProjectType(entry: PlannerItem) {
+  return entry.row.projectType || (entry.runwayIds.length > 0 ? 'strategic' : '')
 }
 
 interface PlannerFilters {
-  owner: DevKey | 'all'
+  owner: DevKey | typeof RUNWAY_SOURCE_KEY | 'all'
   strategicOnly: boolean
   hideCore: boolean
   onboardingOnly: boolean
@@ -2229,8 +2330,9 @@ function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragE
   onTypeChange: (entry: PlannerItem, value: string) => void
   onMove: (entry: PlannerItem, sprintId: string | null) => void
 }) {
-  const type = projectTypeMeta(entry.row.projectType)
+  const type = projectTypeMeta(effectiveProjectType(entry))
   const sprintId = sprintIdForRow(entry.row)
+  const runwayProjects = entry.runwayIds.map(id => RUNWAY_PROJECT_BY_ID.get(id)).filter((project): project is RunwayProject => !!project)
   const customDates = !sprintId && entry.row.sprintStartDate && entry.row.sprintEndDate
   return (
     <article
@@ -2247,7 +2349,13 @@ function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragE
         <div className="mt-1.5 ml-4 flex flex-wrap gap-1">
           <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">{entry.devEmoji} {entry.devName}</span>
           <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${statusPillClass[entry.row.status]}`}>{entry.row.status}</span>
-          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${type.pill}`}>{type.short}</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${type.pill}`} title={!entry.row.projectType && entry.runwayIds.length ? 'Strategic automation, via its runway link' : undefined}>{type.short}</span>
+          {runwayProjects.length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold" title={runwayProjects.map(project => project.name).join('\n')}>🛫 {entry.runwayOnly ? 'Runway' : `Runway ×${runwayProjects.length}`}</span>
+          )}
+          {entry.item.due && (
+            <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold" title="Delivery commitment from the handover MD">⏰ {formatIsoDate(entry.item.due)}</span>
+          )}
         </div>
       </div>
       {expanded && (
@@ -2278,6 +2386,17 @@ function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragE
             <div className="text-[11px] text-amber-700">Custom dates {entry.row.sprintStartDate} → {entry.row.sprintEndDate} — pick a sprint above to align it.</div>
           )}
           {entry.row.notes && <p className="text-[11px] text-gray-500 italic leading-snug">“{entry.row.notes}”</p>}
+          {runwayProjects.length > 0 && (
+            <div className="rounded-lg bg-emerald-50/70 px-2 py-1.5 space-y-1">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-emerald-800">Automation Runway</div>
+              {runwayProjects.map(project => (
+                <div key={project.id} className="text-[11px] text-gray-700 leading-snug">
+                  <span className="font-medium">{project.name}</span>
+                  <span className="text-gray-500"> · {ymLabel(project.start)} – {ymLabel(project.end)}{projectHoursLabel(project) ? ` · ${projectHoursLabel(project)}` : ' · enabler'}{project.owner && project.owner !== 'Unassigned' ? ` · ${project.owner}` : ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {entry.row.updated && (
             <div className="text-[10px] text-gray-400">
               Updated {new Date(entry.row.updated).toLocaleDateString()}{entry.row.updatedBy ? ` · ${entry.row.updatedBy}` : ''}
@@ -2287,7 +2406,9 @@ function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragE
             {entry.item.url && (
               <a href={entry.item.url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium px-2 py-1 rounded-lg bg-cyan/10 text-primary hover:bg-cyan/20 transition">📄 Open MD</a>
             )}
-            <a href={entry.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">🛣️ Forward work doc</a>
+            {entry.forwardWorkUrl && (
+              <a href={entry.forwardWorkUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">{entry.runwayOnly ? '🛫 Open planner' : '🛣️ Forward work doc'}</a>
+            )}
           </div>
         </div>
       )}
@@ -2296,7 +2417,7 @@ function PlannerCard({ entry, expanded, dragging, onToggle, onDragStart, onDragE
 }
 
 function SprintPlanner({ currentUser }: { currentUser: string }) {
-  const [rowsByDev, setRowsByDev] = useState<Record<string, Record<string, RowState>>>(() => Object.fromEntries(devs.map(dev => [dev.key, loadDevState(dev.key)])))
+  const [rowsByDev, setRowsByDev] = useState<Record<string, Record<string, RowState>>>(() => Object.fromEntries([...devs.map(dev => dev.key), RUNWAY_SOURCE_KEY].map(key => [key, loadDevState(key)])))
   const [dynamicByDev, setDynamicByDev] = useState<Record<string, ForwardWorkItem[]>>({})
   const [orderByDev, setOrderByDev] = useState<Record<string, string[]>>(() => Object.fromEntries(devs.map(dev => [dev.key, loadDevOrder(dev.key, dev.forwardWorkItems)])))
   const [loading, setLoading] = useState(HAS_SHARED_API)
@@ -2318,10 +2439,11 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
     let cancelled = false
     const refresh = async (initial = false) => {
       try {
-        const results = await Promise.all(devs.map(async dev => {
+        const sources = [...devs.map(dev => ({ key: dev.key, dynamic: true })), { key: RUNWAY_SOURCE_KEY, dynamic: false }]
+        const results = await Promise.all(sources.map(async dev => {
           const [data, dynamic] = await Promise.all([
             apiGet<{ state: Record<string, RowState>; order: string[] }>(`/api/forward-work/${dev.key}`),
-            apiGet<ForwardWorkItem[]>(`/api/forward-work/${dev.key}/items`).catch(() => [] as ForwardWorkItem[]),
+            dev.dynamic ? apiGet<ForwardWorkItem[]>(`/api/forward-work/${dev.key}/items`).catch(() => [] as ForwardWorkItem[]) : Promise.resolve([] as ForwardWorkItem[]),
           ])
           return { dev, data, dynamic }
         }))
@@ -2363,7 +2485,7 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
     const all = [...(dynamicByDev[dev.key] || []).filter(item => !staticKeys.has(item.key)), ...dev.forwardWorkItems]
     const orderIndex = new Map((orderByDev[dev.key] || []).map((key, index) => [key, index]))
     return all
-      .map(item => ({
+      .map((item): PlannerItem => ({
         id: `${dev.key}:${item.key}`,
         devKey: dev.key,
         devName: dev.name,
@@ -2371,12 +2493,95 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
         item,
         forwardWorkUrl: dev.forwardWorkUrl,
         row: normalizeRowState(rowsByDev[dev.key]?.[item.key]),
+        runwayIds: runwayIdsFor(dev.key, item.key),
+        runwayOnly: false,
       }))
       .sort((a, b) => (orderIndex.get(a.item.key) ?? Number.MAX_SAFE_INTEGER) - (orderIndex.get(b.item.key) ?? Number.MAX_SAFE_INTEGER))
-  }), [dynamicByDev, orderByDev, rowsByDev])
+  }).concat(RUNWAY_ONLY_PROJECTS
+    .slice()
+    .sort((a, b) => ymIdx(a.start) - ymIdx(b.start) || ymIdx(a.end) - ymIdx(b.end))
+    .map((project): PlannerItem => {
+      const stored = rowsByDev[RUNWAY_SOURCE_KEY]?.[project.id]
+      const row: RowState = stored ? normalizeRowState(stored) : { ...blankRow, status: runwayStatusToItemStatus(project.status) }
+      return {
+        id: `${RUNWAY_SOURCE_KEY}:${project.id}`,
+        devKey: RUNWAY_SOURCE_KEY,
+        devName: project.owner && project.owner !== 'Unassigned' ? project.owner : 'Unassigned',
+        devEmoji: '🛫',
+        item: {
+          key: project.id,
+          title: project.name,
+          summary: [project.note, `Planner window ${ymLabel(project.start)} – ${ymLabel(project.end)}${projectHoursLabel(project) ? `, ${projectHoursLabel(project)}` : ''}. No developer item yet — schedule it here or hand it over as an MD.`].filter(Boolean).join(' '),
+          date: `${project.start}-01`,
+        },
+        forwardWorkUrl: RUNWAY.artifactUrl,
+        row,
+        runwayIds: [project.id],
+        runwayOnly: true,
+      }
+    })), [dynamicByDev, orderByDev, rowsByDev])
+
+  // Where each runway project's hours land: the latest sprint among its linked cards,
+  // once every open card has a sprint. Done cards count as banked already.
+  const landings = useMemo(() => {
+    const sprintIndex = new Map(SPRINTS.map((sprint, index) => [sprint.id, index]))
+    const byProject = new Map<string, PlannerItem[]>()
+    items.forEach(entry => entry.runwayIds.forEach(id => byProject.set(id, [...(byProject.get(id) || []), entry])))
+    const out: { project: RunwayProject; sprintId: string | null; done: boolean; unscheduledCards: number }[] = []
+    byProject.forEach((entries, id) => {
+      const project = RUNWAY_PROJECT_BY_ID.get(id)
+      if (!project) return
+      const open = entries.filter(entry => entry.row.status !== 'Done')
+      const latest = (list: PlannerItem[]) => list.map(entry => sprintIdForRow(entry.row)).filter((value): value is string => !!value)
+        .sort((a, b) => (sprintIndex.get(b) ?? 0) - (sprintIndex.get(a) ?? 0))[0] ?? null
+      const unscheduledCards = open.filter(entry => !sprintIdForRow(entry.row)).length
+      const done = open.length === 0
+      out.push({ project, sprintId: done ? latest(entries) : unscheduledCards === 0 ? latest(open) : null, done, unscheduledCards })
+    })
+    return out
+  }, [items])
+  const landingBySprint = new Map<string, { hours: Record<string, number>; projects: RunwayProject[] }>()
+  landings.forEach(landing => {
+    if (!landing.sprintId) return
+    const bucket = landingBySprint.get(landing.sprintId) ?? { hours: {}, projects: [] }
+    Object.entries(landing.project.hours || {}).forEach(([team, value]) => { bucket.hours[team] = (bucket.hours[team] || 0) + (Number(value) || 0) })
+    bucket.projects.push(landing.project)
+    landingBySprint.set(landing.sprintId, bucket)
+  })
+  const runwayHoursTotal = RUNWAY.projects.reduce((sum, project) => sum + Object.values(project.hours || {}).reduce((inner, value) => inner + (Number(value) || 0), 0), 0)
+  const runwayHoursScheduled = landings.filter(landing => landing.sprintId || landing.done).reduce((sum, landing) => sum + Object.values(landing.project.hours || {}).reduce((inner, value) => inner + (Number(value) || 0), 0), 0)
+  // Trigger projection: the runway plan (by planned finish month) versus the board (by sprint landing).
+  const planProjections = projectRunway()
+  const sprintIndexById = new Map(SPRINTS.map((sprint, index) => [sprint.id, index]))
+  const boardCrossings = (teamId: string, capN: number) => crossingsForSchedule(capN, landings
+    .filter(landing => projectHours(landing.project, teamId) > 0 && (landing.done || landing.sprintId))
+    .map(landing => ({ position: landing.done ? -1 : (sprintIndexById.get(landing.sprintId!) ?? -1), hours: projectHours(landing.project, teamId) })))
+  const triggerRows = planProjections.map(projection => {
+    const teamId = projection.team.id
+    const unscheduledHours = landings.filter(landing => !landing.done && !landing.sprintId).reduce((sum, landing) => sum + projectHours(landing.project, teamId), 0)
+      + RUNWAY.projects.filter(project => !landings.some(landing => landing.project.id === project.id)).reduce((sum, project) => sum + projectHours(project, teamId), 0)
+    let board: { n: number; position: number }[]
+    if (teamId === 'ops') {
+      const cs = planProjections.find(candidate => candidate.team.id === 'cs')
+      const dispatch = planProjections.find(candidate => candidate.team.id === 'dispatch')
+      const needed = projection.opsNeeded ?? 0
+      const combined = [...(cs ? boardCrossings('cs', cs.capN) : []), ...(dispatch ? boardCrossings('dispatch', dispatch.capN) : [])].sort((a, b) => a.position - b.position)
+      board = projection.capN > 0 && needed > 0 && combined.length >= needed ? [{ n: 1, position: combined[needed - 1].position }] : []
+    } else {
+      board = boardCrossings(teamId, projection.capN)
+    }
+    const positionLabel = (position: number) => position < 0 ? 'banked' : `Sprint ${SPRINTS[position].number} · ${formatIsoDate(SPRINTS[position].endIso, { day: 'numeric', month: 'short', year: '2-digit' })}`
+    return {
+      team: projection.team,
+      capN: projection.capN,
+      plan: projection.crossings.map(crossing => ymLabel(crossing.ym)),
+      board: board.map(crossing => positionLabel(crossing.position)),
+      unscheduledHours,
+    }
+  }).filter(rowInfo => rowInfo.capN > 0)
 
   const passesFilters = (entry: PlannerItem) => {
-    const type = entry.row.projectType || ''
+    const type = effectiveProjectType(entry)
     if (filters.owner !== 'all' && entry.devKey !== filters.owner) return false
     if (filters.strategicOnly && type !== 'strategic') return false
     if (filters.hideCore && type === 'core') return false
@@ -2392,7 +2597,6 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
     if (!id) return
     bySprint.set(id, [...(bySprint.get(id) || []), entry])
   })
-  const scheduledCount = items.filter(entry => sprintIdForRow(entry.row)).length
   const unscheduledOpenCount = items.filter(entry => !sprintIdForRow(entry.row) && entry.row.status !== 'Done').length
   const currentList = current ? items.filter(entry => sprintIdForRow(entry.row) === current.id) : []
 
@@ -2547,10 +2751,10 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
             <div className="text-base font-semibold text-primary">{currentList.length}</div>
             <div className="text-xs text-gray-600">{currentList.filter(entry => entry.row.status === 'In progress').length} in progress · {currentList.filter(entry => entry.row.status === 'Done').length} done</div>
           </div>
-          <div className="rounded-lg bg-gray-50 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Scheduled</div>
-            <div className="text-base font-semibold text-primary">{scheduledCount}</div>
-            <div className="text-xs text-gray-600">across {SPRINTS.length} sprints</div>
+          <div className="rounded-lg bg-emerald-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Runway hours scheduled</div>
+            <div className="text-base font-semibold text-primary">{Math.round(runwayHoursScheduled)} <span className="text-sm font-normal text-gray-500">of {Math.round(runwayHoursTotal)} h/wk</span></div>
+            <div className="text-xs text-gray-600">{landings.filter(landing => landing.sprintId || landing.done).length} of {RUNWAY.projects.length} runway projects have a landing sprint</div>
           </div>
           <div className="rounded-lg bg-gray-50 p-3">
             <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Unscheduled</div>
@@ -2558,6 +2762,31 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
             <div className="text-xs text-gray-600">open workstreams without a sprint</div>
           </div>
         </div>
+        {triggerRows.length > 0 && (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead className="text-[10px] uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th className="text-left py-1.5 pr-3 font-semibold">Headcount trigger</th>
+                  <th className="text-left py-1.5 pr-3 font-semibold">Runway plan says</th>
+                  <th className="text-left py-1.5 pr-3 font-semibold">Board schedule says</th>
+                  <th className="text-left py-1.5 font-semibold">Not yet scheduled</th>
+                </tr>
+              </thead>
+              <tbody>
+                {triggerRows.map(rowInfo => (
+                  <tr key={rowInfo.team.id} className="border-t border-gray-100 align-top">
+                    <td className="py-1.5 pr-3 font-medium text-primary whitespace-nowrap">{rowInfo.team.name} <span className="text-gray-400 font-normal">−{rowInfo.capN}</span></td>
+                    <td className="py-1.5 pr-3 text-gray-700">{rowInfo.plan.length ? rowInfo.plan.join(' → ') : 'not reached in plan'}</td>
+                    <td className="py-1.5 pr-3 text-gray-700">{rowInfo.board.length ? rowInfo.board.join(' → ') : <span className="text-amber-700">not reached yet</span>}{rowInfo.board.length > 0 && rowInfo.board.length < rowInfo.capN ? <span className="text-amber-700"> · {rowInfo.capN - rowInfo.board.length} more not reached</span> : null}</td>
+                    <td className="py-1.5 text-gray-600">{rowInfo.unscheduledHours > 0 ? `${Math.round(rowInfo.unscheduledHours)} h/wk` : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="text-[11px] text-gray-500 mt-1">A trigger fires when a team banks {RUNWAY.settings.thresholdPct}% of an FTE from done projects. The board column assumes each runway project lands when the last card linked to it is done in its sprint. Snapshot of the planner from {RUNWAY.syncedAt}.</div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)] items-start">
@@ -2577,8 +2806,9 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
               onChange={event => setFilters(prev => ({ ...prev, owner: event.target.value as PlannerFilters['owner'] }))}
               className="w-full text-xs rounded-lg border border-gray-200 px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-cyan/50"
             >
-              <option value="all">All developers</option>
+              <option value="all">Everyone</option>
               {devs.map(dev => <option key={dev.key} value={dev.key}>{dev.emoji} {dev.name}</option>)}
+              <option value={RUNWAY_SOURCE_KEY}>🛫 Runway projects without a developer item</option>
             </select>
             <div className="grid grid-cols-1 gap-1.5 text-xs text-gray-700">
               <label className="flex items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5"><input type="checkbox" checked={filters.strategicOnly} onChange={() => toggleFilter('strategicOnly')} /> Strategic automation only</label>
@@ -2639,7 +2869,13 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
                             {isCurrent && <span className="px-2 py-0.5 rounded-full bg-cyan text-primary text-[10px] font-bold">Current</span>}
                             {isPast && !isCurrent && <span className="px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 text-[10px] font-semibold">Past</span>}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1 mb-2">{plannerSummary(list)}</div>
+                          <div className="text-xs text-gray-500 mt-1">{plannerSummary(list)}</div>
+                          {landingBySprint.get(sprint.id) && (
+                            <div className="text-[11px] font-medium text-emerald-800 mt-0.5" title={landingBySprint.get(sprint.id)!.projects.map(project => project.name).join('\n')}>
+                              🛫 {hoursLabel(landingBySprint.get(sprint.id)!.hours) || 'enabler'} lands here · {landingBySprint.get(sprint.id)!.projects.length} runway project{landingBySprint.get(sprint.id)!.projects.length === 1 ? '' : 's'}
+                            </div>
+                          )}
+                          <div className="mb-2" />
                           <div className="space-y-2">
                             {list.length === 0 ? <div className={dropHint}>Drop workstreams here</div> : list.map(renderCard)}
                           </div>
@@ -2657,10 +2893,176 @@ function SprintPlanner({ currentUser }: { currentUser: string }) {
   )
 }
 
-type Tab = DevKey | 'sprints'
+// ---------------------------------------------------------------------------
+// Runway tab — read-only view of the Automation Runway snapshot, with links to
+// the live planner and counts of the board items that deliver each project.
+// ---------------------------------------------------------------------------
+
+function RunwayTab() {
+  const [group, setGroup] = useState<'fn' | 'owner'>('fn')
+  const months = runwayMonthRange()
+  const projections = projectRunway()
+  const potential = fullPlanPotential()
+  const thisMonth = localTodayIso().slice(0, 7)
+  const active = RUNWAY.projects.filter(project => project.status === 'active').length
+  const done = RUNWAY.projects.filter(project => project.status === 'done').length
+  const headcountNow = RUNWAY.teams.reduce((sum, team) => sum + team.current, 0) - RUNWAY.actions.length
+  const headcountTarget = RUNWAY.teams.reduce((sum, team) => sum + team.target, 0)
+  const nextTrigger = projections.flatMap(projection => projection.crossings.map(crossing => ({ team: projection.team, crossing })))
+    .sort((a, b) => ymIdx(a.crossing.ym) - ymIdx(b.crossing.ym))[0]
+  const groups: { key: string; title: string; sub: string; fnId?: string; projects: RunwayProject[] }[] = group === 'fn'
+    ? RUNWAY.functions.map(fn => ({ key: fn.id, title: fn.name, sub: fn.who, fnId: fn.id, projects: RUNWAY.projects.filter(project => project.fn === fn.id) }))
+    : [...new Set(RUNWAY.projects.map(project => project.owner || 'Unassigned'))].sort((a, b) => (a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b)))
+      .map(owner => ({ key: owner, title: owner, sub: '', projects: RUNWAY.projects.filter(project => (project.owner || 'Unassigned') === owner) }))
+  const laneHours = (projects: RunwayProject[]) => {
+    const totals: Record<string, number> = {}
+    projects.forEach(project => Object.entries(project.hours || {}).forEach(([team, value]) => { totals[team] = (totals[team] || 0) + (Number(value) || 0) }))
+    return hoursLabel(totals)
+  }
+  const gridStyle = { gridTemplateColumns: `repeat(${months.length}, minmax(0, 1fr))` }
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-primary"><span className="mr-2">🛫</span>Automation Runway</h3>
+            <p className="text-gray-600 text-sm mt-1 max-w-3xl">
+              Urgent admin automation programme, {ymLabel(months[0].ym)} – {ymLabel(months[months.length - 1].ym)}. Each project banks hours saved per team when it is done; a headcount trigger fires at {RUNWAY.settings.thresholdPct}% of an FTE.
+              This tab is a read-only snapshot from {RUNWAY.syncedAt}. Edit the plan in the live planner; the Sprint board shows which developer items deliver each project.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {RUNWAY.artifactUrl && (
+              <a href={RUNWAY.artifactUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary text-white hover:opacity-90 transition">🛫 Open live planner</a>
+            )}
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-lg bg-primary text-white p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-white/70">Full-plan potential /yr</div>
+            <div className="text-base font-semibold">{fmtK(potential)}</div>
+            <div className="text-xs text-white/80">all projects done, all triggers actioned</div>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Projects</div>
+            <div className="text-base font-semibold text-primary">{RUNWAY.projects.length}</div>
+            <div className="text-xs text-gray-600">{active} in progress · {done} done · {LINKED_RUNWAY_IDS.size} with developer items</div>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Admin headcount</div>
+            <div className="text-base font-semibold text-primary">{headcountNow} → {headcountTarget}</div>
+            <div className="text-xs text-gray-600">across {RUNWAY.teams.length} teams · {RUNWAY.actions.length} reduction{RUNWAY.actions.length === 1 ? '' : 's'} actioned</div>
+          </div>
+          <div className="rounded-lg bg-gray-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Next projected trigger</div>
+            <div className="text-base font-semibold text-primary">{nextTrigger ? ymLabel(nextTrigger.crossing.ym) : '—'}</div>
+            <div className="text-xs text-gray-600">{nextTrigger ? `−1 ${nextTrigger.team.name}, if projects finish on plan` : 'none reached in plan'}</div>
+          </div>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-[10px] uppercase tracking-wide text-gray-500">
+              <tr>
+                <th className="text-left py-1.5 pr-3 font-semibold">Team</th>
+                <th className="text-right py-1.5 pr-3 font-semibold">FTE now → target</th>
+                <th className="text-right py-1.5 pr-3 font-semibold">h/wk banked / plan</th>
+                <th className="text-left py-1.5 pr-3 font-semibold">Projected triggers</th>
+                <th className="text-right py-1.5 font-semibold">Potential /yr</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projections.map(projection => (
+                <tr key={projection.team.id} className="border-t border-gray-100">
+                  <td className="py-1.5 pr-3 font-medium text-primary whitespace-nowrap" title={projection.team.note}>{projection.team.name}</td>
+                  <td className="py-1.5 pr-3 text-right text-gray-700 whitespace-nowrap">{projection.team.current} → {projection.team.target}</td>
+                  <td className="py-1.5 pr-3 text-right text-gray-700 whitespace-nowrap">{Math.round(projection.bankedHrs)} / {Math.round(projection.totalHrs)}</td>
+                  <td className="py-1.5 pr-3 text-gray-700">{projection.crossings.length ? projection.crossings.map(crossing => `${projection.team.id === 'ops' ? '→ 1 Ops Manager' : `−${crossing.n}`} ${ymLabel(crossing.ym)}`).join(' · ') : projection.capN === 0 ? 'no reduction planned' : 'not reached in plan'}</td>
+                  <td className="py-1.5 text-right text-gray-700 whitespace-nowrap">{fmtK(projection.potentialN * projection.team.rate)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-gray-100">
+          <div className="text-sm font-semibold text-primary">Timeline</div>
+          <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden text-xs">
+            <button type="button" onClick={() => setGroup('fn')} className={`px-3 py-1.5 font-medium ${group === 'fn' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50'}`}>By process</button>
+            <button type="button" onClick={() => setGroup('owner')} className={`px-3 py-1.5 font-medium ${group === 'owner' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-50'}`}>By person</button>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[960px]">
+            <div className="grid grid-cols-[320px_minmax(0,1fr)] border-b border-gray-200 bg-gray-50">
+              <div className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wide text-gray-500">Project</div>
+              <div className="grid" style={gridStyle}>
+                {months.map(month => (
+                  <div key={month.ym} className={`px-2 py-2 text-[10px] font-semibold uppercase tracking-wide border-l border-gray-100 ${month.ym === thisMonth ? 'bg-cyan/10 text-primary' : 'text-gray-500'}`}>{month.label}</div>
+                ))}
+              </div>
+            </div>
+            {groups.map(lane => {
+              const style = functionStyle(lane.fnId ?? '')
+              return (
+                <Fragment key={lane.key}>
+                  <div className="grid grid-cols-[320px_minmax(0,1fr)] border-t border-gray-200 bg-gray-50/60">
+                    <div className="px-4 py-2 flex items-center gap-2">
+                      {lane.fnId && <span className={`inline-block w-2.5 h-2.5 rounded-sm ${style.dot}`} />}
+                      <span className="text-sm font-semibold text-primary">{lane.title}</span>
+                      {lane.sub && <span className="text-xs text-gray-500 truncate">{lane.sub}</span>}
+                    </div>
+                    <div className="px-3 py-2 text-xs text-gray-500 self-center">{laneHours(lane.projects) ? `${laneHours(lane.projects)} /wk at full lane` : ''}</div>
+                  </div>
+                  {lane.projects.slice().sort((a, b) => ymIdx(a.start) - ymIdx(b.start) || ymIdx(a.end) - ymIdx(b.end)).map(project => {
+                    const projectStyle = functionStyle(project.fn)
+                    const start = Math.max(0, ymIdx(project.start) - months[0].i)
+                    const end = Math.min(months.length - 1, ymIdx(project.end) - months[0].i)
+                    const linked = runwayLinkedItemCount(project.id)
+                    return (
+                      <div key={project.id} className="grid grid-cols-[320px_minmax(0,1fr)] border-t border-gray-100">
+                        <div className="px-4 py-2 min-w-0">
+                          <div className="text-[13px] font-medium text-primary leading-snug" title={project.note || undefined}>{project.name}</div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${project.owner && project.owner !== 'Unassigned' ? 'bg-gray-100 text-gray-700' : 'bg-gray-50 text-gray-400'}`}>{project.owner || 'Unassigned'}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${project.status === 'done' ? 'bg-green-100 text-green-700' : project.status === 'active' ? 'bg-cyan/10 text-cyan' : 'bg-gray-100 text-gray-500'}`}>{project.status === 'done' ? 'Done' : project.status === 'active' ? 'In progress' : 'Planned'}</span>
+                            {projectHoursLabel(project) && <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold">{projectHoursLabel(project)}</span>}
+                            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${linked ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'}`} title={linked ? 'Developer items linked on the Sprint board' : 'No developer item yet — appears on the Sprint board as a runway card'}>{linked ? `${linked} board item${linked === 1 ? '' : 's'}` : 'no dev item'}</span>
+                          </div>
+                        </div>
+                        <div className="grid items-center py-2" style={gridStyle}>
+                          <div
+                            className={`h-6 rounded-md flex items-center px-2 text-[11px] font-semibold whitespace-nowrap overflow-hidden ${project.status === 'planned' ? projectStyle.outline : projectStyle.bar} ${project.status === 'done' ? 'opacity-60' : ''}`}
+                            style={{ gridColumn: `${start + 1} / span ${end - start + 1}` }}
+                            title={`${ymLabel(project.start)} – ${ymLabel(project.end)} (to ${ymEndIso(project.end)})`}
+                          >
+                            {project.status === 'done' ? '✓ ' : ''}{Object.values(project.hours || {}).reduce((sum, value) => sum + (Number(value) || 0), 0) || ''}{Object.values(project.hours || {}).some(value => Number(value) > 0) ? 'h/wk' : ''}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </Fragment>
+              )
+            })}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-4 items-center px-4 py-3 border-t border-gray-100 text-xs text-gray-600">
+          {RUNWAY.functions.map(fn => <span key={fn.id} className="inline-flex items-center gap-1.5"><span className={`inline-block w-2.5 h-2.5 rounded-sm ${functionStyle(fn.id).dot}`} />{fn.name}</span>)}
+          <span className="ml-auto">Outline = planned · Solid = in progress · Faded ✓ = done · Team codes: {Object.entries(TEAM_SHORT).map(([id, short]) => `${short} = ${RUNWAY.teams.find(team => team.id === id)?.name ?? id}`).join(', ')}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+type Tab = DevKey | 'sprints' | 'runway'
 
 const tabs: { key: Tab; label: string; emoji: string }[] = [
   { key: 'sprints', label: 'Sprint board', emoji: '📅' },
+  { key: 'runway', label: 'Runway', emoji: '🛫' },
   { key: 'garry', label: 'Garry', emoji: '🛠️' },
   { key: 'kevin', label: 'Kevin', emoji: '🚚' },
   { key: 'kerran', label: 'Kerran', emoji: '🧾' },
@@ -2745,9 +3147,11 @@ export default function App() {
           ))}
         </div>
       </nav>
-      <main className={`${tab === 'sprints' ? 'max-w-[1400px]' : 'max-w-6xl'} mx-auto p-6 space-y-6`}>
+      <main className={`${tab === 'sprints' || tab === 'runway' ? 'max-w-[1400px]' : 'max-w-6xl'} mx-auto p-6 space-y-6`}>
         {tab === 'sprints' ? (
           <SprintPlanner currentUser={editorName} />
+        ) : tab === 'runway' ? (
+          <RunwayTab />
         ) : activeDev ? (
           <>
             <DevHeader dev={activeDev} />

@@ -64,6 +64,7 @@ for a dated, from-Steve-to-<dev> note. Keep it a genuine overview a developer ca
 - **What's here** — a small table of the repo's projects/folders and what each is.
 - **How to wire it in / how to use it** — the actual next steps.
 - **Verified vs not** — be honest about what compiles/tests/passed and what still needs a real run.
+- **Due by** — the delivery date agreed at handover, as a real date (e.g. `Due by: 2026-10-31`). Put it in the TL;DR. The dashboard shows it as a ⏰ chip; the Sprint board target is the live plan and may move, the MD date is the commitment.
 - **What I need from you** — anything blocking (repo access, a decision, a deadline).
 
 Commit and push to that repo's default branch. Note the raw GitHub URL of the file — you'll
@@ -91,6 +92,11 @@ interface Project {
   extraLinks?: { label: string; emoji: string; url: string }[]
 }
 ```
+
+For a **forward-work item** (the `forwardWorkItems` array on a developer in `devs`), the shape is
+`{ key, title, summary, date, url?, due? }`. Set `due` to the MD's "Due by" date. If the item delivers an
+Automation Runway project, add a `'<devKey>:<key>': ['<runwayId>']` line to `RUNWAY_LINKS` (see
+`docs/AUTOMATION-RUNWAY.md`) so it counts as strategic automation and its hours land on the Sprint board.
 
 Insert a new entry next to that developer's other projects. Match the exact one-line shape
 of the surrounding entries — the array is dense and consistent, so a well-formed sibling is

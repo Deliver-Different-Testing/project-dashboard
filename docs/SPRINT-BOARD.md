@@ -44,6 +44,10 @@ target. Both the API and the dev tab were fixed; the dev tab now sends the field
 
 The board polls every 20 s for other people's changes and skips a refresh while a save or drag is in flight.
 
+## Automation Runway link
+
+See `docs/AUTOMATION-RUNWAY.md`. In short: `RUNWAY_LINKS` maps items to runway projects, linked items count as strategic automation, each sprint shows the runway hours landing in it, and the header compares the runway plan's trigger months with what the board schedule reaches. Runway projects without a developer item appear as their own cards under the pseudo key `runway`.
+
 ## Local mode
 
 Without `VITE_PROJECT_DASH_API_URL` the board works against `localStorage` only (same `forward-work:<dev>:v1` keys as

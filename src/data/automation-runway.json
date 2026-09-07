@@ -1,0 +1,603 @@
+{
+  "syncedAt": "2026-09-07",
+  "artifactUrl": "https://claude.ai/code/artifact/4e04011c-17e1-41ff-a518-4b0c051fba09",
+  "settings": {
+    "fteHours": 40,
+    "thresholdPct": 85,
+    "leadWeeks": 4
+  },
+  "teams": [
+    {
+      "id": "cs",
+      "name": "Customer Service",
+      "rate": 70000,
+      "current": 5,
+      "target": 2,
+      "note": "4 local + 1 Philippines. Casual (20 h/wk) tracked as a $ saving on the after-5:30pm dispatch project."
+    },
+    {
+      "id": "dispatch",
+      "name": "Dispatch",
+      "rate": 85000,
+      "current": 7,
+      "target": 3,
+      "note": "End state per plan: 3 dispatchers / fleet managers covering regional, agents, Auckland P2P, chilled & home."
+    },
+    {
+      "id": "ops",
+      "name": "Ops Managers",
+      "rate": 110000,
+      "current": 2,
+      "target": 1,
+      "note": "Potential to consolidate to one ops manager late in the plan."
+    },
+    {
+      "id": "sales",
+      "name": "Sales Support",
+      "rate": 70000,
+      "current": 1,
+      "target": 1,
+      "note": "Maternity leave from early 2027, no cover recruited. Role kept; freed hours redeploy to outbound."
+    },
+    {
+      "id": "finance",
+      "name": "Finance Admin",
+      "rate": 70000,
+      "current": 1,
+      "target": 1,
+      "note": "Load reduction, not removal. Freed hours redeploy to higher-value finance work."
+    }
+  ],
+  "functions": [
+    {
+      "id": "intake",
+      "name": "Job Intake",
+      "who": "CS"
+    },
+    {
+      "id": "dispatch",
+      "name": "Job Distribution",
+      "who": "Dispatchers"
+    },
+    {
+      "id": "support",
+      "name": "Job Support",
+      "who": "CS & Sales Support"
+    },
+    {
+      "id": "reporting",
+      "name": "Reporting",
+      "who": "Finance, Mgmt & Sales Support"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: scheduled jobs into routes (HD runbuilding, chilled, regional, Akl scheduled)",
+      "owner": "Steve",
+      "start": "2026-09",
+      "end": "2026-09",
+      "status": "active",
+      "hours": {
+        "dispatch": 25
+      },
+      "cost": 0,
+      "note": "If schedules hold this up, run the next two phases first and remove a head anyway.",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p2",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: courier agent & network partner jobs (incl. internationals)",
+      "owner": "Steve",
+      "start": "2026-09",
+      "end": "2026-09",
+      "status": "planned",
+      "hours": {
+        "cs": 8
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p3",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: P2P remote areas (ChCh, Wgtn, Tauranga, Hamilton)",
+      "owner": "Steve",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "planned",
+      "hours": {
+        "cs": 6,
+        "dispatch": 12
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p4",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: Auckland P2P after 5:30pm & Saturdays",
+      "owner": "Steve",
+      "start": "2026-10",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "dispatch": 20
+      },
+      "cost": 35000,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p5",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: Auckland P2P outer channels (West, North, Deep South)",
+      "owner": "Steve",
+      "start": "2026-11",
+      "end": "2027-01",
+      "status": "planned",
+      "hours": {
+        "dispatch": 20
+      },
+      "cost": 0,
+      "note": "Only 1–2 drivers in each channel.",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p6",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: Auckland P2P all truck speeds",
+      "owner": "Steve",
+      "start": "2027-01",
+      "end": "2027-02",
+      "status": "planned",
+      "hours": {
+        "dispatch": 20
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p7",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: Auckland P2P Tier C clients & all eco jobs",
+      "owner": "Steve",
+      "start": "2027-02",
+      "end": "2027-03",
+      "status": "planned",
+      "hours": {
+        "dispatch": 12
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p8",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: all directs",
+      "owner": "Steve",
+      "start": "2027-03",
+      "end": "2027-04",
+      "status": "planned",
+      "hours": {
+        "dispatch": 2
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p9",
+      "fn": "dispatch",
+      "name": "Auto-dispatch: remainder of Auckland P2P (95%)",
+      "owner": "Steve",
+      "start": "2027-04",
+      "end": "2027-06",
+      "status": "planned",
+      "hours": {
+        "dispatch": 40
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "p10",
+      "fn": "dispatch",
+      "name": "Flight bookings & other agent types — automate or remove",
+      "owner": "Steve",
+      "start": "2027-06",
+      "end": "2027-08",
+      "status": "planned",
+      "hours": {
+        "cs": 30
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Auto-dispatch"
+    },
+    {
+      "id": "i1",
+      "fn": "intake",
+      "name": "CSP chatbot (Intercom replacement)",
+      "owner": "George",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "planned",
+      "hours": {},
+      "cost": 10000,
+      "note": "Step 1 — needed before Intercom goes offline.",
+      "stream": "CSP chatbot"
+    },
+    {
+      "id": "i2",
+      "fn": "intake",
+      "name": "Job list / print manager self-service upgrade",
+      "owner": "Kerran",
+      "start": "2026-09",
+      "end": "2026-09",
+      "status": "planned",
+      "hours": {
+        "cs": 2
+      },
+      "cost": 0,
+      "note": "Specced in Monday. Lets clients change details on undispatched jobs (HD label notes issue).",
+      "stream": "Self-service & portal"
+    },
+    {
+      "id": "i3",
+      "fn": "intake",
+      "name": "Email/chat parser: book standard jobs (P2P & schedules)",
+      "owner": "George",
+      "start": "2026-11",
+      "end": "2027-01",
+      "status": "planned",
+      "hours": {
+        "cs": 4
+      },
+      "cost": 0,
+      "note": "Excludes flights, agent LH/pallet, trucks.",
+      "stream": "Email parser"
+    },
+    {
+      "id": "i4",
+      "fn": "intake",
+      "name": "Email/chat parser: truck bookings",
+      "owner": "George",
+      "start": "2027-02",
+      "end": "2027-02",
+      "status": "planned",
+      "hours": {
+        "cs": 1,
+        "dispatch": 1
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Email parser"
+    },
+    {
+      "id": "i5",
+      "fn": "intake",
+      "name": "Email/chat parser: flights & LH agents",
+      "owner": "George",
+      "start": "2027-03",
+      "end": "2027-04",
+      "status": "planned",
+      "hours": {
+        "cs": 6
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Email parser"
+    },
+    {
+      "id": "v1",
+      "fn": "intake",
+      "name": "Voice agent: 3CX integration",
+      "owner": "George",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "planned",
+      "hours": {},
+      "cost": 0,
+      "note": "Enabler — agent must interact with our system.",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "v2",
+      "fn": "intake",
+      "name": "Voice agent: bookings for pre-warned regular callers",
+      "owner": "Marcus",
+      "start": "2026-11",
+      "end": "2027-01",
+      "status": "planned",
+      "hours": {
+        "cs": 4
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "v4",
+      "fn": "intake",
+      "name": "Voice agent: all standard bookings (P2P & schedules)",
+      "owner": "Marcus",
+      "start": "2027-01",
+      "end": "2027-03",
+      "status": "planned",
+      "hours": {
+        "cs": 12
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "v5",
+      "fn": "intake",
+      "name": "Voice agent: truck bookings",
+      "owner": "Marcus",
+      "start": "2027-03",
+      "end": "2027-04",
+      "status": "planned",
+      "hours": {
+        "cs": 1
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "v6",
+      "fn": "intake",
+      "name": "Voice agent: flight bookings",
+      "owner": "Marcus",
+      "start": "2027-05",
+      "end": "2027-06",
+      "status": "planned",
+      "hours": {
+        "cs": 3
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "v7",
+      "fn": "intake",
+      "name": "Voice agent: credit card payments + retire after-hours call centre",
+      "owner": "Marcus",
+      "start": "2027-06",
+      "end": "2027-07",
+      "status": "planned",
+      "hours": {
+        "cs": 2
+      },
+      "cost": 12000,
+      "note": "Add the after-hours call centre annual cost as the $ saving here.",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "s1",
+      "fn": "support",
+      "name": "App workflow automations — finish remaining 15%",
+      "owner": "George",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "active",
+      "hours": {
+        "cs": 4,
+        "dispatch": 4
+      },
+      "cost": 0,
+      "note": "85% done. Reduces both dispatch & CS workload.",
+      "stream": "App & tracking automations"
+    },
+    {
+      "id": "s2",
+      "fn": "support",
+      "name": "Email/chat parser: tracking, POD & job detail updates",
+      "owner": "George",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "planned",
+      "hours": {
+        "cs": 8
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Email parser"
+    },
+    {
+      "id": "s3",
+      "fn": "support",
+      "name": "Improved tracking updates & POD automations",
+      "owner": "Naresh",
+      "start": "2026-09",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "cs": 5,
+        "sales": 2
+      },
+      "cost": 0,
+      "note": "Admin-level project — Naresh/Akhil.",
+      "stream": "App & tracking automations"
+    },
+    {
+      "id": "s4",
+      "fn": "support",
+      "name": "Automate returns & chiller check process",
+      "owner": "Akhil",
+      "start": "2026-09",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "cs": 4
+      },
+      "cost": 0,
+      "note": "Admin-level project — Naresh/Akhil.",
+      "stream": "App & tracking automations"
+    },
+    {
+      "id": "s5",
+      "fn": "support",
+      "name": "Voice agent: POD, tracking, job updates & call routing",
+      "owner": "Marcus",
+      "start": "2026-10",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "cs": 8
+      },
+      "cost": 0,
+      "note": "Divert to sales / finance / team members on request.",
+      "stream": "Voice agent"
+    },
+    {
+      "id": "s6",
+      "fn": "support",
+      "name": "Finish courier portal",
+      "owner": "George",
+      "start": "2026-09",
+      "end": "2026-10",
+      "status": "planned",
+      "hours": {
+        "dispatch": 1
+      },
+      "cost": 0,
+      "note": "Frees Vincent (dispatcher) from portal load.",
+      "stream": "Self-service & portal"
+    },
+    {
+      "id": "s7",
+      "fn": "support",
+      "name": "Help centre & docs for clients and drivers",
+      "owner": "Marcus",
+      "start": "2026-09",
+      "end": "2026-12",
+      "status": "planned",
+      "hours": {
+        "cs": 6,
+        "sales": 2
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Self-service & portal"
+    },
+    {
+      "id": "r1",
+      "fn": "reporting",
+      "name": "Automated financial reporting",
+      "owner": "Emily",
+      "start": "2026-10",
+      "end": "2026-12",
+      "status": "planned",
+      "hours": {
+        "ops": 3,
+        "finance": 8
+      },
+      "cost": 0,
+      "note": "Needs Emily & Steve’s input.",
+      "stream": "Reporting automation"
+    },
+    {
+      "id": "r2",
+      "fn": "reporting",
+      "name": "Automated sales reporting",
+      "owner": "Marcus",
+      "start": "2026-11",
+      "end": "2027-01",
+      "status": "planned",
+      "hours": {
+        "sales": 8
+      },
+      "cost": 0,
+      "note": "Sales support on maternity leave from early 2027 — no cover recruited.",
+      "stream": "Reporting automation"
+    },
+    {
+      "id": "r3",
+      "fn": "reporting",
+      "name": "Automated AR chasing",
+      "owner": "Emily",
+      "start": "2027-01",
+      "end": "2027-03",
+      "status": "planned",
+      "hours": {
+        "finance": 6
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Reporting automation"
+    },
+    {
+      "id": "r4",
+      "fn": "reporting",
+      "name": "Automated invoice checking for agents",
+      "owner": "Emily",
+      "start": "2027-02",
+      "end": "2027-04",
+      "status": "planned",
+      "hours": {
+        "finance": 5
+      },
+      "cost": 0,
+      "note": "",
+      "stream": "Reporting automation"
+    },
+    {
+      "id": "r5",
+      "fn": "reporting",
+      "name": "Consolidate to one Ops Manager",
+      "owner": "Marcus",
+      "start": "2027-06",
+      "end": "2027-08",
+      "status": "planned",
+      "hours": {
+        "ops": 40
+      },
+      "cost": 0,
+      "note": "Decision milestone once dispatch & CS automation has landed.",
+      "stream": "Org structure"
+    },
+    {
+      "id": "xwmmxozc",
+      "fn": "intake",
+      "name": "NDP / Eco Overnight set up for returns to Auckland",
+      "owner": "Unassigned",
+      "start": "2026-10",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "cs": 2
+      },
+      "cost": 0,
+      "note": "",
+      "stream": ""
+    },
+    {
+      "id": "xrc3b2em",
+      "fn": "support",
+      "name": "NDP / Eco overnight Tracking links improvements",
+      "owner": "Unassigned",
+      "start": "2026-09",
+      "end": "2026-11",
+      "status": "planned",
+      "hours": {
+        "cs": 2
+      },
+      "cost": 0,
+      "note": "",
+      "stream": ""
+    }
+  ],
+  "actions": []
+}
